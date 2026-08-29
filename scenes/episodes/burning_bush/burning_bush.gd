@@ -187,6 +187,8 @@ func _say_moses(text: String,hold: float) -> void:
 	await get_tree().create_timer(hold).timeout
 
 func _father(text: String,hold: float) -> void:
+	if dialogue_panel != null:
+		dialogue_panel.visible = false
 	if director == null:
 		await get_tree().create_timer(hold).timeout
 		return

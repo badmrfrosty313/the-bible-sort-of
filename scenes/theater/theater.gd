@@ -170,8 +170,6 @@ func _build_control_desk(parent: Node2D) -> void:
 	_rect_poly(desk,Color("#211923"),Rect2(198,224,84,5))
 	_add_console_label(desk,"THEATER 1",Vector2(198,220),Vector2(84,11),6,COLOR_TEXT_GOLD)
 	_add_console_label(desk,"EXODUS",Vector2(207,234),Vector2(66,10),7,Color("#E7D6B1"))
-	_create_light(desk,Vector2(240,251),7,COLOR_BUTTON_RED_DARK)
-	_create_light(desk,Vector2(240,250),5,COLOR_BUTTON_RED)
 
 func _add_console_label(parent: Node,text: String,pos: Vector2,label_size: Vector2,font_size: int,color: Color) -> void:
 	var label := Label.new()
