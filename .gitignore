@@ -3,6 +3,10 @@
 
 # Imported/generated files
 .import/
+*.import
+
+# Generated CI capture output
+ci/captures/
 
 # Mono/C# generated files
 .mono/
