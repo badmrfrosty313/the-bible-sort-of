@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<g>
+<!-- roots --> <path fill="#25160f" d="M53 105l-18 12 21-5 7 10 6-11 23 7-18-14z"/><path fill="#5b321d" d="M58 103l-12 9 14-4 4 7 5-8 14 5-11-9z"/>
+<!-- trunk --> <path fill="#2d1a12" d="M57 52h15l-2 55H55z"/><path fill="#6d3b20" d="M61 55h8l-2 48h-9z"/><path fill="#9a5b2e" d="M63 58h3v42h-4z"/>
+<!-- main branches --> <path fill="#3a2016" d="M61 66L31 40l6-5 26 22 20-31 7 5-20 38z"/><path fill="#4c2b19" d="M60 75L22 64l3-8 36 10 35-18 4 8-35 20z"/><path fill="#744326" d="M62 66L37 43l3-3 23 19 18-29 4 3-18 34z"/>
+<!-- leaf shadow clusters -->
+<g fill="#14251b"><circle cx="28" cy="50" r="16"/><circle cx="41" cy="34" r="18"/><circle cx="60" cy="28" r="20"/><circle cx="81" cy="34" r="19"/><circle cx="99" cy="50" r="17"/><circle cx="31" cy="70" r="17"/><circle cx="51" cy="62" r="20"/><circle cx="77" cy="61" r="21"/><circle cx="100" cy="72" r="16"/><circle cx="62" cy="79" r="22"/></g>
+<!-- mid leaves -->
+<g fill="#25452a"><circle cx="30" cy="47" r="13"/><circle cx="43" cy="31" r="14"/><circle cx="60" cy="26" r="15"/><circle cx="79" cy="32" r="15"/><circle cx="96" cy="49" r="14"/><circle cx="34" cy="69" r="14"/><circle cx="53" cy="59" r="16"/><circle cx="77" cy="58" r="17"/><circle cx="96" cy="70" r="13"/><circle cx="63" cy="76" r="18"/></g>
+<!-- highlights -->
+<g fill="#3e6b38"><circle cx="42" cy="27" r="7"/><circle cx="59" cy="22" r="8"/><circle cx="77" cy="29" r="7"/><circle cx="31" cy="47" r="6"/><circle cx="51" cy="52" r="8"/><circle cx="74" cy="50" r="8"/><circle cx="91" cy="49" r="6"/><circle cx="39" cy="66" r="7"/><circle cx="61" cy="69" r="9"/><circle cx="84" cy="66" r="7"/></g>
+<g fill="#6f8b46"><rect x="38" y="22" width="5" height="3"/><rect x="56" y="18" width="6" height="3"/><rect x="74" y="25" width="5" height="3"/><rect x="47" y="48" width="6" height="3"/><rect x="70" y="46" width="6" height="3"/><rect x="57" y="64" width="7" height="3"/></g>
+<!-- visible twig tips --> <g stroke="#794526" stroke-width="4" stroke-linecap="square"><path d="M30 52L16 43"/><path d="M39 37L31 21"/><path d="M82 36l9-17"/><path d="M96 54l16-8"/><path d="M37 72l-17 9"/><path d="M93 72l17 10"/></g>
+</g></svg>
