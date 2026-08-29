@@ -7,6 +7,9 @@
 # Mono/C# generated files
 .mono/
 
+# Local art inbox (raw generated assets before processing)
+BibleSortOfDrop/
+
 # OS garbage
 .DS_Store
 Thumbs.db
