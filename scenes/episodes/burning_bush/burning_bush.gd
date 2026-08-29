@@ -44,59 +44,88 @@ func _build_scene() -> void:
 	_build_dialogue_ui()
 
 func _build_desert() -> void:
-	_rect_poly(Color("#3B2748"),Rect2(SCREEN_LEFT,SCREEN_TOP,376,58))
-	_rect_poly(Color("#5A3652"),Rect2(SCREEN_LEFT,94,376,33))
-	_rect_poly(Color("#8A4C53"),Rect2(SCREEN_LEFT,127,376,28))
-	_poly(Color("#2B2440"),PackedVector2Array([Vector2(52,139),Vector2(93,101),Vector2(126,132),Vector2(160,109),Vector2(200,144),Vector2(52,144)]))
-	_poly(Color("#342844"),PackedVector2Array([Vector2(190,144),Vector2(245,111),Vector2(281,139),Vector2(331,103),Vector2(382,141),Vector2(428,116),Vector2(428,148),Vector2(190,148)]))
-	_rect_poly(Color("#B66A4D"),Rect2(SCREEN_LEFT,145,376,16))
-	_rect_poly(Color("#A8754B"),Rect2(SCREEN_LEFT,160,376,38))
-	_poly(Color("#C18B58"),PackedVector2Array([Vector2(52,182),Vector2(120,174),Vector2(188,181),Vector2(252,170),Vector2(324,180),Vector2(428,169),Vector2(428,198),Vector2(52,198)]))
-	_circle(Vector2(390,62),9.0,Color("#E4C78A"),14)
-	_circle(Vector2(388,60),8.0,Color("#3B2748"),14)
-	for star in [Vector2(83,66),Vector2(122,82),Vector2(182,61),Vector2(224,76),Vector2(302,61),Vector2(347,88)]:
-		_rect_poly(Color("#E6C98B"),Rect2(star,Vector2(2,2)))
-	_poly(Color("#6F4A3D"),PackedVector2Array([Vector2(270,191),Vector2(276,183),Vector2(286,181),Vector2(294,190),Vector2(294,194),Vector2(270,194)]))
-	_poly(Color("#78503F"),PackedVector2Array([Vector2(373,193),Vector2(378,186),Vector2(386,184),Vector2(393,193),Vector2(373,193)]))
+	# Mockup-driven dusk sky: broad bands are deliberately stepped like a 16-bit backdrop.
+	_rect_poly(Color("#211A38"),Rect2(SCREEN_LEFT,SCREEN_TOP,376,31))
+	_rect_poly(Color("#302044"),Rect2(SCREEN_LEFT,67,376,28))
+	_rect_poly(Color("#51304D"),Rect2(SCREEN_LEFT,95,376,25))
+	_rect_poly(Color("#794451"),Rect2(SCREEN_LEFT,120,376,22))
+	_rect_poly(Color("#A45D50"),Rect2(SCREEN_LEFT,142,376,17))
+
+	# Sparse stars and a crescent moon.
+	for star in [Vector2(73,53),Vector2(101,72),Vector2(137,49),Vector2(178,78),Vector2(215,58),Vector2(252,84),Vector2(292,54),Vector2(326,74),Vector2(360,48)]:
+		_rect_poly(Color("#F1D79B"),Rect2(star,Vector2(2,2)))
+	_circle(Vector2(394,58),10.0,Color("#F0D18D"),16)
+	_circle(Vector2(390,54),9.0,Color("#211A38"),16)
+
+	# Layered mountains from the mockup: cool silhouettes against the warm horizon.
+	_poly(Color("#29213E"),PackedVector2Array([Vector2(52,145),Vector2(82,116),Vector2(105,132),Vector2(132,99),Vector2(165,137),Vector2(194,111),Vector2(225,145)]))
+	_poly(Color("#342744"),PackedVector2Array([Vector2(164,146),Vector2(209,112),Vector2(237,137),Vector2(274,103),Vector2(305,137),Vector2(344,109),Vector2(380,139),Vector2(428,112),Vector2(428,151),Vector2(164,151)]))
+	_poly(Color("#4C3046"),PackedVector2Array([Vector2(52,153),Vector2(95,136),Vector2(128,149),Vector2(172,129),Vector2(211,151),Vector2(260,133),Vector2(304,151),Vector2(353,130),Vector2(396,149),Vector2(428,137),Vector2(428,160),Vector2(52,160)]))
+
+	# Sand with stepped highlights rather than one flat slab.
+	_rect_poly(Color("#8C5A45"),Rect2(SCREEN_LEFT,158,376,40))
+	_poly(Color("#A86F4B"),PackedVector2Array([Vector2(52,174),Vector2(91,169),Vector2(129,176),Vector2(168,168),Vector2(207,177),Vector2(249,166),Vector2(290,176),Vector2(334,165),Vector2(377,173),Vector2(428,164),Vector2(428,198),Vector2(52,198)]))
+	_poly(Color("#C08A58"),PackedVector2Array([Vector2(52,188),Vector2(107,181),Vector2(154,188),Vector2(205,179),Vector2(259,188),Vector2(310,179),Vector2(365,187),Vector2(428,178),Vector2(428,198),Vector2(52,198)]))
+
+	# Rocks and scrub make the stage read like the detailed mockup instead of empty geometry.
+	_rock(Vector2(88,187),12.0)
+	_rock(Vector2(230,190),9.0)
+	_rock(Vector2(390,190),8.0)
+	_grass(Vector2(116,190),Color("#65543A"))
+	_grass(Vector2(196,187),Color("#5A4B37"))
+	_grass(Vector2(286,191),Color("#67583B"))
+	_grass(Vector2(414,187),Color("#554733"))
+
+	# Firelight painted onto the sand under the bush.
+	_poly(Color("#D68A4A88"),PackedVector2Array([Vector2(292,197),Vector2(306,183),Vector2(336,176),Vector2(368,183),Vector2(387,197)]))
+	_poly(Color("#F0A34B66"),PackedVector2Array([Vector2(310,197),Vector2(321,185),Vector2(337,181),Vector2(354,186),Vector2(368,197)]))
 
 func _build_burning_bush() -> void:
 	bush_root = Node2D.new()
 	bush_root.name = "BurningBush"
-	bush_root.position = Vector2(336,188)
+	bush_root.position = Vector2(337,190)
 	bush_root.z_index = 3
 	add_child(bush_root)
 
-	# A restrained supernatural halo. It breathes harder only while Father speaks.
-	bush_glow = _circle_at(bush_root,Vector2(0,-31),44.0,Color("#FFB33A24"),20)
+	bush_glow = _circle_at(bush_root,Vector2(0,-31),45.0,Color("#FFB33A24"),20)
 	bush_glow.z_index = -2
-	_poly_at(bush_root,Color("#2E3823"),PackedVector2Array([Vector2(-25,-5),Vector2(-31,-18),Vector2(-20,-31),Vector2(-12,-27),Vector2(-5,-42),Vector2(3,-30),Vector2(13,-38),Vector2(20,-25),Vector2(31,-17),Vector2(24,-5)]))
-	_poly_at(bush_root,Color("#486238"),PackedVector2Array([Vector2(-21,-7),Vector2(-25,-18),Vector2(-15,-26),Vector2(-8,-23),Vector2(-3,-35),Vector2(5,-25),Vector2(13,-31),Vector2(24,-16),Vector2(19,-7)]))
-	_rect_poly_at(bush_root,Color("#4A2E1D"),Rect2(-3,-9,7,10))
-	_rect_poly_at(bush_root,Color("#6B4224"),Rect2(-15,-17,29,4))
+
+	# Dense layered foliage, closer to the leafy mockup than the original single polygon.
+	_rect_poly_at(bush_root,Color("#4A2E1D"),Rect2(-3,-14,7,15))
+	_rect_poly_at(bush_root,Color("#714424"),Rect2(-16,-18,32,5))
+	_leaf(Vector2(-21,-17),10,Color("#263825"))
+	_leaf(Vector2(-12,-27),12,Color("#31482C"))
+	_leaf(Vector2(0,-23),13,Color("#3F5B34"))
+	_leaf(Vector2(13,-28),11,Color("#35502E"))
+	_leaf(Vector2(22,-17),10,Color("#2B4028"))
+	_leaf(Vector2(-2,-37),11,Color("#45633A"))
+	_leaf(Vector2(-24,-8),8,Color("#334A2C"))
+	_leaf(Vector2(25,-8),8,Color("#3C5732"))
+
 	flame_outer = Polygon2D.new()
-	flame_outer.color = Color("#E64F24")
-	flame_outer.polygon = PackedVector2Array([Vector2(-18,-11),Vector2(-22,-28),Vector2(-13,-42),Vector2(-9,-58),Vector2(-1,-47),Vector2(4,-71),Vector2(13,-50),Vector2(20,-39),Vector2(16,-18),Vector2(10,-9),Vector2(-10,-9)])
+	flame_outer.color = Color("#D84420")
+	flame_outer.polygon = PackedVector2Array([Vector2(-23,-12),Vector2(-27,-29),Vector2(-19,-40),Vector2(-16,-58),Vector2(-8,-48),Vector2(-3,-73),Vector2(4,-59),Vector2(10,-82),Vector2(16,-58),Vector2(25,-44),Vector2(21,-25),Vector2(15,-12)])
 	bush_root.add_child(flame_outer)
 	flame_mid = Polygon2D.new()
-	flame_mid.color = Color("#FF8A28")
-	flame_mid.polygon = PackedVector2Array([Vector2(-12,-12),Vector2(-15,-29),Vector2(-7,-42),Vector2(-3,-55),Vector2(3,-42),Vector2(8,-57),Vector2(14,-36),Vector2(11,-17),Vector2(5,-10),Vector2(-7,-10)])
+	flame_mid.color = Color("#F47B24")
+	flame_mid.polygon = PackedVector2Array([Vector2(-16,-13),Vector2(-19,-31),Vector2(-10,-43),Vector2(-7,-61),Vector2(0,-49),Vector2(5,-69),Vector2(11,-48),Vector2(18,-35),Vector2(13,-16),Vector2(5,-10),Vector2(-8,-11)])
 	bush_root.add_child(flame_mid)
 	flame_core = Polygon2D.new()
 	flame_core.color = Color("#FFD45A")
-	flame_core.polygon = PackedVector2Array([Vector2(-7,-11),Vector2(-9,-25),Vector2(-2,-37),Vector2(2,-48),Vector2(7,-31),Vector2(8,-18),Vector2(4,-10)])
+	flame_core.polygon = PackedVector2Array([Vector2(-8,-12),Vector2(-10,-28),Vector2(-3,-39),Vector2(1,-55),Vector2(6,-40),Vector2(10,-30),Vector2(7,-16),Vector2(3,-10)])
 	bush_root.add_child(flame_core)
-	for i in range(6):
+	for i in range(8):
 		var ember := Polygon2D.new()
-		ember.color = Color("#FFB23E")
+		ember.color = Color("#FFB23E") if i % 2 == 0 else Color("#FFE078")
 		ember.polygon = PackedVector2Array([Vector2(-1,-1),Vector2(1,-1),Vector2(1,1),Vector2(-1,1)])
-		ember.position = Vector2(-13+i*5,-55-i*3)
+		ember.position = Vector2(-17+i*5,-55-i*3)
 		bush_root.add_child(ember)
 		embers.append(ember)
 
 func _build_moses() -> void:
 	moses = Node2D.new()
 	moses.name = "Moses"
-	moses.position = Vector2(145,190)
+	moses.position = Vector2(142,191)
 	moses.z_index = 4
 	add_child(moses)
 	moses_sprite = Sprite2D.new()
@@ -106,40 +135,44 @@ func _build_moses() -> void:
 	moses_sprite.centered = true
 	moses_sprite.position = Vector2(0,-31)
 	moses.add_child(moses_sprite)
+	# Ground contact shadow helps the sprite belong to the painted stage.
+	var shadow := _circle_at(moses,Vector2(0,-1),15.0,Color("#3A283F66"),14)
+	shadow.scale.y = 0.24
+	shadow.z_index = -1
 
 func _build_dialogue_ui() -> void:
 	dialogue_panel = Panel.new()
-	dialogue_panel.position = Vector2(83,53)
-	dialogue_panel.size = Vector2(314,43)
+	dialogue_panel.position = Vector2(72,48)
+	dialogue_panel.size = Vector2(264,45)
 	dialogue_panel.z_index = 20
 	dialogue_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var dialogue_style := StyleBoxFlat.new()
-	dialogue_style.bg_color = Color("#120F19E8")
-	dialogue_style.border_color = Color("#A9824A")
-	dialogue_style.border_width_left = 1
-	dialogue_style.border_width_top = 1
-	dialogue_style.border_width_right = 1
-	dialogue_style.border_width_bottom = 1
-	dialogue_style.corner_radius_top_left = 3
-	dialogue_style.corner_radius_top_right = 3
-	dialogue_style.corner_radius_bottom_left = 3
-	dialogue_style.corner_radius_bottom_right = 3
+	dialogue_style.bg_color = Color("#100D18F2")
+	dialogue_style.border_color = Color("#D6A449")
+	dialogue_style.border_width_left = 2
+	dialogue_style.border_width_top = 2
+	dialogue_style.border_width_right = 2
+	dialogue_style.border_width_bottom = 2
+	dialogue_style.corner_radius_top_left = 2
+	dialogue_style.corner_radius_top_right = 2
+	dialogue_style.corner_radius_bottom_left = 2
+	dialogue_style.corner_radius_bottom_right = 2
 	dialogue_panel.add_theme_stylebox_override("panel",dialogue_style)
 	add_child(dialogue_panel)
 	speaker_label = Label.new()
 	speaker_label.text = "MOSES"
 	speaker_label.position = Vector2(9,4)
-	speaker_label.size = Vector2(60,10)
+	speaker_label.size = Vector2(70,11)
 	speaker_label.add_theme_font_size_override("font_size",8)
-	speaker_label.add_theme_color_override("font_color",Color("#E0A64C"))
+	speaker_label.add_theme_color_override("font_color",Color("#F0BE55"))
 	dialogue_panel.add_child(speaker_label)
 	dialogue_label = Label.new()
-	dialogue_label.position = Vector2(9,15)
-	dialogue_label.size = Vector2(296,23)
+	dialogue_label.position = Vector2(9,16)
+	dialogue_label.size = Vector2(246,23)
 	dialogue_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	dialogue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	dialogue_label.add_theme_font_size_override("font_size",10)
-	dialogue_label.add_theme_color_override("font_color",Color("#F6F1E9"))
+	dialogue_label.add_theme_color_override("font_color",Color("#FFF7E8"))
 	dialogue_panel.add_child(dialogue_label)
 	prompt_panel = Panel.new()
 	prompt_panel.position = Vector2(160,164)
@@ -159,7 +192,6 @@ func _build_dialogue_ui() -> void:
 	_set_prompt_style(false)
 
 func _run_episode() -> void:
-	# Moses gets a tiny visual double-take before the first line.
 	await _moses_double_take()
 	await _say_moses("That bush is on fire.",1.05)
 	await _say_moses("...and somehow still a bush.",1.10)
@@ -175,9 +207,7 @@ func _run_episode() -> void:
 		await _father(FATHER_REPLIES[i],0.85)
 	await _say_moses("So... anyone else?",0.72)
 	moses_sprite.texture = MOSES_SHRUG_TEXTURE
-	# Hold the silence just long enough for the theater-side reaction to land.
 	await get_tree().create_timer(0.34).timeout
-	# Father is the voice of the burning bush here. He stays seated in the theater.
 	await _father("Fine. Aaron can help.",0.90)
 	await _show_prompt(true,0.75)
 	moses_sprite.texture = MOSES_IDLE_TEXTURE
@@ -215,15 +245,15 @@ func _father(text: String,hold: float) -> void:
 
 func _moses_double_take() -> void:
 	var tween := create_tween()
-	tween.tween_property(moses,"position:x",149.0,0.10)
-	tween.tween_property(moses,"position:x",145.0,0.12)
+	tween.tween_property(moses,"position:x",146.0,0.10)
+	tween.tween_property(moses,"position:x",142.0,0.12)
 	await tween.finished
 
 func _moses_recoil() -> void:
 	moses_reaction_strength = 1.0
 	var tween := create_tween()
-	tween.tween_property(moses,"position:x",137.0,0.09)
-	tween.tween_property(moses,"position:x",145.0,0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(moses,"position:x",134.0,0.09)
+	tween.tween_property(moses,"position:x",142.0,0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	await tween.finished
 	moses_reaction_strength = 0.0
 
@@ -303,8 +333,19 @@ func _process(_delta: float) -> void:
 		var speed := 8.0+float(i)+speech_boost*5.0
 		var cycle := fmod(t*speed,22.0)
 		ember.position.y = -53.0-cycle-i*2.0
-		ember.position.x = -12.0+i*5.0+sin(t*4.0+i)*3.0
+		ember.position.x = -17.0+i*5.0+sin(t*4.0+i)*3.0
 		ember.modulate = Color(1,1,1,1.0-(cycle/22.0))
+
+func _rock(center: Vector2,size: float) -> void:
+	_poly(Color("#4A3540"),PackedVector2Array([center+Vector2(-size,3),center+Vector2(-size*0.65,-size*0.35),center+Vector2(0,-size*0.62),center+Vector2(size*0.72,-size*0.25),center+Vector2(size,3)]))
+	_poly(Color("#6A4745"),PackedVector2Array([center+Vector2(-size*0.55,-size*0.28),center+Vector2(0,-size*0.62),center+Vector2(size*0.45,-size*0.28),center+Vector2(size*0.18,0),center+Vector2(-size*0.35,0)]))
+
+func _grass(center: Vector2,color: Color) -> void:
+	_poly(color,PackedVector2Array([center+Vector2(-7,2),center+Vector2(-5,-7),center+Vector2(-2,0),center+Vector2(0,-10),center+Vector2(2,0),center+Vector2(6,-6),center+Vector2(5,2)]))
+
+func _leaf(center: Vector2,radius: float,color: Color) -> void:
+	var leaf := _circle_at(bush_root,center,radius,color,10)
+	leaf.scale.y = 0.72
 
 func _rect_poly(color: Color,rect: Rect2) -> Polygon2D:
 	var poly := Polygon2D.new()
