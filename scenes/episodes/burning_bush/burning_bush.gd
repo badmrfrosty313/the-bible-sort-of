@@ -43,8 +43,6 @@ func _build_scene() -> void:
 	_build_dialogue_ui()
 
 func _build_art_stage() -> void:
-	# The generated artwork is now the visual master for the theater screen.
-	# We crop it to the episode viewport instead of rebuilding the desert from polygons.
 	art_sprite = Sprite2D.new()
 	art_sprite.name = "BurningBushArtwork"
 	art_sprite.texture = BURNING_BUSH_ART
@@ -54,27 +52,21 @@ func _build_art_stage() -> void:
 	art_sprite.z_index = 0
 	add_child(art_sprite)
 
-	var texture_size := BURNING_BUSH_ART.get_size()
+	var texture_size: Vector2 = BURNING_BUSH_ART.get_size()
 	if texture_size.x > 0.0 and texture_size.y > 0.0:
-		var scale_factor := max(SCREEN_SIZE.x / texture_size.x,SCREEN_SIZE.y / texture_size.y)
+		var scale_factor: float = maxf(SCREEN_SIZE.x / texture_size.x,SCREEN_SIZE.y / texture_size.y)
 		art_sprite.scale = Vector2.ONE * scale_factor
 
-	# Darken the lower portion slightly so our live Moses sprite reads over the reference art.
-	var stage_tint := Polygon2D.new()
+	var stage_tint: Polygon2D = Polygon2D.new()
 	stage_tint.color = Color("#120D1A18")
-	stage_tint.polygon = PackedVector2Array([
-		Vector2(SCREEN_LEFT,SCREEN_TOP),Vector2(SCREEN_RIGHT,SCREEN_TOP),
-		Vector2(SCREEN_RIGHT,SCREEN_BOTTOM),Vector2(SCREEN_LEFT,SCREEN_BOTTOM)
-	])
+	stage_tint.polygon = PackedVector2Array([Vector2(SCREEN_LEFT,SCREEN_TOP),Vector2(SCREEN_RIGHT,SCREEN_TOP),Vector2(SCREEN_RIGHT,SCREEN_BOTTOM),Vector2(SCREEN_LEFT,SCREEN_BOTTOM)])
 	stage_tint.z_index = 1
 	add_child(stage_tint)
 
-	# A live light pulse sits over the painted bush. It gives God's speech a physical response
-	# while we prepare separated bush/fire assets in the next art pass.
 	fire_glow = _circle(Vector2(335,132),34.0,Color("#FF9B3024"),20)
 	fire_glow.z_index = 2
 	for i in range(9):
-		var ember := Polygon2D.new()
+		var ember: Polygon2D = Polygon2D.new()
 		ember.color = Color("#FFB23E") if i % 2 == 0 else Color("#FFE078")
 		ember.polygon = PackedVector2Array([Vector2(-1,-1),Vector2(1,-1),Vector2(1,1),Vector2(-1,1)])
 		ember.position = Vector2(314+i*5,117-i*3)
@@ -95,7 +87,7 @@ func _build_moses() -> void:
 	moses_sprite.centered = true
 	moses_sprite.position = Vector2(0,-31)
 	moses.add_child(moses_sprite)
-	var shadow := _circle_at(moses,Vector2(0,-1),15.0,Color("#21162666"),14)
+	var shadow: Polygon2D = _circle_at(moses,Vector2(0,-1),15.0,Color("#21162666"),14)
 	shadow.scale.y = 0.24
 	shadow.z_index = -1
 
@@ -105,7 +97,7 @@ func _build_dialogue_ui() -> void:
 	dialogue_panel.size = Vector2(264,45)
 	dialogue_panel.z_index = 20
 	dialogue_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var dialogue_style := StyleBoxFlat.new()
+	var dialogue_style: StyleBoxFlat = StyleBoxFlat.new()
 	dialogue_style.bg_color = Color("#100D18F2")
 	dialogue_style.border_color = Color("#D6A449")
 	dialogue_style.border_width_left = 2
@@ -182,7 +174,7 @@ func _say_moses(text: String,hold: float) -> void:
 	dialogue_label.text = text
 	dialogue_panel.modulate = Color(1,1,1,0)
 	dialogue_panel.visible = true
-	var fade := create_tween()
+	var fade: Tween = create_tween()
 	fade.tween_property(dialogue_panel,"modulate:a",1.0,0.08)
 	await fade.finished
 	await get_tree().create_timer(hold).timeout
@@ -191,26 +183,26 @@ func _father(text: String,hold: float) -> void:
 	if dialogue_panel != null:
 		dialogue_panel.visible = false
 	father_speaking = true
-	var surge := create_tween()
+	var surge: Tween = create_tween()
 	surge.tween_property(self,"father_speech_strength",1.0,0.10)
 	if director == null:
 		await get_tree().create_timer(hold).timeout
 	else:
 		await director.father_speak(text,hold)
 	father_speaking = false
-	var settle := create_tween()
+	var settle: Tween = create_tween()
 	settle.tween_property(self,"father_speech_strength",0.0,0.18)
 	await settle.finished
 
 func _moses_double_take() -> void:
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(moses,"position:x",146.0,0.10)
 	tween.tween_property(moses,"position:x",142.0,0.12)
 	await tween.finished
 
 func _moses_recoil() -> void:
 	moses_reaction_strength = 1.0
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(moses,"position:x",134.0,0.09)
 	tween.tween_property(moses,"position:x",142.0,0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	await tween.finished
@@ -221,15 +213,15 @@ func _show_prompt(accepted: bool,hold: float) -> void:
 	prompt_label.text = "ACCEPT QUEST?   [ YES ]" if accepted else "ACCEPT QUEST?   [ NO ]"
 	prompt_panel.modulate = Color(1,1,1,0)
 	prompt_panel.visible = true
-	var fade_in := create_tween()
+	var fade_in: Tween = create_tween()
 	fade_in.tween_property(prompt_panel,"modulate:a",1.0,0.08)
 	await fade_in.finished
-	var pulse := create_tween()
+	var pulse: Tween = create_tween()
 	pulse.tween_property(prompt_panel,"scale",Vector2(1.03,1.03),0.08)
 	pulse.tween_property(prompt_panel,"scale",Vector2.ONE,0.08)
 	await pulse.finished
 	await get_tree().create_timer(hold).timeout
-	var fade_out := create_tween()
+	var fade_out: Tween = create_tween()
 	fade_out.tween_property(prompt_panel,"modulate:a",0.0,0.08)
 	await fade_out.finished
 	prompt_panel.visible = false
@@ -237,7 +229,7 @@ func _show_prompt(accepted: bool,hold: float) -> void:
 func _set_prompt_style(accepted: bool) -> void:
 	if prompt_panel == null:
 		return
-	var style := StyleBoxFlat.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = Color("#111018F2")
 	style.border_color = Color("#61A66F") if accepted else Color("#B94A52")
 	style.border_width_left = 1
@@ -260,51 +252,49 @@ func _show_quest_accepted() -> void:
 	prompt_label.text = "QUEST ACCEPTED: EXODUS"
 	prompt_panel.visible = true
 	prompt_panel.modulate = Color(1,1,1,0)
-	var fade := create_tween()
+	var fade: Tween = create_tween()
 	fade.tween_property(prompt_panel,"modulate:a",1.0,0.12)
 	await fade.finished
-	var pop := create_tween()
+	var pop: Tween = create_tween()
 	pop.tween_property(prompt_panel,"scale",Vector2(1.06,1.06),0.10)
 	pop.tween_property(prompt_panel,"scale",Vector2.ONE,0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	await pop.finished
 	await get_tree().create_timer(0.86).timeout
 
 func _process(_delta: float) -> void:
-	var t := Time.get_ticks_msec() * 0.001
-	var speech_boost := father_speech_strength
+	var t: float = Time.get_ticks_msec() * 0.001
+	var speech_boost: float = father_speech_strength
 	if fire_glow != null:
-		var glow_scale := 0.96 + sin(t*3.2)*0.04 + speech_boost*0.20
+		var glow_scale: float = 0.96 + sin(t*3.2)*0.04 + speech_boost*0.20
 		fire_glow.scale = Vector2(glow_scale,glow_scale)
 		fire_glow.modulate.a = 0.50 + speech_boost*0.50
 	if art_sprite != null:
-		# Tiny cinematic push during divine speech, subtle enough not to feel like a zoom effect.
-		var base_scale := art_sprite.scale.x
 		art_sprite.modulate = Color(1.0,0.97+speech_boost*0.03,0.94+speech_boost*0.06,1.0)
 	for i in range(embers.size()):
-		var ember := embers[i]
-		var speed := 7.0+float(i)+speech_boost*5.0
-		var cycle := fmod(t*speed,24.0)
+		var ember: Polygon2D = embers[i]
+		var speed: float = 7.0+float(i)+speech_boost*5.0
+		var cycle: float = fmod(t*speed,24.0)
 		ember.position.y = 117.0-cycle-i*2.0
 		ember.position.x = 314.0+i*5.0+sin(t*4.0+i)*3.0
 		ember.modulate = Color(1,1,1,1.0-(cycle/24.0))
 
 func _circle(center: Vector2,radius: float,color: Color,count: int) -> Polygon2D:
-	var poly := Polygon2D.new()
+	var poly: Polygon2D = Polygon2D.new()
 	poly.color = color
-	var points := PackedVector2Array()
+	var points: PackedVector2Array = PackedVector2Array()
 	for i in range(count):
-		var angle := TAU * float(i) / float(count)
+		var angle: float = TAU * float(i) / float(count)
 		points.append(center+Vector2(cos(angle),sin(angle))*radius)
 	poly.polygon = points
 	add_child(poly)
 	return poly
 
 func _circle_at(parent: Node2D,center: Vector2,radius: float,color: Color,count: int) -> Polygon2D:
-	var poly := Polygon2D.new()
+	var poly: Polygon2D = Polygon2D.new()
 	poly.color = color
-	var points := PackedVector2Array()
+	var points: PackedVector2Array = PackedVector2Array()
 	for i in range(count):
-		var angle := TAU * float(i) / float(count)
+		var angle: float = TAU * float(i) / float(count)
 		points.append(center+Vector2(cos(angle),sin(angle))*radius)
 	poly.polygon = points
 	parent.add_child(poly)
