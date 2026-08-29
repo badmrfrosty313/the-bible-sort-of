@@ -162,15 +162,13 @@ func _run_episode() -> void:
 		await _father(FATHER_REPLIES[i],0.85)
 	await _say_moses("So... anyone else?",0.72)
 	moses_sprite.texture = MOSES_SHRUG_TEXTURE
-	if director != null:
-		await director.send_father_into_episode(Vector2(264,190))
+	# Father is the voice of the burning bush here. He stays seated in the theater.
+	# Physical episode entry remains a director capability for stories that need it.
 	await _father("Fine. Aaron can help.",0.90)
 	await _show_prompt(true,0.75)
 	moses_sprite.texture = MOSES_IDLE_TEXTURE
 	await _say_moses("Fine.",0.58)
-	await _father("Excellent. I'm going back to my chair.",0.82)
-	if director != null:
-		await director.return_father_to_theater()
+	await _father("Excellent. Let's get moving.",0.82)
 	await _show_quest_accepted()
 	episode_finished.emit()
 	if director != null:
