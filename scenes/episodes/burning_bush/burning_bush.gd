@@ -2,12 +2,14 @@ extends Node2D
 class_name BurningBushEpisode
 
 signal episode_finished
+signal father_line_requested(text: String)
+signal father_enter_requested(entry_position: Vector2)
+signal father_exit_requested
 
 var dialogue_label: Label
 var prompt_label: Label
 var moses: Node2D
 var bush_flame: Polygon2D
-var objection_index := 0
 
 const OBJECTIONS := [
 	"MOSES: Who am I supposed to be?",
@@ -17,12 +19,19 @@ const OBJECTIONS := [
 	"MOSES: Could You maybe send literally anyone else?"
 ]
 
+const FATHER_REPLIES := [
+	"You're Moses. We've covered this.",
+	"Tell them I AM sent you.",
+	"They won't. That's why we're doing signs.",
+	"I know.",
+	"Moses."
+]
+
 func _ready() -> void:
 	_build_scene()
 	await _run_episode()
 
 func _build_scene() -> void:
-	# Desert sky and ground, intentionally chunky for the pixel-art target.
 	var sky := Polygon2D.new()
 	sky.color = Color("#5B3948")
 	sky.polygon = PackedVector2Array([Vector2(52, 48), Vector2(428, 48), Vector2(428, 208), Vector2(52, 208)])
@@ -33,7 +42,6 @@ func _build_scene() -> void:
 	ground.polygon = PackedVector2Array([Vector2(52, 160), Vector2(428, 160), Vector2(428, 208), Vector2(52, 208)])
 	add_child(ground)
 
-	# Burning bush placeholder. We will swap this for authored pixel art later.
 	var bush := Polygon2D.new()
 	bush.color = Color("#3E5C35")
 	bush.polygon = PackedVector2Array([Vector2(305, 163), Vector2(326, 143), Vector2(348, 163), Vector2(340, 183), Vector2(313, 183)])
@@ -44,7 +52,6 @@ func _build_scene() -> void:
 	bush_flame.polygon = PackedVector2Array([Vector2(316, 165), Vector2(322, 145), Vector2(328, 154), Vector2(334, 132), Vector2(342, 158), Vector2(338, 174), Vector2(320, 174)])
 	add_child(bush_flame)
 
-	# Moses placeholder silhouette until the Moses art is committed.
 	moses = Node2D.new()
 	moses.name = "Moses"
 	moses.position = Vector2(150, 153)
@@ -85,38 +92,46 @@ func _run_episode() -> void:
 	await _beat(1.5)
 	dialogue_label.text = "MOSES: ...and somehow still a bush."
 	await _beat(1.6)
-	dialogue_label.text = "GOD: Moses."
+	father_line_requested.emit("Moses.")
 	await _beat(1.2)
 	dialogue_label.text = "MOSES: Yep. Talking bush. Sure."
 	await _beat(1.5)
-	dialogue_label.text = "GOD: I need you to go to Egypt."
+	father_line_requested.emit("I need you to go to Egypt.")
 	await _beat(1.5)
 
-	for objection in OBJECTIONS:
-		dialogue_label.text = objection
+	for i in range(OBJECTIONS.size()):
+		dialogue_label.text = OBJECTIONS[i]
 		await _beat(1.35)
 		prompt_label.text = "ACCEPT QUEST?   [ NO ]"
 		prompt_label.visible = true
-		await _beat(0.85)
+		await _beat(0.75)
 		prompt_label.visible = false
-		dialogue_label.text = "GOD: ..."
-		await _beat(0.65)
+		father_line_requested.emit(FATHER_REPLIES[i])
+		await _beat(1.0)
 
-	dialogue_label.text = "GOD: Aaron can help."
+	# Talking has failed. Father physically enters the episode.
+	dialogue_label.text = "MOSES: So... anyone else?"
+	await _beat(0.8)
+	father_enter_requested.emit(Vector2(255, 150))
 	await _beat(1.0)
+	father_line_requested.emit("Fine. Aaron can help.")
+	await _beat(1.1)
 	prompt_label.text = "ACCEPT QUEST?   [ YES ]"
 	prompt_label.visible = true
-	await _beat(1.25)
+	await _beat(1.0)
 	prompt_label.visible = false
 	dialogue_label.text = "MOSES: Fine."
-	await _beat(1.0)
+	await _beat(0.9)
+	father_line_requested.emit("Excellent. I'm going back to my chair.")
+	await _beat(0.9)
+	father_exit_requested.emit()
+	await _beat(1.2)
 	dialogue_label.text = "QUEST ACCEPTED: EXODUS"
-	await _beat(1.5)
+	await _beat(1.4)
 	episode_finished.emit()
 
 func _process(_delta: float) -> void:
 	if bush_flame != null:
-		# Tiny deterministic flicker without needing an animation asset yet.
 		bush_flame.scale.y = 0.92 + (sin(Time.get_ticks_msec() * 0.012) * 0.08)
 
 func _beat(seconds: float) -> void:
