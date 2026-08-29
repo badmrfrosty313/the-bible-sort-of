@@ -9,6 +9,7 @@ const IDLE_TEXTURE := preload("res://art/characters/father/father_idle.svg")
 const WALK_A_TEXTURE := preload("res://art/characters/father/father_walk_a.svg")
 const WALK_B_TEXTURE := preload("res://art/characters/father/father_walk_b.svg")
 const SIT_TEXTURE := preload("res://art/characters/father/father_sit.svg")
+const SIT_BACK_TEXTURE := preload("res://art/characters/father/father_sit_back.svg")
 const REACT_TEXTURE := preload("res://art/characters/father/father_react.svg")
 
 var state: State = State.IDLE
@@ -23,20 +24,17 @@ func _ready() -> void:
 	legacy_sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if legacy_sprite:
 		legacy_sprite.visible = false
-
 	character_sprite = Sprite2D.new()
 	character_sprite.name = "CharacterSprite"
 	character_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	character_sprite.centered = true
 	character_sprite.position = Vector2(0, -31)
 	add_child(character_sprite)
-
 	stand()
 
 func _process(delta: float) -> void:
 	if character_sprite == null:
 		return
-
 	if state == State.WALKING:
 		walk_elapsed += delta
 		var next_frame := int(floor(walk_elapsed * 8.0)) % 2
@@ -45,7 +43,6 @@ func _process(delta: float) -> void:
 			character_sprite.texture = WALK_A_TEXTURE if walk_frame == 0 else WALK_B_TEXTURE
 		character_sprite.position.y = -31.0 + float(walk_frame)
 		return
-
 	if state == State.WATCHING:
 		idle_elapsed += delta
 		var breath := 1.0 if int(idle_elapsed * 1.7) % 4 == 3 else 0.0
@@ -114,13 +111,13 @@ func sit() -> void:
 	state = State.SITTING
 	facing_left = false
 	idle_elapsed = 0.0
-	_apply_texture(SIT_TEXTURE)
+	_apply_texture(SIT_BACK_TEXTURE)
 
 func watch_stage() -> void:
 	state = State.WATCHING
 	facing_left = false
 	idle_elapsed = 0.0
-	_apply_texture(SIT_TEXTURE)
+	_apply_texture(SIT_BACK_TEXTURE)
 
 func react() -> void:
 	state = State.REACTING
