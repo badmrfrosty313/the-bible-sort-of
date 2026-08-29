@@ -126,12 +126,12 @@ func _build_father_chair(parent: Node2D) -> void:
 	chair.name = "FatherChair"
 	chair.z_index = -1
 	parent.add_child(chair)
-	_rect_poly(chair, Color("#2A1117"), Rect2(214,158,52,59))
-	_rect_poly(chair, Color("#661D27"), Rect2(218,161,44,55))
-	_rect_poly(chair, Color("#8D2934"), Rect2(222,164,36,49))
-	_rect_poly(chair, Color("#B23A43"), Rect2(225,166,5,43))
-	_rect_poly(chair, Color("#3B171D"), Rect2(211,197,8,20))
-	_rect_poly(chair, Color("#3B171D"), Rect2(261,197,8,20))
+	_rect_poly(chair, Color("#2A1117"), Rect2(216,171,48,46))
+	_rect_poly(chair, Color("#661D27"), Rect2(220,174,40,42))
+	_rect_poly(chair, Color("#8D2934"), Rect2(223,177,34,36))
+	_rect_poly(chair, Color("#B23A43"), Rect2(226,179,5,31))
+	_rect_poly(chair, Color("#3B171D"), Rect2(212,198,9,19))
+	_rect_poly(chair, Color("#3B171D"), Rect2(259,198,9,19))
 
 func _build_control_desk(parent: Node2D) -> void:
 	var desk := Node2D.new()
@@ -165,13 +165,13 @@ func _build_control_desk(parent: Node2D) -> void:
 	center_bank.color = COLOR_CONSOLE
 	center_bank.polygon = PackedVector2Array([Vector2(184,216),Vector2(296,216),Vector2(305,260),Vector2(175,260)])
 	desk.add_child(center_bank)
-	_rect_poly(desk,Color("#17121A"),Rect2(194,224,92,14))
-	_rect_poly(desk,COLOR_STAGE_GOLD,Rect2(196,226,88,10))
-	_rect_poly(desk,Color("#211923"),Rect2(198,228,84,6))
-	_add_console_label(desk,"THEATER 1",Vector2(198,226),Vector2(84,9),7,COLOR_TEXT_GOLD)
-	_add_console_label(desk,"EXODUS",Vector2(207,243),Vector2(66,10),8,Color("#E7D6B1"))
-	_create_light(desk,Vector2(240,256),9,COLOR_BUTTON_RED_DARK)
-	_create_light(desk,Vector2(240,254),7,COLOR_BUTTON_RED)
+	_rect_poly(desk,Color("#17121A"),Rect2(194,220,92,13))
+	_rect_poly(desk,COLOR_STAGE_GOLD,Rect2(196,222,88,9))
+	_rect_poly(desk,Color("#211923"),Rect2(198,224,84,5))
+	_add_console_label(desk,"THEATER 1",Vector2(198,220),Vector2(84,11),6,COLOR_TEXT_GOLD)
+	_add_console_label(desk,"EXODUS",Vector2(207,234),Vector2(66,10),7,Color("#E7D6B1"))
+	_create_light(desk,Vector2(240,251),7,COLOR_BUTTON_RED_DARK)
+	_create_light(desk,Vector2(240,250),5,COLOR_BUTTON_RED)
 
 func _add_console_label(parent: Node,text: String,pos: Vector2,label_size: Vector2,font_size: int,color: Color) -> void:
 	var label := Label.new()
