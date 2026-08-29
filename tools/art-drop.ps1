@@ -10,7 +10,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
+$repoRoot = (Split-Path -Parent $PSScriptRoot).TrimEnd('\','/')
 $dropDir = Join-Path $repoRoot "BibleSortOfDrop"
 
 if (-not (Test-Path $dropDir)) {
@@ -45,7 +45,10 @@ $destination = Join-Path $destinationDir ("{0}{1}" -f $safeName, $extension)
 
 Copy-Item $source.FullName $destination -Force
 
-$relativeDestination = [System.IO.Path]::GetRelativePath($repoRoot, $destination).Replace('\','/')
+# Windows PowerShell 5.1 does not provide System.IO.Path.GetRelativePath.
+# Since every destination lives under the repo root, trim that prefix instead.
+$relativeDestination = $destination.Substring($repoRoot.Length).TrimStart('\','/').Replace('\','/')
+
 Write-Host ""
 Write-Host "ART DROP" -ForegroundColor Cyan
 Write-Host "Source:      $($source.Name)"
