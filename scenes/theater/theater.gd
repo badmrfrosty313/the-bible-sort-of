@@ -16,7 +16,6 @@ const COLOR_CONSOLE_TOP := Color("#463044")
 const COLOR_CONSOLE_EDGE := Color("#785064")
 const COLOR_CONSOLE_DARK := Color("#171219")
 const COLOR_BUTTON_RED := Color("#C92D39")
-const COLOR_BUTTON_RED_DARK := Color("#731A24")
 const COLOR_BUTTON_GOLD := Color("#D4A23E")
 const COLOR_BUTTON_GREEN := Color("#4D8C69")
 const COLOR_BUTTON_BLUE := Color("#3B6F91")
@@ -27,6 +26,7 @@ enum FatherLocation { THEATER, EPISODE, TRANSITION }
 var stage_content: Node2D
 var theater_character_layer: Node2D
 var theater_foreground_layer: Node2D
+var chair_layer: Node2D
 var father_anchor: Marker2D
 var left_entrance: Marker2D
 var right_entrance: Marker2D
@@ -55,21 +55,21 @@ func build_theater() -> void:
 	_build_father_dialogue()
 
 func _build_background() -> void:
-	_rect_poly(self, COLOR_BACKGROUND, Rect2(0, 0, 480, 270))
-	_rect_poly(self, COLOR_WALL, Rect2(18, 16, 444, 238))
-	_rect_poly(self, Color("#241825"), Rect2(18, 206, 444, 3))
-	_rect_poly(self, Color("#0D0A10"), Rect2(18, 252, 444, 18))
+	_rect_poly(self, COLOR_BACKGROUND, Rect2(0,0,480,270))
+	_rect_poly(self, COLOR_WALL, Rect2(18,16,444,238))
+	_rect_poly(self, Color("#241825"), Rect2(18,206,444,3))
+	_rect_poly(self, Color("#0D0A10"), Rect2(18,252,444,18))
 
 func _build_stage() -> void:
 	var stage := Node2D.new()
 	stage.name = "Stage"
 	stage.z_index = 0
 	add_child(stage)
-	_rect_poly(stage, Color("#08070B"), Rect2(42, 26, 396, 182))
-	_rect_poly(stage, COLOR_STAGE_FRAME, Rect2(46, 30, 388, 174))
-	_rect_poly(stage, COLOR_STAGE_EDGE, Rect2(49, 33, 382, 168))
-	_rect_poly(stage, Color("#0C0910"), Rect2(52, 36, 376, 162))
-	_rect_poly(stage, COLOR_STAGE_GOLD, Rect2(52, 36, 376, 2))
+	_rect_poly(stage,Color("#08070B"),Rect2(42,26,396,182))
+	_rect_poly(stage,COLOR_STAGE_FRAME,Rect2(46,30,388,174))
+	_rect_poly(stage,COLOR_STAGE_EDGE,Rect2(49,33,382,168))
+	_rect_poly(stage,Color("#0C0910"),Rect2(52,36,376,162))
+	_rect_poly(stage,COLOR_STAGE_GOLD,Rect2(52,36,376,2))
 	stage_content = Node2D.new()
 	stage_content.name = "StageContent"
 	stage_content.z_index = 1
@@ -81,16 +81,26 @@ func _build_theater_layers() -> void:
 	curtains.z_index = 5
 	add_child(curtains)
 	_build_curtains(curtains)
-	theater_character_layer = Node2D.new()
-	theater_character_layer.name = "TheaterCharacters"
-	theater_character_layer.z_index = 8
-	add_child(theater_character_layer)
-	_build_father_chair(theater_character_layer)
+
+	# Physical room order, back to front: SCREEN -> CONSOLE -> FATHER -> CHAIR -> CAMERA.
+	# This is intentional. Father must overlap the near edge of the console,
+	# while the plain chair overlaps only his lower body. No controls live on the chair.
 	theater_foreground_layer = Node2D.new()
-	theater_foreground_layer.name = "TheaterForeground"
-	theater_foreground_layer.z_index = 12
+	theater_foreground_layer.name = "ConsoleLayer"
+	theater_foreground_layer.z_index = 7
 	add_child(theater_foreground_layer)
 	_build_control_desk(theater_foreground_layer)
+
+	theater_character_layer = Node2D.new()
+	theater_character_layer.name = "TheaterCharacters"
+	theater_character_layer.z_index = 10
+	add_child(theater_character_layer)
+
+	chair_layer = Node2D.new()
+	chair_layer.name = "ChairLayer"
+	chair_layer.z_index = 11
+	add_child(chair_layer)
+	_build_father_chair(chair_layer)
 
 func _build_curtains(parent: Node2D) -> void:
 	var left := Polygon2D.new()
@@ -118,58 +128,69 @@ func _build_curtains(parent: Node2D) -> void:
 		mirror.position = Vector2(480,0)
 		mirror.scale = Vector2(-1,1)
 		parent.add_child(mirror)
-	_rect_poly(parent, COLOR_STAGE_GOLD, Rect2(0,31,54,2))
-	_rect_poly(parent, COLOR_STAGE_GOLD, Rect2(426,31,54,2))
+	_rect_poly(parent,COLOR_STAGE_GOLD,Rect2(0,31,54,2))
+	_rect_poly(parent,COLOR_STAGE_GOLD,Rect2(426,31,54,2))
 
 func _build_father_chair(parent: Node2D) -> void:
+	# Plain chair, camera-side of Father. Absolutely no labels or controls here.
 	var chair := Node2D.new()
 	chair.name = "FatherChair"
-	chair.z_index = -1
 	parent.add_child(chair)
-	_rect_poly(chair, Color("#2A1117"), Rect2(216,171,48,46))
-	_rect_poly(chair, Color("#661D27"), Rect2(220,174,40,42))
-	_rect_poly(chair, Color("#8D2934"), Rect2(223,177,34,36))
-	_rect_poly(chair, Color("#B23A43"), Rect2(226,179,5,31))
-	_rect_poly(chair, Color("#3B171D"), Rect2(212,198,9,19))
-	_rect_poly(chair, Color("#3B171D"), Rect2(259,198,9,19))
+	_rect_poly(chair,Color("#1D1015"),Rect2(216,220,48,45))
+	_rect_poly(chair,Color("#3A171F"),Rect2(219,217,42,46))
+	_rect_poly(chair,Color("#641D28"),Rect2(222,219,36,41))
+	_rect_poly(chair,Color("#8D2934"),Rect2(225,221,30,36))
+	_rect_poly(chair,Color("#B23A43"),Rect2(228,223,4,31))
+	_rect_poly(chair,Color("#2B1319"),Rect2(211,235,10,25))
+	_rect_poly(chair,Color("#2B1319"),Rect2(259,235,10,25))
 
 func _build_control_desk(parent: Node2D) -> void:
 	var desk := Node2D.new()
 	desk.name = "ControlDesk"
 	parent.add_child(desk)
+
+	# Console is physically BETWEEN Father and the stage. Its surface recedes
+	# toward the screen. Father will overlap its near edge when seated.
 	var surface := Polygon2D.new()
 	surface.color = COLOR_CONSOLE_TOP
-	surface.polygon = PackedVector2Array([Vector2(54,205),Vector2(426,205),Vector2(462,270),Vector2(18,270)])
+	surface.polygon = PackedVector2Array([Vector2(70,184),Vector2(410,184),Vector2(438,232),Vector2(42,232)])
 	desk.add_child(surface)
-	_rect_poly(desk, COLOR_CONSOLE_EDGE, Rect2(58,205,364,4))
-	_rect_poly(desk, COLOR_CONSOLE_DARK, Rect2(24,260,432,10))
+	_rect_poly(desk,COLOR_CONSOLE_EDGE,Rect2(72,184,336,3))
+	_rect_poly(desk,COLOR_CONSOLE_DARK,Rect2(46,229,388,5))
+
 	var left_bank := Polygon2D.new()
 	left_bank.color = COLOR_CONSOLE
-	left_bank.polygon = PackedVector2Array([Vector2(72,216),Vector2(174,216),Vector2(191,257),Vector2(52,257)])
+	left_bank.polygon = PackedVector2Array([Vector2(82,191),Vector2(176,191),Vector2(187,224),Vector2(64,224)])
 	desk.add_child(left_bank)
-	_rect_poly(desk, COLOR_CONSOLE_DARK, Rect2(79,223,81,27))
-	_create_light(desk,Vector2(96,235),6,COLOR_BUTTON_RED)
-	_create_light(desk,Vector2(122,235),4,COLOR_BUTTON_GOLD)
-	_create_light(desk,Vector2(145,235),4,COLOR_BUTTON_GREEN)
-	_add_console_label(desk,"INTERVENE",Vector2(78,248),Vector2(85,9),7,Color("#D9C8B5"))
+	_rect_poly(desk,COLOR_CONSOLE_DARK,Rect2(88,197,76,21))
+	_create_light(desk,Vector2(101,207),5,COLOR_BUTTON_RED)
+	_create_light(desk,Vector2(124,207),4,COLOR_BUTTON_GOLD)
+	_create_light(desk,Vector2(146,207),4,COLOR_BUTTON_GREEN)
+	_add_console_label(desk,"INTERVENE",Vector2(86,216),Vector2(80,7),6,Color("#D9C8B5"))
+
 	var right_bank := Polygon2D.new()
 	right_bank.color = COLOR_CONSOLE
-	right_bank.polygon = PackedVector2Array([Vector2(306,216),Vector2(408,216),Vector2(428,257),Vector2(289,257)])
+	right_bank.polygon = PackedVector2Array([Vector2(304,191),Vector2(398,191),Vector2(416,224),Vector2(293,224)])
 	desk.add_child(right_bank)
-	_rect_poly(desk, COLOR_CONSOLE_DARK, Rect2(318,223,77,27))
-	_create_light(desk,Vector2(334,235),5,COLOR_BUTTON_GREEN)
-	_create_light(desk,Vector2(358,235),5,COLOR_BUTTON_BLUE)
-	_create_light(desk,Vector2(382,235),5,COLOR_BUTTON_GOLD)
-	_add_console_label(desk,"TIMELINE: STABLE(ISH)",Vector2(309,248),Vector2(99,9),6,Color("#BFD6C4"))
+	_rect_poly(desk,COLOR_CONSOLE_DARK,Rect2(316,197,70,21))
+	_create_light(desk,Vector2(330,207),4,COLOR_BUTTON_GREEN)
+	_create_light(desk,Vector2(351,207),4,COLOR_BUTTON_BLUE)
+	_create_light(desk,Vector2(372,207),4,COLOR_BUTTON_GOLD)
+	_add_console_label(desk,"TIMELINE: STABLE(ISH)",Vector2(306,216),Vector2(92,7),5,Color("#BFD6C4"))
+
+	# Center controls are on the SAME physical surface as the side banks,
+	# farther from the camera than Father. When Father sits at x=240 his body
+	# intentionally hides most of these controls. When he stands, they are revealed.
 	var center_bank := Polygon2D.new()
 	center_bank.color = COLOR_CONSOLE
-	center_bank.polygon = PackedVector2Array([Vector2(184,216),Vector2(296,216),Vector2(305,260),Vector2(175,260)])
+	center_bank.polygon = PackedVector2Array([Vector2(181,188),Vector2(299,188),Vector2(307,226),Vector2(173,226)])
 	desk.add_child(center_bank)
-	_rect_poly(desk,Color("#17121A"),Rect2(194,220,92,13))
-	_rect_poly(desk,COLOR_STAGE_GOLD,Rect2(196,222,88,9))
-	_rect_poly(desk,Color("#211923"),Rect2(198,224,84,5))
-	_add_console_label(desk,"THEATER 1",Vector2(198,220),Vector2(84,11),6,COLOR_TEXT_GOLD)
-	_add_console_label(desk,"EXODUS",Vector2(207,234),Vector2(66,10),7,Color("#E7D6B1"))
+	_rect_poly(desk,Color("#17121A"),Rect2(194,191,92,11))
+	_rect_poly(desk,COLOR_STAGE_GOLD,Rect2(196,193,88,7))
+	_add_console_label(desk,"THEATER 1",Vector2(198,191),Vector2(84,10),6,COLOR_TEXT_GOLD)
+	_rect_poly(desk,Color("#211923"),Rect2(203,204,74,10))
+	_add_console_label(desk,"EXODUS",Vector2(205,204),Vector2(70,10),7,Color("#E7D6B1"))
+	_create_light(desk,Vector2(240,220),6,COLOR_BUTTON_RED)
 
 func _add_console_label(parent: Node,text: String,pos: Vector2,label_size: Vector2,font_size: int,color: Color) -> void:
 	var label := Label.new()
@@ -182,7 +203,7 @@ func _add_console_label(parent: Node,text: String,pos: Vector2,label_size: Vecto
 	label.add_theme_color_override("font_color",color)
 	parent.add_child(label)
 
-func _create_light(parent: Node2D, center: Vector2, radius: float, color: Color) -> void:
+func _create_light(parent: Node2D,center: Vector2,radius: float,color: Color) -> void:
 	var rim := Polygon2D.new()
 	var rim_color := color
 	rim_color.a = 0.28
@@ -219,7 +240,9 @@ func _build_runtime_anchors() -> void:
 	left_entrance = _marker("LeftEntrance",Vector2(-24,218))
 	right_entrance = _marker("RightEntrance",Vector2(504,218))
 	father_anchor = _marker("FatherStanding",Vector2(188,218))
-	seat_anchor = _marker("FatherSeat",Vector2(240,216))
+	# Seated Father is camera-side of the console. His sprite overlaps the near
+	# console edge and hides the center controls, proving the room geometry.
+	seat_anchor = _marker("FatherSeat",Vector2(240,238))
 	episode_portal = _marker("EpisodePortal",Vector2(420,218))
 
 func _marker(node_name: String,pos: Vector2) -> Marker2D:
