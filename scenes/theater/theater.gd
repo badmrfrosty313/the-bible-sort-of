@@ -31,6 +31,9 @@ var father_anchor: Marker2D
 var left_entrance: Marker2D
 var right_entrance: Marker2D
 var seat_anchor: Marker2D
+var left_aisle_anchor: Marker2D
+var center_aisle_anchor: Marker2D
+var right_aisle_anchor: Marker2D
 var episode_portal: Marker2D
 var father: Father
 var father_location := FatherLocation.THEATER
@@ -83,8 +86,6 @@ func _build_theater_layers() -> void:
 	_build_curtains(curtains)
 
 	# Physical room order, back to front: SCREEN -> CONSOLE -> FATHER -> CHAIR -> CAMERA.
-	# This is intentional. Father must overlap the near edge of the console,
-	# while the plain chair overlaps only his lower body. No controls live on the chair.
 	theater_foreground_layer = Node2D.new()
 	theater_foreground_layer.name = "ConsoleLayer"
 	theater_foreground_layer.z_index = 7
@@ -132,7 +133,6 @@ func _build_curtains(parent: Node2D) -> void:
 	_rect_poly(parent,COLOR_STAGE_GOLD,Rect2(426,31,54,2))
 
 func _build_father_chair(parent: Node2D) -> void:
-	# Plain chair, camera-side of Father. Absolutely no labels or controls here.
 	var chair := Node2D.new()
 	chair.name = "FatherChair"
 	parent.add_child(chair)
@@ -148,16 +148,12 @@ func _build_control_desk(parent: Node2D) -> void:
 	var desk := Node2D.new()
 	desk.name = "ControlDesk"
 	parent.add_child(desk)
-
-	# Console is physically BETWEEN Father and the stage. Its surface recedes
-	# toward the screen. Father will overlap its near edge when seated.
 	var surface := Polygon2D.new()
 	surface.color = COLOR_CONSOLE_TOP
 	surface.polygon = PackedVector2Array([Vector2(70,184),Vector2(410,184),Vector2(438,232),Vector2(42,232)])
 	desk.add_child(surface)
 	_rect_poly(desk,COLOR_CONSOLE_EDGE,Rect2(72,184,336,3))
 	_rect_poly(desk,COLOR_CONSOLE_DARK,Rect2(46,229,388,5))
-
 	var left_bank := Polygon2D.new()
 	left_bank.color = COLOR_CONSOLE
 	left_bank.polygon = PackedVector2Array([Vector2(82,191),Vector2(176,191),Vector2(187,224),Vector2(64,224)])
@@ -167,7 +163,6 @@ func _build_control_desk(parent: Node2D) -> void:
 	_create_light(desk,Vector2(124,207),4,COLOR_BUTTON_GOLD)
 	_create_light(desk,Vector2(146,207),4,COLOR_BUTTON_GREEN)
 	_add_console_label(desk,"INTERVENE",Vector2(86,216),Vector2(80,7),6,Color("#D9C8B5"))
-
 	var right_bank := Polygon2D.new()
 	right_bank.color = COLOR_CONSOLE
 	right_bank.polygon = PackedVector2Array([Vector2(304,191),Vector2(398,191),Vector2(416,224),Vector2(293,224)])
@@ -177,10 +172,6 @@ func _build_control_desk(parent: Node2D) -> void:
 	_create_light(desk,Vector2(351,207),4,COLOR_BUTTON_BLUE)
 	_create_light(desk,Vector2(372,207),4,COLOR_BUTTON_GOLD)
 	_add_console_label(desk,"TIMELINE: STABLE(ISH)",Vector2(306,216),Vector2(92,7),5,Color("#BFD6C4"))
-
-	# Center controls are on the SAME physical surface as the side banks,
-	# farther from the camera than Father. When Father sits at x=240 his body
-	# intentionally hides most of these controls. When he stands, they are revealed.
 	var center_bank := Polygon2D.new()
 	center_bank.color = COLOR_CONSOLE
 	center_bank.polygon = PackedVector2Array([Vector2(181,188),Vector2(299,188),Vector2(307,226),Vector2(173,226)])
@@ -237,11 +228,14 @@ func _rect_poly(parent: Node,color: Color,rect: Rect2) -> Polygon2D:
 	return poly
 
 func _build_runtime_anchors() -> void:
-	left_entrance = _marker("LeftEntrance",Vector2(-24,218))
-	right_entrance = _marker("RightEntrance",Vector2(504,218))
-	father_anchor = _marker("FatherStanding",Vector2(188,218))
-	# Seated Father is camera-side of the console. His sprite overlaps the near
-	# console edge and hides the center controls, proving the room geometry.
+	# The aisle is camera-side of the console. Father always travels here first,
+	# then approaches or leaves the chair. He never takes a straight line through the desk.
+	left_entrance = _marker("LeftEntrance",Vector2(-24,252))
+	right_entrance = _marker("RightEntrance",Vector2(504,252))
+	left_aisle_anchor = _marker("LeftAisle",Vector2(176,252))
+	center_aisle_anchor = _marker("CenterAisle",Vector2(240,252))
+	right_aisle_anchor = _marker("RightAisle",Vector2(414,252))
+	father_anchor = _marker("FatherStanding",Vector2(188,238))
 	seat_anchor = _marker("FatherSeat",Vector2(240,238))
 	episode_portal = _marker("EpisodePortal",Vector2(420,218))
 
@@ -298,7 +292,12 @@ func _spawn_father() -> void:
 
 func _run_intro() -> void:
 	father_location = FatherLocation.TRANSITION
-	await father.enter_from_left(left_entrance.global_position,father_anchor.global_position)
+	# Enter along the open aisle in front of the console, not through the console.
+	father.global_position = left_entrance.global_position
+	father.visible = true
+	await father.move_to(left_aisle_anchor.global_position)
+	await father.move_to(center_aisle_anchor.global_position)
+	await father.move_to(father_anchor.global_position)
 	father.stand()
 	await father_speak("Alright. Let's see what my humans get up to this time.",1.55)
 	await father.move_to(seat_anchor.global_position)
@@ -342,6 +341,10 @@ func send_father_into_episode(entry_position: Vector2) -> void:
 		return
 	father_location = FatherLocation.TRANSITION
 	father.stand()
+	# Back away from the chair, cross the open aisle, then approach the portal
+	# from the console's right side. No diagonal path through the workstation.
+	await father.move_to(center_aisle_anchor.global_position)
+	await father.move_to(right_aisle_anchor.global_position)
 	await father.move_to(episode_portal.global_position)
 	var portal := await _open_portal(stage_content,Vector2(412,167))
 	father.visible = false
@@ -369,6 +372,9 @@ func return_father_to_theater() -> void:
 	father.z_index = 0
 	father.visible = true
 	father.stand()
+	# Reverse the same physical route: portal -> right aisle -> center aisle -> chair.
+	await father.move_to(right_aisle_anchor.global_position)
+	await father.move_to(center_aisle_anchor.global_position)
 	await father.move_to(seat_anchor.global_position)
 	father.sit()
 	father_location = FatherLocation.THEATER
