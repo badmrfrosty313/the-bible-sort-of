@@ -3,12 +3,13 @@ class_name Father
 
 enum State { IDLE, WALKING, STANDING, SITTING, WATCHING, REACTING }
 
-@export var walk_speed: float = 70.0
+@export var walk_speed: float = 72.0
 
 const IDLE_TEXTURE := preload("res://art/characters/father/father_idle.svg")
 const WALK_A_TEXTURE := preload("res://art/characters/father/father_walk_a.svg")
 const WALK_B_TEXTURE := preload("res://art/characters/father/father_walk_b.svg")
 const SIT_TEXTURE := preload("res://art/characters/father/father_sit.svg")
+const REACT_TEXTURE := preload("res://art/characters/father/father_react.svg")
 
 var state: State = State.IDLE
 var legacy_sprite: Sprite2D
@@ -16,28 +17,39 @@ var character_sprite: Sprite2D
 var facing_left := false
 var walk_elapsed := 0.0
 var walk_frame := 0
+var idle_elapsed := 0.0
 
 func _ready() -> void:
 	legacy_sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if legacy_sprite:
 		legacy_sprite.visible = false
+
 	character_sprite = Sprite2D.new()
 	character_sprite.name = "CharacterSprite"
 	character_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	character_sprite.centered = true
 	character_sprite.position = Vector2(0, -31)
 	add_child(character_sprite)
+
 	stand()
 
 func _process(delta: float) -> void:
-	if state != State.WALKING:
+	if character_sprite == null:
 		return
-	walk_elapsed += delta
-	var next_frame := int(floor(walk_elapsed * 7.0)) % 2
-	if next_frame != walk_frame:
-		walk_frame = next_frame
-		character_sprite.texture = WALK_A_TEXTURE if walk_frame == 0 else WALK_B_TEXTURE
-	character_sprite.position.y = -31 + (1 if walk_frame == 1 else 0)
+
+	if state == State.WALKING:
+		walk_elapsed += delta
+		var next_frame := int(floor(walk_elapsed * 8.0)) % 2
+		if next_frame != walk_frame:
+			walk_frame = next_frame
+			character_sprite.texture = WALK_A_TEXTURE if walk_frame == 0 else WALK_B_TEXTURE
+		character_sprite.position.y = -31.0 + float(walk_frame)
+		return
+
+	if state == State.WATCHING:
+		idle_elapsed += delta
+		var breath := 1.0 if int(idle_elapsed * 1.7) % 4 == 3 else 0.0
+		character_sprite.position.y = -31.0 + breath
 
 func _apply_texture(texture: Texture2D, y_offset: float = -31.0) -> void:
 	if character_sprite == null:
@@ -95,22 +107,27 @@ func leave_to_right(exit_position: Vector2) -> void:
 
 func stand() -> void:
 	state = State.STANDING
+	idle_elapsed = 0.0
 	_apply_texture(IDLE_TEXTURE)
 
 func sit() -> void:
 	state = State.SITTING
 	facing_left = false
-	_apply_texture(SIT_TEXTURE, -31)
+	idle_elapsed = 0.0
+	_apply_texture(SIT_TEXTURE)
 
 func watch_stage() -> void:
 	state = State.WATCHING
 	facing_left = false
-	_apply_texture(SIT_TEXTURE, -31)
+	idle_elapsed = 0.0
+	_apply_texture(SIT_TEXTURE)
 
 func react() -> void:
 	state = State.REACTING
-	_apply_texture(IDLE_TEXTURE)
+	idle_elapsed = 0.0
+	_apply_texture(REACT_TEXTURE)
 
 func idle() -> void:
 	state = State.IDLE
+	idle_elapsed = 0.0
 	_apply_texture(IDLE_TEXTURE)

@@ -1,1 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" shape-rendering="crispEdges"><g><path fill="#4b211b" d="M17 23h30v4h4v29h-6V32H19v24h-6V27h4z"/><path fill="#762d25" d="M19 25h26v5H19z"/><path fill="#eadfc9" d="M22 5h20v3h6v7h4v16h-5v9h-6V19H23v21h-6v-9h-5V15h4V8h6z"/><path fill="#b8aa95" d="M14 17h7v23h-5V30h-4V19h2zm29 0h7v2h2v11h-4v10h-5z"/><path fill="#c99368" d="M23 12h18v17H23z"/><path fill="#9c6748" d="M23 23h18v6H23z"/><rect fill="#2a1a16" x="26" y="18" width="3" height="3"/><rect fill="#2a1a16" x="36" y="18" width="3" height="3"/><path fill="#eadfc9" d="M21 27h22v11h-4v7H25v-7h-4z"/><path fill="#b8aa95" d="M25 38h14v7H25z"/><path fill="#8e1f28" d="M17 39h30v6h4v19H13V45h4z"/><path fill="#d8c7a2" d="M22 38h20v22H22z"/><path fill="#a99572" d="M22 53h20v7H22z"/><rect fill="#5b3825" x="21" y="47" width="22" height="4"/><rect fill="#c59643" x="30" y="46" width="4" height="6"/><path fill="#c99368" d="M14 44h8v8h-8zm28 0h8v8h-8z"/><path fill="#5b3825" d="M20 59h11v5H18v-3h2zm13 0h11v2h2v3H33z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" shape-rendering="crispEdges">
+<g>
+<!-- shadow -->
+<path fill="#1b1115" d="M15 59h36v3H15z"/>
+<!-- cape silhouette -->
+<path fill="#32141b" d="M17 26h7v-5h17v4h7v7h4v27h-8v4H18v-4H11V34h3v-5h3z"/>
+<path fill="#7f202b" d="M15 31h10v-5h18v5h6v25h-8l-3-16-6 5-7-5-3 16h-7z"/>
+<path fill="#a22b36" d="M16 32h6v22h-6zM42 31h6v20h-5z"/>
+<!-- robe -->
+<path fill="#5b3a25" d="M23 34h19v28H21v-6h2z"/>
+<path fill="#ead8aa" d="M24 34h16v26H22l2-9z"/>
+<path fill="#c5a873" d="M35 38h5v22h-6z"/>
+<path fill="#f4e4b9" d="M25 36h8v20h-9z"/>
+<!-- belt -->
+<path fill="#4c2f20" d="M22 45h20v4H22z"/>
+<path fill="#d39b35" d="M30 44h5v6h-5z"/>
+<path fill="#f0c45a" d="M31 45h3v4h-3z"/>
+<!-- hair outer -->
+<path fill="#4a3429" d="M18 6h5V3h20v3h4v4h4v16h-4v8h-5V18H22v16h-5v-8h-4V11h5z"/>
+<path fill="#f2ead8" d="M20 5h22v3h5v6h3v11h-5v12h-6V17H24v20h-6V26h-4V13h4V8h2z"/>
+<path fill="#c8bca6" d="M14 17h5v17h4v5h-7v-8h-4v-11h2zm31 1h5v4h2v11h-4v7h-7v-4h4z"/>
+<path fill="#fff7e7" d="M23 5h14v3H23z"/>
+<!-- face -->
+<path fill="#7b4a31" d="M23 12h19v17H22V15h1z"/>
+<path fill="#d99a69" d="M24 11h17v17H24z"/>
+<path fill="#efb17c" d="M26 12h12v5H26z"/>
+<!-- brows eyes nose -->
+<path fill="#4a2b23" d="M26 17h5v2h-5zM35 17h5v2h-5z"/>
+<path fill="#181114" d="M27 20h3v3h-3zM36 20h3v3h-3z"/>
+<path fill="#b8744f" d="M32 20h4v7h3v3h-8v-3h2z"/>
+<!-- beard -->
+<path fill="#4a3429" d="M20 26h24v12h-4v8h-5v5h-8v-5h-5v-8h-4v-10h2z"/>
+<path fill="#f4ecdc" d="M21 25h22v12h-4v8h-5v5h-6v-5h-5v-8h-4V28h2z"/>
+<path fill="#d4c7b0" d="M24 31h5v13h4v5h-5v-4h-5v-8h-3v-5zM38 29h5v8h-4v8h-5v-4h3z"/>
+<path fill="#fff7e7" d="M25 27h13v4H25z"/>
+<!-- arms -->
+<path fill="#32141b" d="M10 36h8v17h7v8H14v-5h-5zM46 35h8v21h-5v5H39v-8h7z"/>
+<path fill="#ead8aa" d="M12 37h7v16h6v6H15v-5h-4zM45 37h7v17h-4v5h-9v-6h6z"/>
+<path fill="#d99a69" d="M18 52h8v7h-8zM38 53h9v6h-9z"/>
+<!-- sandals -->
+<path fill="#3a251b" d="M20 59h11v5H18v-3h2zm13 0h11v2h2v3H33z"/>
+</g>
+</svg>

@@ -9,7 +9,7 @@ on:
 
 jobs:
   smoke-test:
-    name: Godot 4.7.2 headless smoke test
+    name: Godot 4.7.2 validation
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -43,7 +43,6 @@ jobs:
           set -o pipefail
           timeout 12s godot --headless --path . 2>&1 | tee godot-smoke.log || status=$?
           status=${status:-0}
-          # timeout(124) is expected because the game loop intentionally keeps running.
           if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then
             exit "$status"
           fi
@@ -53,6 +52,28 @@ jobs:
           fi
           echo "Main scene survived the smoke window."
 
+      - name: Install virtual display
+        if: success()
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb
+
+      - name: Capture visual regression snapshots
+        if: success()
+        shell: bash
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -o pipefail
+          mkdir -p ci_artifacts
+          timeout 50s xvfb-run -a godot \
+            --path . \
+            --rendering-method gl_compatibility \
+            --script ci/capture_theater.gd \
+            2>&1 | tee godot-visual.log
+          test -f ci_artifacts/02_burning_bush.png
+
       - name: Upload Godot logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -61,5 +82,15 @@ jobs:
           path: |
             godot-import.log
             godot-smoke.log
+            godot-visual.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload visual snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-visual-snapshots
+          path: ci_artifacts/*.png
           if-no-files-found: ignore
           retention-days: 14
