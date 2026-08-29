@@ -17,6 +17,8 @@ const FATHER_REPLIES := ["You're Moses. We've covered this.","Tell them I AM sen
 var director
 var moses: Node2D
 var moses_sprite: Sprite2D
+var bush_root: Node2D
+var bush_glow: Polygon2D
 var flame_outer: Polygon2D
 var flame_mid: Polygon2D
 var flame_core: Polygon2D
@@ -26,6 +28,9 @@ var speaker_label: Label
 var dialogue_label: Label
 var prompt_panel: Panel
 var prompt_label: Label
+var father_speaking := false
+var father_speech_strength := 0.0
+var moses_reaction_strength := 0.0
 
 func _ready() -> void:
 	_build_scene()
@@ -55,32 +60,37 @@ func _build_desert() -> void:
 	_poly(Color("#78503F"),PackedVector2Array([Vector2(373,193),Vector2(378,186),Vector2(386,184),Vector2(393,193),Vector2(373,193)]))
 
 func _build_burning_bush() -> void:
-	var bush := Node2D.new()
-	bush.name = "BurningBush"
-	bush.position = Vector2(336,188)
-	add_child(bush)
-	_poly_at(bush,Color("#2E3823"),PackedVector2Array([Vector2(-25,-5),Vector2(-31,-18),Vector2(-20,-31),Vector2(-12,-27),Vector2(-5,-42),Vector2(3,-30),Vector2(13,-38),Vector2(20,-25),Vector2(31,-17),Vector2(24,-5)]))
-	_poly_at(bush,Color("#486238"),PackedVector2Array([Vector2(-21,-7),Vector2(-25,-18),Vector2(-15,-26),Vector2(-8,-23),Vector2(-3,-35),Vector2(5,-25),Vector2(13,-31),Vector2(24,-16),Vector2(19,-7)]))
-	_rect_poly_at(bush,Color("#4A2E1D"),Rect2(-3,-9,7,10))
-	_rect_poly_at(bush,Color("#6B4224"),Rect2(-15,-17,29,4))
+	bush_root = Node2D.new()
+	bush_root.name = "BurningBush"
+	bush_root.position = Vector2(336,188)
+	bush_root.z_index = 3
+	add_child(bush_root)
+
+	# A restrained supernatural halo. It breathes harder only while Father speaks.
+	bush_glow = _circle_at(bush_root,Vector2(0,-31),44.0,Color("#FFB33A24"),20)
+	bush_glow.z_index = -2
+	_poly_at(bush_root,Color("#2E3823"),PackedVector2Array([Vector2(-25,-5),Vector2(-31,-18),Vector2(-20,-31),Vector2(-12,-27),Vector2(-5,-42),Vector2(3,-30),Vector2(13,-38),Vector2(20,-25),Vector2(31,-17),Vector2(24,-5)]))
+	_poly_at(bush_root,Color("#486238"),PackedVector2Array([Vector2(-21,-7),Vector2(-25,-18),Vector2(-15,-26),Vector2(-8,-23),Vector2(-3,-35),Vector2(5,-25),Vector2(13,-31),Vector2(24,-16),Vector2(19,-7)]))
+	_rect_poly_at(bush_root,Color("#4A2E1D"),Rect2(-3,-9,7,10))
+	_rect_poly_at(bush_root,Color("#6B4224"),Rect2(-15,-17,29,4))
 	flame_outer = Polygon2D.new()
 	flame_outer.color = Color("#E64F24")
 	flame_outer.polygon = PackedVector2Array([Vector2(-18,-11),Vector2(-22,-28),Vector2(-13,-42),Vector2(-9,-58),Vector2(-1,-47),Vector2(4,-71),Vector2(13,-50),Vector2(20,-39),Vector2(16,-18),Vector2(10,-9),Vector2(-10,-9)])
-	bush.add_child(flame_outer)
+	bush_root.add_child(flame_outer)
 	flame_mid = Polygon2D.new()
 	flame_mid.color = Color("#FF8A28")
 	flame_mid.polygon = PackedVector2Array([Vector2(-12,-12),Vector2(-15,-29),Vector2(-7,-42),Vector2(-3,-55),Vector2(3,-42),Vector2(8,-57),Vector2(14,-36),Vector2(11,-17),Vector2(5,-10),Vector2(-7,-10)])
-	bush.add_child(flame_mid)
+	bush_root.add_child(flame_mid)
 	flame_core = Polygon2D.new()
 	flame_core.color = Color("#FFD45A")
 	flame_core.polygon = PackedVector2Array([Vector2(-7,-11),Vector2(-9,-25),Vector2(-2,-37),Vector2(2,-48),Vector2(7,-31),Vector2(8,-18),Vector2(4,-10)])
-	bush.add_child(flame_core)
-	for i in range(4):
+	bush_root.add_child(flame_core)
+	for i in range(6):
 		var ember := Polygon2D.new()
 		ember.color = Color("#FFB23E")
 		ember.polygon = PackedVector2Array([Vector2(-1,-1),Vector2(1,-1),Vector2(1,1),Vector2(-1,1)])
-		ember.position = Vector2(-10+i*7,-58-i*5)
-		bush.add_child(ember)
+		ember.position = Vector2(-13+i*5,-55-i*3)
+		bush_root.add_child(ember)
 		embers.append(ember)
 
 func _build_moses() -> void:
@@ -149,9 +159,12 @@ func _build_dialogue_ui() -> void:
 	_set_prompt_style(false)
 
 func _run_episode() -> void:
+	# Moses gets a tiny visual double-take before the first line.
+	await _moses_double_take()
 	await _say_moses("That bush is on fire.",1.05)
 	await _say_moses("...and somehow still a bush.",1.10)
 	await _father("Moses.",0.75)
+	await _moses_recoil()
 	await _say_moses("Yep. Talking bush. Sure.",1.00)
 	await _father("I need you to go to Egypt.",1.00)
 	for i in range(OBJECTIONS.size()):
@@ -162,8 +175,9 @@ func _run_episode() -> void:
 		await _father(FATHER_REPLIES[i],0.85)
 	await _say_moses("So... anyone else?",0.72)
 	moses_sprite.texture = MOSES_SHRUG_TEXTURE
+	# Hold the silence just long enough for the theater-side reaction to land.
+	await get_tree().create_timer(0.34).timeout
 	# Father is the voice of the burning bush here. He stays seated in the theater.
-	# Physical episode entry remains a director capability for stories that need it.
 	await _father("Fine. Aaron can help.",0.90)
 	await _show_prompt(true,0.75)
 	moses_sprite.texture = MOSES_IDLE_TEXTURE
@@ -187,10 +201,31 @@ func _say_moses(text: String,hold: float) -> void:
 func _father(text: String,hold: float) -> void:
 	if dialogue_panel != null:
 		dialogue_panel.visible = false
+	father_speaking = true
+	var surge := create_tween()
+	surge.tween_property(self,"father_speech_strength",1.0,0.10)
 	if director == null:
 		await get_tree().create_timer(hold).timeout
-		return
-	await director.father_speak(text,hold)
+	else:
+		await director.father_speak(text,hold)
+	father_speaking = false
+	var settle := create_tween()
+	settle.tween_property(self,"father_speech_strength",0.0,0.18)
+	await settle.finished
+
+func _moses_double_take() -> void:
+	var tween := create_tween()
+	tween.tween_property(moses,"position:x",149.0,0.10)
+	tween.tween_property(moses,"position:x",145.0,0.12)
+	await tween.finished
+
+func _moses_recoil() -> void:
+	moses_reaction_strength = 1.0
+	var tween := create_tween()
+	tween.tween_property(moses,"position:x",137.0,0.09)
+	tween.tween_property(moses,"position:x",145.0,0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await tween.finished
+	moses_reaction_strength = 0.0
 
 func _show_prompt(accepted: bool,hold: float) -> void:
 	_set_prompt_style(accepted)
@@ -239,23 +274,36 @@ func _show_quest_accepted() -> void:
 	var fade := create_tween()
 	fade.tween_property(prompt_panel,"modulate:a",1.0,0.12)
 	await fade.finished
-	await get_tree().create_timer(1.10).timeout
+	var pop := create_tween()
+	pop.tween_property(prompt_panel,"scale",Vector2(1.06,1.06),0.10)
+	pop.tween_property(prompt_panel,"scale",Vector2.ONE,0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await pop.finished
+	await get_tree().create_timer(0.86).timeout
 
 func _process(_delta: float) -> void:
 	var t := Time.get_ticks_msec() * 0.001
+	var speech_boost := father_speech_strength
+	if bush_glow != null:
+		var glow_breath := 0.96 + sin(t*3.2)*0.04
+		var glow_scale := glow_breath + speech_boost*0.16 + sin(t*10.0)*0.015*speech_boost
+		bush_glow.scale = Vector2(glow_scale,glow_scale)
+		bush_glow.modulate.a = 0.62 + speech_boost*0.38
 	if flame_outer != null:
-		flame_outer.scale.y = 0.96 + sin(t*9.0)*0.05
-		flame_outer.position.x = round(sin(t*6.0))
+		flame_outer.scale.y = 0.96 + sin(t*9.0)*0.05 + speech_boost*0.09
+		flame_outer.scale.x = 1.0 + speech_boost*0.05
+		flame_outer.position.x = round(sin(t*6.0)*(1.0+speech_boost))
 	if flame_mid != null:
-		flame_mid.scale.y = 0.94 + sin(t*11.0+1.2)*0.07
-		flame_mid.position.x = round(sin(t*8.0+0.8))
+		flame_mid.scale.y = 0.94 + sin(t*11.0+1.2)*0.07 + speech_boost*0.11
+		flame_mid.position.x = round(sin(t*8.0+0.8)*(1.0+speech_boost))
 	if flame_core != null:
-		flame_core.scale.y = 0.93 + sin(t*13.0+2.0)*0.08
+		flame_core.scale.y = 0.93 + sin(t*13.0+2.0)*0.08 + speech_boost*0.13
+		flame_core.modulate = Color(1.0,1.0,1.0,1.0)
 	for i in range(embers.size()):
 		var ember := embers[i]
-		var cycle := fmod(t*(8.0+i),22.0)
-		ember.position.y = -53.0-cycle-i*3.0
-		ember.position.x = -9.0+i*6.0+sin(t*4.0+i)*3.0
+		var speed := 8.0+float(i)+speech_boost*5.0
+		var cycle := fmod(t*speed,22.0)
+		ember.position.y = -53.0-cycle-i*2.0
+		ember.position.x = -12.0+i*5.0+sin(t*4.0+i)*3.0
 		ember.modulate = Color(1,1,1,1.0-(cycle/22.0))
 
 func _rect_poly(color: Color,rect: Rect2) -> Polygon2D:
@@ -295,4 +343,15 @@ func _circle(center: Vector2,radius: float,color: Color,count: int) -> Polygon2D
 		points.append(center+Vector2(cos(angle),sin(angle))*radius)
 	poly.polygon = points
 	add_child(poly)
+	return poly
+
+func _circle_at(parent: Node2D,center: Vector2,radius: float,color: Color,count: int) -> Polygon2D:
+	var poly := Polygon2D.new()
+	poly.color = color
+	var points := PackedVector2Array()
+	for i in range(count):
+		var angle := TAU * float(i) / float(count)
+		points.append(center+Vector2(cos(angle),sin(angle))*radius)
+	poly.polygon = points
+	parent.add_child(poly)
 	return poly
