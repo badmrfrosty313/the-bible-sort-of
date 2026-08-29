@@ -76,10 +76,15 @@ func _build_theater_layers() -> void:
 	curtains.z_index = 5
 	add_child(curtains)
 	_build_curtains(curtains)
+
+	# Theater Father is deliberately sandwiched between the stage/curtains and
+	# the console foreground. The console therefore owns the pixels in front of
+	# his torso when he is seated.
 	theater_character_layer = Node2D.new()
 	theater_character_layer.name = "TheaterCharacters"
 	theater_character_layer.z_index = 8
 	add_child(theater_character_layer)
+
 	theater_foreground_layer = Node2D.new()
 	theater_foreground_layer.name = "TheaterForeground"
 	theater_foreground_layer.z_index = 12
@@ -97,10 +102,22 @@ func _build_curtains(parent: Node2D) -> void:
 
 func _build_control_desk(parent: Node2D) -> void:
 	var desk := Node2D.new(); desk.name = "ControlDesk"; parent.add_child(desk)
-	var surface := Polygon2D.new(); surface.color = COLOR_DESK; surface.polygon = PackedVector2Array([Vector2(90,220),Vector2(390,220),Vector2(440,270),Vector2(40,270)]); desk.add_child(surface)
+
+	# This is a true foreground console now. Its rear lip begins at y=208,
+	# overlapping the seated Father instead of merely touching his feet.
+	var surface := Polygon2D.new()
+	surface.color = COLOR_DESK
+	surface.polygon = PackedVector2Array([Vector2(90,208),Vector2(390,208),Vector2(440,270),Vector2(40,270)])
+	desk.add_child(surface)
+
+	var rear_lip := Polygon2D.new()
+	rear_lip.color = COLOR_DESK_FRONT
+	rear_lip.polygon = PackedVector2Array([Vector2(90,208),Vector2(390,208),Vector2(386,216),Vector2(94,216)])
+	desk.add_child(rear_lip)
+
 	var front := Polygon2D.new(); front.color = COLOR_DESK_FRONT; front.polygon = PackedVector2Array([Vector2(40,258),Vector2(440,258),Vector2(440,270),Vector2(40,270)]); desk.add_child(front)
-	var panel := Polygon2D.new(); panel.color = COLOR_PANEL; panel.polygon = PackedVector2Array([Vector2(155,230),Vector2(325,230),Vector2(350,260),Vector2(130,260)]); desk.add_child(panel)
-	_create_light(desk,Vector2(240,243),8,COLOR_BUTTON_RED); _create_light(desk,Vector2(190,244),4,COLOR_BUTTON_GOLD); _create_light(desk,Vector2(290,244),4,COLOR_BUTTON_GREEN); _create_light(desk,Vector2(166,248),2,COLOR_BUTTON_GREEN); _create_light(desk,Vector2(314,248),2,COLOR_BUTTON_GOLD)
+	var panel := Polygon2D.new(); panel.color = COLOR_PANEL; panel.polygon = PackedVector2Array([Vector2(155,224),Vector2(325,224),Vector2(350,260),Vector2(130,260)]); desk.add_child(panel)
+	_create_light(desk,Vector2(240,238),8,COLOR_BUTTON_RED); _create_light(desk,Vector2(190,239),4,COLOR_BUTTON_GOLD); _create_light(desk,Vector2(290,239),4,COLOR_BUTTON_GREEN); _create_light(desk,Vector2(166,244),2,COLOR_BUTTON_GREEN); _create_light(desk,Vector2(314,244),2,COLOR_BUTTON_GOLD)
 
 func _create_light(parent: Node2D, center: Vector2, radius: float, color: Color) -> void:
 	var light := Polygon2D.new(); light.color = color; var points := PackedVector2Array()
@@ -118,9 +135,9 @@ func _build_runtime_anchors() -> void:
 	left_entrance = _marker("LeftEntrance",Vector2(-30,218))
 	right_entrance = _marker("RightEntrance",Vector2(510,218))
 	father_anchor = _marker("FatherStanding",Vector2(240,218))
-	# Rear edge of the console is y=220. Father sits just behind it so the
-	# foreground surface masks his lower body instead of placing him on top.
-	seat_anchor = _marker("FatherSeat",Vector2(240,216))
+	# The 64x64 seated asset is centered on this point. At y=202 his lower
+	# half extends behind the console, while his head/shoulders remain visible.
+	seat_anchor = _marker("FatherSeat",Vector2(240,202))
 	episode_portal = _marker("EpisodePortal",Vector2(430,205))
 
 func _marker(node_name: String, pos: Vector2) -> Marker2D:
@@ -151,7 +168,7 @@ func _on_father_exit_requested() -> void: await _return_father_to_theater()
 func _father_speak(text: String, duration: float = 1.0) -> void:
 	if father_dialogue_label == null: return
 	father_dialogue_label.text = "FATHER: " + text
-	father_dialogue_label.position = Vector2(90,55) if father_location == FatherLocation.EPISODE else Vector2(90,164)
+	father_dialogue_label.position = Vector2(90,55) if father_location == FatherLocation.EPISODE else Vector2(90,154)
 	father_dialogue_label.visible = true; await get_tree().create_timer(duration).timeout; father_dialogue_label.visible = false
 
 func _send_father_into_episode(entry_position: Vector2) -> void:
