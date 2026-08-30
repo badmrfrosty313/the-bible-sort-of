@@ -5,7 +5,7 @@ enum State { IDLE, WALKING, STANDING, SITTING, WATCHING, REACTING }
 
 @export var walk_speed: float = 72.0
 
-const WALK_SHEET := preload("res://art/characters/father_pixel/father_walk_native.svg")
+const WALK_SHEET := preload("res://art/characters/father_pixel/father_walk_sketch.png")
 const SIT_BACK_TEXTURE := preload("res://art/characters/father/father_sit_back.svg")
 const FRAME_SIZE := Vector2(48, 64)
 const STAND_OFFSET_Y := -32.0
