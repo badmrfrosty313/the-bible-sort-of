@@ -14,6 +14,7 @@ const WALK_5_TEXTURE := preload("res://art/characters/father_pixel/father_walk_5
 const WALK_6_TEXTURE := preload("res://art/characters/father_pixel/father_walk_6.png")
 const SIT_BACK_TEXTURE := preload("res://art/characters/father_pixel/father_sit_back.png")
 
+const DISPLAY_SCALE := Vector2(1.0, 1.0)
 const STAND_OFFSET_Y := -34.0
 const WALK_OFFSET_Y := -34.0
 const SIT_OFFSET_Y := -33.0
@@ -43,6 +44,7 @@ func _ready() -> void:
 	character_sprite.name = "CharacterSprite"
 	character_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	character_sprite.centered = true
+	character_sprite.scale = DISPLAY_SCALE
 	add_child(character_sprite)
 	stand()
 
