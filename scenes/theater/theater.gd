@@ -292,18 +292,27 @@ func _spawn_father() -> void:
 
 func _run_intro() -> void:
 	father_location = FatherLocation.TRANSITION
-	# Enter along the open aisle in front of the console, then stop beside the chair.
-	# Switching to the seated pose moves him into the chair without visibly walking across the console.
+	# Enter along the open aisle and stop beside the chair.
 	father.global_position = left_entrance.global_position
 	father.visible = true
 	await father.move_to(left_aisle_anchor.global_position)
 	await father.move_to(center_aisle_anchor.global_position)
 	await father.move_to(father_anchor.global_position)
-	father.stand()
-	await father_speak("Alright. Let's see what my humans get up to this time.",1.55)
+	# Sit first. The pre-episode line belongs to the seated theater beat.
 	father.global_position = seat_anchor.global_position
 	father.sit()
 	father_location = FatherLocation.THEATER
+	await _episode_pre_roll()
+
+func _episode_pre_roll(line: String = "I wonder what my creation is doing.") -> void:
+	# Reusable beat before every episode: Father is seated at the console,
+	# then wonders what creation is up to before the episode begins.
+	if father == null:
+		return
+	father.global_position = seat_anchor.global_position
+	father.sit()
+	father_location = FatherLocation.THEATER
+	await father_speak(line, 1.55)
 
 func _start_burning_bush() -> void:
 	current_episode = BURNING_BUSH_SCENE.instantiate()
@@ -373,10 +382,9 @@ func return_father_to_theater() -> void:
 	father.z_index = 0
 	father.visible = true
 	father.stand()
-	# Reverse the same route, then snap into the seated pose instead of walking through the console.
+	# Reverse the same physical route: portal -> right aisle -> center aisle -> chair.
 	await father.move_to(right_aisle_anchor.global_position)
 	await father.move_to(center_aisle_anchor.global_position)
-	await father.move_to(father_anchor.global_position)
 	father.global_position = seat_anchor.global_position
 	father.sit()
 	father_location = FatherLocation.THEATER
