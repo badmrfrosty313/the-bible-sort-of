@@ -62,7 +62,7 @@ func _atlas(region: Rect2) -> AtlasTexture:
 
 func _make_white_key_material() -> ShaderMaterial:
 	var shader := Shader.new()
-	shader.code = "shader_type canvas_item;\nvoid fragment() {\n\tvec4 c = texture(TEXTURE, UV);\n\tfloat whiteness = min(c.r, min(c.g, c.b));\n\tfloat spread = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));\n\tif (whiteness > 0.94 && spread < 0.06) { discard; }\n\tCOLOR = c;\n}"
+	shader.code = "shader_type canvas_item;\nvoid fragment() {\n\tvec4 c = texture(TEXTURE, UV);\n\tfloat whiteness = min(c.r, min(c.g, c.b));\n\tfloat spread = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));\n\tif (whiteness > 0.985 && spread < 0.015) { discard; }\n\tCOLOR = c;\n}"
 	var material := ShaderMaterial.new()
 	material.shader = shader
 	return material
