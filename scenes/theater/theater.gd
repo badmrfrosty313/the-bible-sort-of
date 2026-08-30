@@ -292,7 +292,8 @@ func _spawn_father() -> void:
 
 func _run_intro() -> void:
 	father_location = FatherLocation.TRANSITION
-	# Enter along the open aisle in front of the console, not through the console.
+	# Enter along the open aisle in front of the console, then stop beside the chair.
+	# Switching to the seated pose moves him into the chair without visibly walking across the console.
 	father.global_position = left_entrance.global_position
 	father.visible = true
 	await father.move_to(left_aisle_anchor.global_position)
@@ -300,7 +301,7 @@ func _run_intro() -> void:
 	await father.move_to(father_anchor.global_position)
 	father.stand()
 	await father_speak("Alright. Let's see what my humans get up to this time.",1.55)
-	await father.move_to(seat_anchor.global_position)
+	father.global_position = seat_anchor.global_position
 	father.sit()
 	father_location = FatherLocation.THEATER
 
@@ -372,10 +373,11 @@ func return_father_to_theater() -> void:
 	father.z_index = 0
 	father.visible = true
 	father.stand()
-	# Reverse the same physical route: portal -> right aisle -> center aisle -> chair.
+	# Reverse the same route, then snap into the seated pose instead of walking through the console.
 	await father.move_to(right_aisle_anchor.global_position)
 	await father.move_to(center_aisle_anchor.global_position)
-	await father.move_to(seat_anchor.global_position)
+	await father.move_to(father_anchor.global_position)
+	father.global_position = seat_anchor.global_position
 	father.sit()
 	father_location = FatherLocation.THEATER
 
