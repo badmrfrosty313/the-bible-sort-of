@@ -38,17 +38,95 @@ func _build_walk_frames() -> void:
 	for i in range(6):
 		var region := Rect2i(FRAME_SIZE.x * i, 0, FRAME_SIZE.x, FRAME_SIZE.y)
 		var frame_image: Image = source.get_region(region)
-		_remove_black_background(frame_image)
+		_remove_edge_background(frame_image)
+		_remove_stray_islands(frame_image)
 		walk_textures.append(ImageTexture.create_from_image(frame_image))
 
-func _remove_black_background(image: Image) -> void:
-	for y in range(image.get_height()):
-		for x in range(image.get_width()):
-			var pixel: Color = image.get_pixel(x, y)
-			# The approved sketch was exported on black. Remove only the near-black
-			# backdrop while preserving the dark outline pixels on Father himself.
-			if pixel.r < 0.035 and pixel.g < 0.035 and pixel.b < 0.045:
-				image.set_pixel(x, y, Color(0.0, 0.0, 0.0, 0.0))
+func _is_background(pixel: Color) -> bool:
+	return pixel.a > 0.0 and pixel.r < 0.10 and pixel.g < 0.10 and pixel.b < 0.13
+
+func _remove_edge_background(image: Image) -> void:
+	# Only remove dark pixels connected to the OUTSIDE of the frame.
+	# This keeps Father's dark eyes and internal outline intact.
+	var width := image.get_width()
+	var height := image.get_height()
+	var visited := PackedByteArray()
+	visited.resize(width * height)
+	var queue: Array[Vector2i] = []
+
+	for x in range(width):
+		_queue_background_pixel(image, Vector2i(x, 0), visited, queue)
+		_queue_background_pixel(image, Vector2i(x, height - 1), visited, queue)
+	for y in range(height):
+		_queue_background_pixel(image, Vector2i(0, y), visited, queue)
+		_queue_background_pixel(image, Vector2i(width - 1, y), visited, queue)
+
+	var index := 0
+	while index < queue.size():
+		var point := queue[index]
+		index += 1
+		image.set_pixel(point.x, point.y, Color(0.0, 0.0, 0.0, 0.0))
+		_queue_background_pixel(image, point + Vector2i.LEFT, visited, queue)
+		_queue_background_pixel(image, point + Vector2i.RIGHT, visited, queue)
+		_queue_background_pixel(image, point + Vector2i.UP, visited, queue)
+		_queue_background_pixel(image, point + Vector2i.DOWN, visited, queue)
+
+func _queue_background_pixel(image: Image, point: Vector2i, visited: PackedByteArray, queue: Array[Vector2i]) -> void:
+	var width := image.get_width()
+	var height := image.get_height()
+	if point.x < 0 or point.y < 0 or point.x >= width or point.y >= height:
+		return
+	var flat_index := point.y * width + point.x
+	if visited[flat_index] != 0:
+		return
+	visited[flat_index] = 1
+	if _is_background(image.get_pixel(point.x, point.y)):
+		queue.append(point)
+
+func _remove_stray_islands(image: Image) -> void:
+	# Generated source art occasionally contains a few detached pixels near a
+	# frame edge. Keep only substantial connected opaque clusters, which removes
+	# those flickering specks without touching facial details inside Father.
+	var width := image.get_width()
+	var height := image.get_height()
+	var visited := PackedByteArray()
+	visited.resize(width * height)
+	var components: Array[Array] = []
+
+	for y in range(height):
+		for x in range(width):
+			var flat_index := y * width + x
+			if visited[flat_index] != 0 or image.get_pixel(x, y).a <= 0.01:
+				continue
+			var component: Array[Vector2i] = []
+			var queue: Array[Vector2i] = [Vector2i(x, y)]
+			visited[flat_index] = 1
+			var queue_index := 0
+			while queue_index < queue.size():
+				var point := queue[queue_index]
+				queue_index += 1
+				component.append(point)
+				for neighbor in [point + Vector2i.LEFT, point + Vector2i.RIGHT, point + Vector2i.UP, point + Vector2i.DOWN]:
+					if neighbor.x < 0 or neighbor.y < 0 or neighbor.x >= width or neighbor.y >= height:
+						continue
+					var neighbor_index := neighbor.y * width + neighbor.x
+					if visited[neighbor_index] != 0:
+						continue
+					visited[neighbor_index] = 1
+					if image.get_pixel(neighbor.x, neighbor.y).a > 0.01:
+						queue.append(neighbor)
+			components.append(component)
+
+	var largest_size := 0
+	for component in components:
+		largest_size = maxi(largest_size, component.size())
+
+	var minimum_keep_size := maxi(4, int(largest_size * 0.015))
+	for component in components:
+		if component.size() >= minimum_keep_size:
+			continue
+		for point in component:
+			image.set_pixel(point.x, point.y, Color(0.0, 0.0, 0.0, 0.0))
 
 func _process(delta: float) -> void:
 	if character_sprite == null:
