@@ -7,7 +7,7 @@ enum State { IDLE, WALKING, STANDING, SITTING, WATCHING, REACTING }
 
 const WALK_SHEET := preload("res://art/characters/father_pixel/father_walk_sketch.png")
 const SIT_BACK_TEXTURE := preload("res://art/characters/father/father_sit_back.svg")
-const FRAME_SIZE := Vector2(48, 64)
+const FRAME_SIZE := Vector2i(48, 64)
 const STAND_OFFSET_Y := -32.0
 const WALK_OFFSET_Y := -32.0
 const SIT_OFFSET_Y := -31.0
@@ -18,7 +18,7 @@ var facing_left: bool = false
 var walk_elapsed: float = 0.0
 var walk_frame: int = 0
 var idle_elapsed: float = 0.0
-var walk_textures: Array[AtlasTexture] = []
+var walk_textures: Array[Texture2D] = []
 
 func _ready() -> void:
 	var old_sprite := get_node_or_null("Sprite2D") as Sprite2D
@@ -34,11 +34,21 @@ func _ready() -> void:
 
 func _build_walk_frames() -> void:
 	walk_textures.clear()
+	var source: Image = WALK_SHEET.get_image()
 	for i in range(6):
-		var frame := AtlasTexture.new()
-		frame.atlas = WALK_SHEET
-		frame.region = Rect2(FRAME_SIZE.x * i, 0.0, FRAME_SIZE.x, FRAME_SIZE.y)
-		walk_textures.append(frame)
+		var region := Rect2i(FRAME_SIZE.x * i, 0, FRAME_SIZE.x, FRAME_SIZE.y)
+		var frame_image: Image = source.get_region(region)
+		_remove_black_background(frame_image)
+		walk_textures.append(ImageTexture.create_from_image(frame_image))
+
+func _remove_black_background(image: Image) -> void:
+	for y in range(image.get_height()):
+		for x in range(image.get_width()):
+			var pixel: Color = image.get_pixel(x, y)
+			# The approved sketch was exported on black. Remove only the near-black
+			# backdrop while preserving the dark outline pixels on Father himself.
+			if pixel.r < 0.035 and pixel.g < 0.035 and pixel.b < 0.045:
+				image.set_pixel(x, y, Color(0.0, 0.0, 0.0, 0.0))
 
 func _process(delta: float) -> void:
 	if character_sprite == null:
@@ -58,7 +68,8 @@ func _show(texture: Texture2D, y_offset: float) -> void:
 	if character_sprite == null:
 		return
 	character_sprite.texture = texture
-	character_sprite.flip_h = facing_left
+	# The approved source frames face left. Flip them when Father travels right.
+	character_sprite.flip_h = not facing_left
 	character_sprite.position = Vector2(0, y_offset)
 
 func move_to(target_position: Vector2) -> void:
