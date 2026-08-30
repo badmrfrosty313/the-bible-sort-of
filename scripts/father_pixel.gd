@@ -21,7 +21,7 @@ var idle_elapsed: float = 0.0
 var walk_textures: Array[Texture2D] = []
 
 func _ready() -> void:
-	var old_sprite := get_node_or_null("Sprite2D") as Sprite2D
+	var old_sprite: Sprite2D = get_node_or_null("Sprite2D") as Sprite2D
 	if old_sprite != null:
 		old_sprite.visible = false
 	_build_walk_frames()
@@ -35,8 +35,8 @@ func _ready() -> void:
 func _build_walk_frames() -> void:
 	walk_textures.clear()
 	var source: Image = WALK_SHEET.get_image()
-	for i in range(6):
-		var region := Rect2i(FRAME_SIZE.x * i, 0, FRAME_SIZE.x, FRAME_SIZE.y)
+	for i: int in range(6):
+		var region: Rect2i = Rect2i(FRAME_SIZE.x * i, 0, FRAME_SIZE.x, FRAME_SIZE.y)
 		var frame_image: Image = source.get_region(region)
 		_remove_edge_background(frame_image)
 		_remove_stray_islands(frame_image)
@@ -48,22 +48,22 @@ func _is_background(pixel: Color) -> bool:
 func _remove_edge_background(image: Image) -> void:
 	# Only remove dark pixels connected to the OUTSIDE of the frame.
 	# This keeps Father's dark eyes and internal outline intact.
-	var width := image.get_width()
-	var height := image.get_height()
-	var visited := PackedByteArray()
+	var width: int = image.get_width()
+	var height: int = image.get_height()
+	var visited: PackedByteArray = PackedByteArray()
 	visited.resize(width * height)
 	var queue: Array[Vector2i] = []
 
-	for x in range(width):
+	for x: int in range(width):
 		_queue_background_pixel(image, Vector2i(x, 0), visited, queue)
 		_queue_background_pixel(image, Vector2i(x, height - 1), visited, queue)
-	for y in range(height):
+	for y: int in range(height):
 		_queue_background_pixel(image, Vector2i(0, y), visited, queue)
 		_queue_background_pixel(image, Vector2i(width - 1, y), visited, queue)
 
-	var index := 0
+	var index: int = 0
 	while index < queue.size():
-		var point := queue[index]
+		var point: Vector2i = queue[index]
 		index += 1
 		image.set_pixel(point.x, point.y, Color(0.0, 0.0, 0.0, 0.0))
 		_queue_background_pixel(image, point + Vector2i.LEFT, visited, queue)
@@ -72,11 +72,11 @@ func _remove_edge_background(image: Image) -> void:
 		_queue_background_pixel(image, point + Vector2i.DOWN, visited, queue)
 
 func _queue_background_pixel(image: Image, point: Vector2i, visited: PackedByteArray, queue: Array[Vector2i]) -> void:
-	var width := image.get_width()
-	var height := image.get_height()
+	var width: int = image.get_width()
+	var height: int = image.get_height()
 	if point.x < 0 or point.y < 0 or point.x >= width or point.y >= height:
 		return
-	var flat_index := point.y * width + point.x
+	var flat_index: int = point.y * width + point.x
 	if visited[flat_index] != 0:
 		return
 	visited[flat_index] = 1
@@ -87,29 +87,35 @@ func _remove_stray_islands(image: Image) -> void:
 	# Generated source art occasionally contains a few detached pixels near a
 	# frame edge. Keep only substantial connected opaque clusters, which removes
 	# those flickering specks without touching facial details inside Father.
-	var width := image.get_width()
-	var height := image.get_height()
-	var visited := PackedByteArray()
+	var width: int = image.get_width()
+	var height: int = image.get_height()
+	var visited: PackedByteArray = PackedByteArray()
 	visited.resize(width * height)
 	var components: Array[Array] = []
 
-	for y in range(height):
-		for x in range(width):
-			var flat_index := y * width + x
+	for y: int in range(height):
+		for x: int in range(width):
+			var flat_index: int = y * width + x
 			if visited[flat_index] != 0 or image.get_pixel(x, y).a <= 0.01:
 				continue
 			var component: Array[Vector2i] = []
 			var queue: Array[Vector2i] = [Vector2i(x, y)]
 			visited[flat_index] = 1
-			var queue_index := 0
+			var queue_index: int = 0
 			while queue_index < queue.size():
-				var point := queue[queue_index]
+				var point: Vector2i = queue[queue_index]
 				queue_index += 1
 				component.append(point)
-				for neighbor in [point + Vector2i.LEFT, point + Vector2i.RIGHT, point + Vector2i.UP, point + Vector2i.DOWN]:
+				var neighbors: Array[Vector2i] = [
+					point + Vector2i.LEFT,
+					point + Vector2i.RIGHT,
+					point + Vector2i.UP,
+					point + Vector2i.DOWN,
+				]
+				for neighbor: Vector2i in neighbors:
 					if neighbor.x < 0 or neighbor.y < 0 or neighbor.x >= width or neighbor.y >= height:
 						continue
-					var neighbor_index := neighbor.y * width + neighbor.x
+					var neighbor_index: int = neighbor.y * width + neighbor.x
 					if visited[neighbor_index] != 0:
 						continue
 					visited[neighbor_index] = 1
@@ -117,15 +123,15 @@ func _remove_stray_islands(image: Image) -> void:
 						queue.append(neighbor)
 			components.append(component)
 
-	var largest_size := 0
-	for component in components:
+	var largest_size: int = 0
+	for component: Array in components:
 		largest_size = maxi(largest_size, component.size())
 
-	var minimum_keep_size := maxi(4, int(largest_size * 0.015))
-	for component in components:
+	var minimum_keep_size: int = maxi(4, int(largest_size * 0.015))
+	for component: Array in components:
 		if component.size() >= minimum_keep_size:
 			continue
-		for point in component:
+		for point: Vector2i in component:
 			image.set_pixel(point.x, point.y, Color(0.0, 0.0, 0.0, 0.0))
 
 func _process(delta: float) -> void:
