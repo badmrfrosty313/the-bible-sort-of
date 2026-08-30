@@ -292,13 +292,12 @@ func _spawn_father() -> void:
 
 func _run_intro() -> void:
 	father_location = FatherLocation.TRANSITION
-	# Enter along the open aisle and stop beside the chair.
+	# Walk straight down the open aisle to the chair's centerline.
+	# Do not take the old upper-left standing-anchor detour before sitting.
 	father.global_position = left_entrance.global_position
 	father.visible = true
 	await father.move_to(left_aisle_anchor.global_position)
 	await father.move_to(center_aisle_anchor.global_position)
-	await father.move_to(father_anchor.global_position)
-	# Sit first. The pre-episode line belongs to the seated theater beat.
 	father.global_position = seat_anchor.global_position
 	father.sit()
 	father_location = FatherLocation.THEATER
