@@ -1,5 +1,5 @@
 extends Node2D
-class_name PixelFather
+class_name Father
 
 enum State { IDLE, WALKING, STANDING, SITTING, WATCHING, REACTING }
 
