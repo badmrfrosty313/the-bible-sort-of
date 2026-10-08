@@ -39,7 +39,23 @@ func _run() -> void:
 		push_error("Eagle was not named Jeff. This is unacceptable.")
 		quit(1)
 		return
-	print("Eden vertical slice check passed: free roam, rock gag, First Jeff.")
+	scene.queue_free()
+	await process_frame
+
+	var cutscene_packed := load("res://scenes/episodes/eden/eve_cutscene.tscn") as PackedScene
+	if cutscene_packed == null:
+		push_error("Eve creation cutscene missing.")
+		quit(1)
+		return
+	var cutscene := cutscene_packed.instantiate()
+	root.add_child(cutscene)
+	await create_timer(0.2).timeout
+	cutscene.ci_jump_to_sleep_line()
+	await _capture("11_eve_sleep_line.png")
+	cutscene.ci_jump_to_cow_payoff()
+	await _capture("12_eve_cow_payoff.png")
+
+	print("Eden story check passed: free roam, rock gag, First Jeff, Eve creation payoff.")
 	quit()
 
 func _capture(file_name: String) -> void:
