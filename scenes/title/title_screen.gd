@@ -66,14 +66,14 @@ func _build_title() -> void:
 	var logo := Sprite2D.new()
 	logo.name = "GameLogo"
 	logo.texture = TITLE_LOGO
-	logo.position = Vector2(273, 70)
-	logo.scale = Vector2(0.32, 0.32)
+	logo.position = Vector2(252, 63)
+	logo.scale = Vector2(0.275, 0.275)
 	logo.centered = true
 	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	title_group.add_child(logo)
 
 	menu_group = Control.new()
-	menu_group.position = Vector2(178, 148)
+	menu_group.position = Vector2(145, 135)
 	menu_group.size = Vector2(190, 99)
 	title_group.add_child(menu_group)
 
@@ -210,11 +210,11 @@ func _save_profile() -> void:
 		push_error("Unable to remember last save slot: %s" % error)
 
 func _subtitle(caption: String, y: float = 145.0, size: int = 13, fill: Color = MENU_SELECTED) -> void:
-	var heading := _label(panel_group, caption, Rect2(194, y, 198, 25), size, fill)
+	var heading := _label(panel_group, caption, Rect2(141, y, 198, 25), size, fill)
 	_style_section_heading(heading, fill)
 
 func _submenu_button(caption: String, y: float) -> Button:
-	var button := _menu_button(panel_group, caption, Rect2(198, y, 190, 20))
+	var button := _menu_button(panel_group, caption, Rect2(145, y, 190, 20))
 	button.focus_entered.connect(_highlight_menu_entry.bind(button))
 	return button
 
