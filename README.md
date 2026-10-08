@@ -1,5 +1,7 @@
 # The Bible: Sort Of
 
+> **Production checkpoint — October 8, 2026:** Story expansion is intentionally paused while a dedicated sprite-animation pipeline is built. The current God/Adam/Eve sprites are temporary and should not be treated as final art. Resume from `docs/PAUSE_CHECKPOINT_2026-10-08.md` before making new production changes.
+
 A narrative game in Godot. The beach opening and title screen are the new starting point.
 
 ## Run
