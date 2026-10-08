@@ -236,7 +236,7 @@ func _adam_eats() -> void:
 func _god_comment() -> void:
 	if adam_clothed:
 		return
-	var line := god_comments[god_comment_index % god_comments.size()]
+	var line: String = str(god_comments[god_comment_index % god_comments.size()])
 	god_comment_index += 1
 	theater_label.text = "GOD — FROM THE THEATER\n" + line
 
