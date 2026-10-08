@@ -12,7 +12,7 @@ Open `project.godot` in Godot 4.7.2 and press Play. The game currently starts im
 - **Chapter Selection** currently contains the prologue.
 - **Options** toggles fullscreen.
 
-The title art is a clean background plate; logo, menu, focus states, and save slot controls are native Godot UI. The beach background remains a single illustrated plate already containing God, Adam, the vines, and the mug. All title and submenu actions use consistent, unboxed text over the scene. Actual character animation, environmental motion, and full chapter gameplay remain future work. The previous animatic script is retained in the repository but is not loaded by the title scene. The Google Doc **The Bible: Sort Of Game Scripting** governs the story, with the current outline reflected in `docs/game-script.md`.
+The background is the illustrated God-and-Adam beach plate. The title wordmark is a separate gold-and-ribbon SVG asset (`art/title/bible_logo.svg`) based on the approved adventure-logo concept; the menus, focus states, and save slot controls remain native Godot UI. The beach background remains a single illustrated plate already containing God, Adam, the vines, and the mug. All title and submenu actions use consistent, unboxed text over the scene. Actual character animation, environmental motion, and full chapter gameplay remain future work. The previous animatic script is retained in the repository but is not loaded by the title scene. The Google Doc **The Bible: Sort Of Game Scripting** governs the story, with the current outline reflected in `docs/game-script.md`.
 
 The previous theater/Burning Bush prototype remains in Git history. The current main scene is `scenes/title/title_screen.tscn`.
 
