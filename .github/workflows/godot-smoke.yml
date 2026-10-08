@@ -59,7 +59,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y xvfb
 
-      - name: Capture title screen snapshots
+      - name: Capture static menu and navigation snapshots
         if: success()
         shell: bash
         env:
@@ -72,42 +72,13 @@ jobs:
             --rendering-method gl_compatibility \
             --script ci/capture_title.gd \
             2>&1 | tee godot-visual.log
-          test -f ci_artifacts/02_adam_falls.png
-          test -f ci_artifacts/03_vines_catch_adam.png
-          test -f ci_artifacts/04_gods_punchline.png
-          test -f ci_artifacts/05_title_menu.png
-
-      - name: Record playable intro
-        if: success()
-        shell: bash
-        env:
-          LIBGL_ALWAYS_SOFTWARE: "1"
-        run: |
-          set -euo pipefail
-          command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
-          mkdir -p ci_artifacts
-          timeout 30s xvfb-run -a -s "-screen 0 1440x810x24" bash -c '
-            set -euo pipefail
-            godot --path . --rendering-method gl_compatibility > godot-record.log 2>&1 &
-            game_pid=$!
-            trap "kill $game_pid 2>/dev/null || true" EXIT
-            sleep 1
-            ffmpeg -hide_banner -loglevel error -y \
-              -f x11grab -framerate 12 -video_size 1440x810 \
-              -i "$DISPLAY+0,0" -t 9 \
-              -c:v libx264 -pix_fmt yuv420p -preset veryfast -crf 26 \
-              ci_artifacts/live_intro_preview.mp4
-          '
-          test -s ci_artifacts/live_intro_preview.mp4
-
-      - name: Upload gameplay preview
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: godot-live-intro-preview
-          path: ci_artifacts/live_intro_preview.mp4
-          if-no-files-found: ignore
-          retention-days: 14
+          test -f ci_artifacts/01_title_menu.png
+          test -f ci_artifacts/02_new_game_slots.png
+          test -f ci_artifacts/03_prologue.png
+          test -f ci_artifacts/04_load_slots.png
+          test -f ci_artifacts/05_chapter_select.png
+          test -f ci_artifacts/06_options.png
+          test -f ci_artifacts/07_return_to_title.png
 
       - name: Upload Godot logs
         if: always()
