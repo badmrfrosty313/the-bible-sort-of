@@ -1,64 +1,195 @@
 # The Bible: Sort Of — Game Script
 
-Source: Kyle's opening-screen outline, October 8, 2026. This is a transcription of the current authored beats. Dialogue and actions below are the source for implementation; details not specified here remain open.
+Narrative source of truth: **The Bible: Sort Of Game Scripting** (Google Doc, synced October 8, 2026).
 
-## 1. Opening Screen
+This repository copy exists so implementation work can proceed without inventing story beats. The Google Doc wins if the two ever disagree.
 
-### 1a. Beach after creation
+## Opening Screen
 
-**Setting:** God sits on a beach after creation, drinking from a “World's Greatest Creator” mug and enjoying His day of rest. Palm trees stand behind Him. Waves crash in.
+- God sits on a beach post-creation, drinking from a **World's Greatest Creator** mug and enjoying His day of rest.
+- Palm trees behind Him, waves crashing in.
+- After a few seconds Adam falls from a tree and gets caught by vines on the way down.
+- God rolls His eyes: **"I guess my break is over."**
+- Title screen:
+  - The Bible: Sort Of logo
+  - New Game
+  - Continue — resumes the last game played
+  - Load — three save slots
+  - Chapter Selection
+  - Options
 
-**Action:** After a few seconds, Adam falls from a tree and is caught by vines on the way down.
+> Current production decision: the title screen is static for now. The authored Adam-fall intro remains a later animation pass.
 
-**Reaction:** God rolls His eyes.
+---
 
-**God:** “I guess my break is over.”
+# Adam and Eve's Story
 
-### 1b. Title screen
+## Creation / Adam introduction
 
-The screen shows:
+- Initial cutscenes show the creation story.
+- God goes to speak to Adam, who has existed for roughly five minutes and is, currently, a bit of a dumbass.
+- God attempts to speak with him. Adam cannot figure much of anything out.
+- Cut to five hours later:
+  - God asks what Adam has learned.
+  - Adam proudly answers: **"Adam."**
+  - God shakes His head.
+  - Montage of God teaching Adam basic words.
 
-- *The Bible: Sort Of* logo
-- **New Game**
-- **Continue** — continues from the last game played
-- **Load** — three save slots
-- **Chapter Selection**
-- **Options**
+## Free-roam Eden
 
-## Open production details
+- Player can free roam the Garden before the animal-naming quest.
+- Eden should be a reasonable-sized square map with clear natural boundaries, broadly top-down like a Pokémon overworld with better sprites.
+- Animals are inside the playable garden boundary.
+- Talking to animals makes them respond with animal noises.
 
-- Shot framing, animation timing beyond “a few seconds,” and the transition from beach to title menu
-- Logo treatment and exact menu layout
-- Save slot naming, Chapter Selection availability, and Options contents
+### The Rock
 
-## 2. Planned stories (author's Google Docs outline)
+A very obvious rock is interactable.
 
-The native Google Doc **The Bible: Sort Of Game Scripting** is the narrative source
-of truth. These are recorded topics, **not** permission to invent finished scenes
-or dialogue.
+If Adam talks to it, open a ridiculously large dialogue tree where Adam tells the rock everything he thinks and knows about his extremely short existence.
 
-- **Adam and Eve:** Initial cutscenes show the creation story. The draft
-  continues with "God goes to speak to Adam who be" and stops mid-sentence.
-  The remainder of this scene is still unwritten.
-- **Noah's Story:** Listed for a future chapter; no scene script yet.
-- **Tower of Babel:** Listed for a future chapter; no scene script yet.
+If the player keeps going long enough, God finally interrupts:
 
-## 3. Planned DLC: New Testament
+> **God:** "That's a rock, Adam."
 
-- **Gospels:** Jesus has an earpiece that lets Him communicate with the Father.
-  Establish this device consistently during gameplay.
-- **Crucifixion payoff:** During "Father, Father why have you forsaken me,"
-  the earpiece and the Father's visible distress at His control desk convey
-  that He hears Jesus. Emotional staging matters here. The full scene and
-  exact dialogue beyond the original biblical line have not been scripted.
+Adam smiles and nods.
 
-## Implementation notes (not additions to the story)
+## Animal Naming Quest
 
-- The beach opening now uses the existing still background plus a separate,
-  temporary animated Adam/vines/reaction layer.
-- The sequence is: beach rest -> Adam falls -> vines catch -> Father reacts
-  -> "I guess my break is over." -> title menu.
-- Character drawings and the floating eye-roll indicator are animatic
-  placeholders. Final transparent animation sprites, God sipping from the
-  "World's Greatest Creator" mug, and animated environment art remain to do.
-- The prologue still has a placeholder screen, not completed gameplay.
+Gameplay section.
+
+Adam attempts to name animals. His available names are mostly nonsense, increasingly exasperating God.
+
+Use a group of roughly five animals, each with selectable name choices.
+
+### Eagle
+
+When Adam reaches the eagle, **every choice is Jeff**.
+
+God gives in:
+
+> **God:** "You know what? That's Jeff."
+
+**Achievement: First Jeff**
+
+## Creation of Eve
+
+God realizes Adam needs help.
+
+- God picks up a log.
+- Screen cuts to black.
+- When the image returns Adam is very clearly unconscious.
+- God looks directly toward the player and states very seriously:
+
+> **God:** "And I PUT HIM TO SLEEP."
+
+God takes Adam's rib and creates the woman who will be Eve.
+
+He immediately tests her by showing her a cow.
+
+> **God:** "What is this?"
+>
+> **Eve:** "That's a cow."
+
+God responds that He likes this one, then turns toward unconscious Adam and shakes His head.
+
+End scene.
+
+## Eve gameplay
+
+The next day:
+
+- Adam wakes up and sees Eve.
+- Player now controls Eve.
+- Adam follows her around.
+- Eve properly names the animals.
+
+God sees Eve doing well and Adam occupied, so He goes back to the theater.
+
+## Serpent / Fall
+
+Eve eventually meets the serpent, who tempts her to eat the fruit.
+
+Adam eats it because the pretty lady told him to.
+
+Before eating the fruit, both characters' nude regions use a blurred visual treatment.
+
+After eating:
+- the blur gradually becomes black censorship boxes,
+- Eve notices and covers herself with leaves,
+- control later returns to Adam.
+
+While controlling Adam, the player can open inventory, select leaves, and cover him.
+
+If the player refuses and simply leaves Adam standing there, God is outside the story in the theater and continues making comments until the player finally clothes Adam. The joke should feel like God talking partly to the player rather than only to Adam.
+
+---
+
+# Noah's Story
+
+Gameplay note from source:
+
+> Matching game. Something something. Figure it the fuck out.
+
+Still open for design.
+
+---
+
+# Tower of Babel
+
+- Tetris-esque construction game.
+- Starts easy, allowing the tower to get uncomfortably close.
+- A button appears on God's desk.
+- Pressing it makes the game extremely difficult.
+- Commands cease being understandable to the other characters.
+- Chaos follows.
+- Everyone gives up and separates.
+
+---
+
+# Jonah and the Whale
+
+- Dungeon-crawler platformer.
+
+---
+
+# DLC — New Testament
+
+## Gospels
+
+When Jesus prays to the Father, He uses an earpiece to communicate with the Father.
+
+Establish this device throughout gameplay so the later payoff is already understood.
+
+### Crucifixion payoff
+
+At **"Father, Father, why have you forsaken me?"**
+
+- the established earpiece makes clear that the Father can still hear Him,
+- Father is visible at the control desk,
+- Father's posture shows visible distress.
+
+Exact staging beyond this beat remains unwritten.
+
+---
+
+# God in the Theater — Basic Behavior
+
+When God is not physically in the field of play, He returns to the theater.
+
+He exits the playable scene and re-enters the theater through the stage door on whichever side matches the direction needed for His next entrance or exit.
+
+---
+
+# Implementation Guardrails
+
+- **Story source:** Google Doc is authoritative.
+- **Do not silently invent finished dialogue** for unscripted beats.
+- New jokes, mechanics, staging, map layout, and interaction ideas are welcome during prototyping, but should be clearly treated as implementation/design additions until accepted.
+- Title screen is currently static even though the eventual authored opening includes Adam's fall and God's punchline.
+- First gameplay vertical slice should prioritize:
+  1. Eden free roam
+  2. animal interaction noises
+  3. Rock conversation
+  4. animal naming quest
+  5. First Jeff achievement
