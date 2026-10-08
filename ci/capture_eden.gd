@@ -54,8 +54,22 @@ func _run() -> void:
 	await _capture("11_eve_sleep_line.png")
 	cutscene.ci_jump_to_cow_payoff()
 	await _capture("12_eve_cow_payoff.png")
+	cutscene.queue_free()
+	await process_frame
 
-	print("Eden story check passed: free roam, rock gag, First Jeff, Eve creation payoff.")
+	var eve_day := packed.instantiate()
+	root.add_child(eve_day)
+	await create_timer(0.15).timeout
+	eve_day.ci_start_eve_day()
+	await _capture("13_eve_day.png")
+	eve_day.ci_complete_eve_day()
+	await _capture("14_serpent_unlocked.png")
+
+	if not eve_day.serpent_unlocked or not eve_day.eve_day_complete:
+		push_error("Eve day did not unlock the serpent.")
+		quit(1)
+		return
+	print("Eden story check passed: free roam, rock gag, First Jeff, Eve creation, Eve day and serpent unlock.")
 	quit()
 
 func _capture(file_name: String) -> void:
