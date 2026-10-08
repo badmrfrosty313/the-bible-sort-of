@@ -59,7 +59,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y xvfb
 
-      - name: Capture visual regression snapshots
+      - name: Capture title screen snapshots
         if: success()
         shell: bash
         env:
@@ -70,9 +70,9 @@ jobs:
           timeout 50s xvfb-run -a godot \
             --path . \
             --rendering-method gl_compatibility \
-            --script ci/capture_theater.gd \
+            --script ci/capture_title.gd \
             2>&1 | tee godot-visual.log
-          test -f ci_artifacts/02_burning_bush.png
+          test -f ci_artifacts/02_title_menu.png
 
       - name: Upload Godot logs
         if: always()
