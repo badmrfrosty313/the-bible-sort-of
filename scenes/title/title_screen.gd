@@ -6,6 +6,9 @@ const SLOT_COUNT := 3
 const GOLD := Color("#FFE2A0")
 const CREAM := Color("#FFF2D7")
 const DARK := Color("#171026DD")
+const BUBBLE_FILL := Color("#FFF5E1")
+const BUBBLE_EDGE := Color("#654632")
+const BUBBLE_INK := Color("#362719")
 
 enum Screen { INTRO, MENU, SLOTS, PROLOGUE, OPTIONS }
 
@@ -15,6 +18,7 @@ var title_group: Control
 var menu_group: Control
 var panel_group: Control
 var intro_group: Control
+var menu_marker: Label
 var beach_intro
 var beach_plate: Sprite2D
 var continue_button: Button
@@ -57,31 +61,48 @@ func _build_title() -> void:
 	title_group.size = Vector2(480, 270)
 	title_group.visible = false
 	ui.add_child(title_group)
-	var shade := _panel(title_group, Rect2(236, 33, 153, 166), Color("#1C102099"))
-	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	# No tinted card behind the logo or the menu: let the beach illustration show.
 	_label(title_group, "THE", Rect2(252, 37, 120, 15), 11, GOLD)
 	_label(title_group, "BIBLE:", Rect2(248, 49, 132, 39), 29, GOLD)
 	_label(title_group, "SORT OF", Rect2(254, 85, 120, 22), 16, CREAM)
+
 	menu_group = Control.new()
 	menu_group.position = Vector2(258, 116)
-	menu_group.size = Vector2(119, 77)
+	menu_group.size = Vector2(140, 94)
 	title_group.add_child(menu_group)
+
 	var entries := ["NEW GAME", "CONTINUE", "LOAD", "CHAPTER SELECTION", "OPTIONS"]
 	for i in range(entries.size()):
-		var button := _button(menu_group, entries[i], Rect2(0, i * 15, 119, 14), 9)
+		var button := _menu_button(menu_group, entries[i], Rect2(0, i * 18, 140, 17))
 		button.pressed.connect(_on_menu_pressed.bind(entries[i]))
+		button.focus_entered.connect(_move_menu_marker.bind(button))
 		if entries[i] == "CONTINUE":
 			continue_button = button
 
+	# An unobtrusive gold chevron replaces the old focus rectangle.
+	menu_marker = _label(menu_group, "›", Rect2(-11, 0, 11, 17), 14, GOLD)
+	menu_marker.visible = false
+	menu_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 func _build_intro() -> void:
 	intro_group = Control.new()
-	intro_group.name = "IntroCaption"
+	intro_group.name = "GodThoughtBubble"
 	intro_group.size = Vector2(480, 270)
+	intro_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	intro_group.visible = false
 	ui.add_child(intro_group)
-	_panel(intro_group, Rect2(144, 223, 245, 34), DARK)
-	_label(intro_group, "GOD", Rect2(153, 225, 225, 10), 8, GOLD, false)
-	_label(intro_group, "I guess my break is over.", Rect2(153, 235, 225, 16), 11, CREAM, false)
+
+	# God's punchline belongs near his head, not in a bottom-of-screen RPG box.
+	var bubble := _thought_shape(intro_group, Rect2(154, 34, 177, 59))
+	var line := _label(bubble, "I guess my break\\nis over.", Rect2(13, 9, 151, 40), 11, BUBBLE_INK)
+	line.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
+	line.add_theme_constant_override("shadow_offset_x", 0)
+	line.add_theme_constant_override("shadow_offset_y", 0)
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_thought_dot(intro_group, Vector2(150, 92), 13)
+	_thought_dot(intro_group, Vector2(135, 104), 9)
+	_thought_dot(intro_group, Vector2(123, 110), 6)
 
 func _build_panel_group() -> void:
 	panel_group = Control.new()
@@ -242,6 +263,55 @@ func _save_profile() -> void:
 	var error := profile.save("user://profile.cfg")
 	if error != OK:
 		push_error("Unable to remember last save slot: %s" % error)
+
+func _thought_shape(parent: Control, rect: Rect2) -> Panel:
+	var panel := Panel.new()
+	panel.position = rect.position
+	panel.size = rect.size
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = BUBBLE_FILL
+	style.border_color = BUBBLE_EDGE
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(29)
+	panel.add_theme_stylebox_override("panel", style)
+	parent.add_child(panel)
+	return panel
+
+func _thought_dot(parent: Control, center: Vector2, diameter: int) -> void:
+	var dot := Panel.new()
+	dot.position = center - Vector2.ONE * float(diameter) * 0.5
+	dot.size = Vector2.ONE * float(diameter)
+	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = BUBBLE_FILL
+	style.border_color = BUBBLE_EDGE
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(diameter)
+	dot.add_theme_stylebox_override("panel", style)
+	parent.add_child(dot)
+
+func _menu_button(parent: Control, caption: String, rect: Rect2) -> Button:
+	var button := _button(parent, caption, rect, 10)
+	button.flat = true
+	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	button.add_theme_color_override("font_pressed_color", GOLD)
+	button.add_theme_color_override("font_hover_color", GOLD)
+	button.add_theme_color_override("font_focus_color", GOLD)
+	button.add_theme_color_override("font_color", CREAM)
+	button.add_theme_color_override("font_disabled_color", Color("#A8A098"))
+	# Explicit transparent styles remove ALL default button and keyboard-focus
+	# rectangles while retaining clickable / keyboard-accessible hit targets.
+	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+		var style := StyleBoxEmpty.new()
+		button.add_theme_stylebox_override(state, style)
+	return button
+
+func _move_menu_marker(button: Button) -> void:
+	if menu_marker == null:
+		return
+	menu_marker.position = Vector2(-11, button.position.y)
+	menu_marker.visible = true
 
 func _panel(parent: Control, rect: Rect2, color: Color) -> Panel:
 	var panel := Panel.new()
