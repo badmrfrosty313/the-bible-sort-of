@@ -174,7 +174,7 @@ func _on_menu_pressed(entry: String) -> void:
 			_show_slots(true)
 		"CONTINUE":
 			if last_slot > 0 and _slot_exists(last_slot):
-				_open_prologue(last_slot)
+				_load_slot(last_slot)
 		"LOAD":
 			_show_slots(false)
 		"CHAPTER SELECTION":
@@ -188,15 +188,32 @@ func _show_slots(new_game: bool) -> void:
 	_subtitle("CHOOSE SAVE SLOT" if new_game else "LOAD GAME")
 	for i in range(1, SLOT_COUNT + 1):
 		var occupied := _slot_exists(i)
-		var caption := "SLOT %d  -  PROLOGUE" % i if occupied else "SLOT %d  -  EMPTY" % i
+		var caption := _slot_caption(i) if occupied else "SLOT %d  -  EMPTY" % i
 		var button := _submenu_button(caption, 184 + (i - 1) * 27)
 		button.disabled = not new_game and not occupied
 		if new_game:
 			button.pressed.connect(_start_new_game.bind(i))
 		else:
-			button.pressed.connect(_open_prologue.bind(i))
+			button.pressed.connect(_load_slot.bind(i))
 	_add_back_button()
 	_focus_first(panel_group)
+
+func _slot_caption(slot: int) -> String:
+	var save := ConfigFile.new()
+	if save.load(_slot_path(slot)) != OK:
+		return "SLOT %d  -  UNKNOWN" % slot
+	var chapter := str(save.get_value("progress", "chapter", "prologue"))
+	return "SLOT %d  -  %s" % [slot, "EDEN" if chapter == "eden" else "PROLOGUE"]
+
+func _load_slot(slot: int) -> void:
+	last_slot = slot
+	active_slot = slot
+	_save_profile()
+	var save := ConfigFile.new()
+	if save.load(_slot_path(slot)) == OK and str(save.get_value("progress", "chapter", "prologue")) == "eden":
+		get_tree().change_scene_to_file("res://scenes/episodes/eden/eden.tscn")
+		return
+	_open_prologue(slot)
 
 func _start_new_game(slot: int) -> void:
 	var save := ConfigFile.new()
