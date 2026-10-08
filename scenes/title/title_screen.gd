@@ -61,26 +61,19 @@ func _build_title() -> void:
 	title_group.visible = false
 	ui.add_child(title_group)
 
-	# Move the main logo left into the open sky. Keep its last punctuation
-	# clear of Adam and his hanging vines.
-	# The asset's source size is 928x444; display at 80% of the old size.
+	# Gold fantasy wordmark is an actual SVG texture, not screen text.
+	# Keep it clear of Adam on the right and leave room for five live buttons.
 	var logo := Sprite2D.new()
 	logo.name = "GameLogo"
 	logo.texture = TITLE_LOGO
-	logo.position = Vector2(293, 61.5)
-	logo.scale = Vector2(0.20, 0.20)
+	logo.position = Vector2(273, 70)
+	logo.scale = Vector2(0.32, 0.32)
 	logo.centered = true
 	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	title_group.add_child(logo)
 
-	# A native bold topper is legible below the palm fronds. The former
-	# miniature SVG paths were nearly black at the game's 480px viewport.
-	var topper := _label(title_group, "THE", Rect2(263, 23, 60, 17), 12, MENU_SELECTED)
-	_style_section_heading(topper, MENU_SELECTED)
-	topper.add_theme_constant_override("outline_size", 2)
-
 	menu_group = Control.new()
-	menu_group.position = Vector2(198, 116)
+	menu_group.position = Vector2(178, 148)
 	menu_group.size = Vector2(190, 99)
 	title_group.add_child(menu_group)
 
@@ -129,7 +122,7 @@ func _show_slots(new_game: bool) -> void:
 	for i in range(1, SLOT_COUNT + 1):
 		var occupied := _slot_exists(i)
 		var caption := "SLOT %d  -  PROLOGUE" % i if occupied else "SLOT %d  -  EMPTY" % i
-		var button := _submenu_button(caption, 142 + (i - 1) * 22)
+		var button := _submenu_button(caption, 170 + (i - 1) * 19)
 		button.disabled = not new_game and not occupied
 		if new_game:
 			button.pressed.connect(_start_new_game.bind(i))
@@ -157,15 +150,15 @@ func _open_prologue(slot: int) -> void:
 	_clear_panel()
 	_subtitle("PROLOGUE  /  SLOT %d" % slot)
 	# Scene content has not been authored yet. Keep this honest and unboxed.
-	_subtitle("STORY IN DEVELOPMENT", 161, 10, MENU_TEXT)
-	_submenu_button("RETURN TO TITLE", 209).pressed.connect(_show_menu)
+	_subtitle("STORY IN DEVELOPMENT", 176, 10, MENU_TEXT)
+	_submenu_button("RETURN TO TITLE", 230).pressed.connect(_show_menu)
 	_focus_first(panel_group)
 
 func _show_chapters() -> void:
 	screen = Screen.SLOTS
 	_clear_panel()
 	_subtitle("CHAPTER SELECTION")
-	_submenu_button("PROLOGUE", 157).pressed.connect(_open_prologue.bind(last_slot if last_slot > 0 else 1))
+	_submenu_button("PROLOGUE", 179).pressed.connect(_open_prologue.bind(last_slot if last_slot > 0 else 1))
 	_add_back_button()
 	_focus_first(panel_group)
 
@@ -173,7 +166,7 @@ func _show_options() -> void:
 	screen = Screen.OPTIONS
 	_clear_panel()
 	_subtitle("OPTIONS")
-	_submenu_button("TOGGLE FULLSCREEN", 157).pressed.connect(_toggle_fullscreen)
+	_submenu_button("TOGGLE FULLSCREEN", 179).pressed.connect(_toggle_fullscreen)
 	_add_back_button()
 	_focus_first(panel_group)
 
@@ -182,7 +175,7 @@ func _toggle_fullscreen() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if mode == DisplayServer.WINDOW_MODE_FULLSCREEN else DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 func _add_back_button() -> void:
-	_submenu_button("BACK", 218).pressed.connect(_show_menu)
+	_submenu_button("BACK", 235).pressed.connect(_show_menu)
 
 func _clear_panel() -> void:
 	for child in panel_group.get_children():
@@ -216,7 +209,7 @@ func _save_profile() -> void:
 	if error != OK:
 		push_error("Unable to remember last save slot: %s" % error)
 
-func _subtitle(caption: String, y: float = 112.0, size: int = 13, fill: Color = MENU_SELECTED) -> void:
+func _subtitle(caption: String, y: float = 145.0, size: int = 13, fill: Color = MENU_SELECTED) -> void:
 	var heading := _label(panel_group, caption, Rect2(194, y, 198, 25), size, fill)
 	_style_section_heading(heading, fill)
 
