@@ -12,6 +12,7 @@ var rock_topics_seen := 0
 var rock_topics := ["THE SUN", "TREES", "THE GUY WITH THE MUG", "ADAM", "EXISTENCE"]
 var naming_active := false
 var naming_complete := false
+var eve_created := false
 var naming_index := 0
 var naming_order := ["cow", "sheep", "rabbit", "turtle", "eagle"]
 
@@ -469,8 +470,13 @@ func _rock_topic(index: int) -> void:
 
 func _open_naming_intro() -> void:
 	if naming_complete:
-		_show_dialogue("ANIMAL NAMING", "Five animals have names. One of those names is Jeff. History has been made.")
-		_choice("RETURN TO EDEN", _close_dialogue)
+		if eve_created:
+			_show_dialogue("ANIMAL NAMING", "Five animals have names. One of those names is Jeff. Eve has also proven dramatically more competent.")
+			_choice("RETURN TO EDEN", _close_dialogue)
+		else:
+			_show_dialogue("ANIMAL NAMING", "Five animals have names. One of those names is Jeff. God has concluded that Adam may require additional assistance.")
+			_choice("CONTINUE STORY", _start_eve_cutscene)
+			_choice("WANDER EDEN", _close_dialogue)
 		return
 	if naming_active:
 		_show_naming_choice()
@@ -527,9 +533,14 @@ func _select_name(id_value: String, chosen_name: String) -> void:
 		_save_checkpoint()
 		_unlock_first_jeff()
 		_show_dialogue("GOD", "\"You know what? That's Jeff.\"")
-		_choice("ACCEPT JEFF", _close_dialogue)
+		_choice("CONTINUE STORY", _start_eve_cutscene)
+		_choice("WANDER EDEN", _close_dialogue)
 		return
 	_show_naming_choice()
+
+func _start_eve_cutscene() -> void:
+	_close_dialogue()
+	get_tree().change_scene_to_file("res://scenes/episodes/eden/eve_cutscene.tscn")
 
 func _finish_naming() -> void:
 	naming_complete = true
@@ -556,11 +567,14 @@ func _load_checkpoint() -> void:
 	if str(save.get_value("progress", "chapter", "prologue")) != "eden":
 		return
 	naming_complete = bool(save.get_value("progress", "naming_complete", false))
+	eve_created = bool(save.get_value("progress", "eve_created", false))
 	rock_topics_seen = int(save.get_value("progress", "rock_topics_seen", 0))
 	for id_value in naming_order:
 		if save.has_section_key("names", id_value):
 			named_animals[id_value] = str(save.get_value("names", id_value, ""))
-	if naming_complete:
+	if eve_created:
+		quest_label.text = "EVE CREATED  •  NEXT DAY STORY BEAT NOT YET BUILT"
+	elif naming_complete:
 		quest_label.text = "ANIMAL NAMING QUEST COMPLETE  •  FIRST JEFF"
 
 func _save_checkpoint() -> void:
@@ -575,6 +589,7 @@ func _save_checkpoint() -> void:
 	save.set_value("progress", "chapter", "eden")
 	save.set_value("progress", "naming_complete", naming_complete)
 	save.set_value("progress", "first_jeff", naming_complete)
+	save.set_value("progress", "eve_created", eve_created)
 	save.set_value("progress", "rock_topics_seen", rock_topics_seen)
 	for id_value in named_animals.keys():
 		save.set_value("names", str(id_value), str(named_animals[id_value]))
