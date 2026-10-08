@@ -216,10 +216,18 @@ func _open_prologue(slot: int) -> void:
 	screen = Screen.PROLOGUE
 	_clear_panel()
 	_subtitle("PROLOGUE  /  SLOT %d" % slot)
-	# Scene content has not been authored yet. Keep this honest and unboxed.
-	_subtitle("STORY IN DEVELOPMENT", 198, 10, MENU_TEXT)
+	_subtitle("EDEN VERTICAL SLICE READY", 188, 10, MENU_TEXT)
+	_submenu_button("ENTER EDEN", 226).pressed.connect(_enter_eden)
 	_submenu_button("RETURN TO TITLE", 268).pressed.connect(_show_menu)
 	_focus_first(panel_group)
+
+func _enter_eden() -> void:
+	if active_slot > 0:
+		var save := ConfigFile.new()
+		save.load(_slot_path(active_slot))
+		save.set_value("progress", "chapter", "eden")
+		save.save(_slot_path(active_slot))
+	get_tree().change_scene_to_file("res://scenes/episodes/eden/eden.tscn")
 
 func _show_chapters() -> void:
 	screen = Screen.SLOTS
