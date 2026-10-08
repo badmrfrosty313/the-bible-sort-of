@@ -61,20 +61,26 @@ func _build_title() -> void:
 	title_group.visible = false
 	ui.add_child(title_group)
 
-	# Fully path-based old-world adventure logo. No installed fonts needed.
-	# Use explicit sprite scale: TextureRect was drawing at the SVG's 928x444
-	# source dimensions instead of the intended 232x111 display area.
+	# Move the main logo left into the open sky. Keep its last punctuation
+	# clear of Adam and his hanging vines.
+	# The asset's source size is 928x444; 0.25 restores the 232x111 canvas.
 	var logo := Sprite2D.new()
 	logo.name = "GameLogo"
 	logo.texture = TITLE_LOGO
-	logo.position = Vector2(317, 61.5)
+	logo.position = Vector2(293, 61.5)
 	logo.scale = Vector2(0.25, 0.25)
 	logo.centered = true
 	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	title_group.add_child(logo)
 
+	# A native bold topper is legible below the palm fronds. The former
+	# miniature SVG paths were nearly black at the game's 480px viewport.
+	var topper := _label(title_group, "THE", Rect2(263, 23, 60, 17), 12, MENU_SELECTED)
+	_style_section_heading(topper, MENU_SELECTED)
+	topper.add_theme_constant_override("outline_size", 2)
+
 	menu_group = Control.new()
-	menu_group.position = Vector2(217, 116)
+	menu_group.position = Vector2(198, 116)
 	menu_group.size = Vector2(190, 99)
 	title_group.add_child(menu_group)
 
@@ -211,11 +217,11 @@ func _save_profile() -> void:
 		push_error("Unable to remember last save slot: %s" % error)
 
 func _subtitle(caption: String, y: float = 112.0, size: int = 13, fill: Color = MENU_SELECTED) -> void:
-	var heading := _label(panel_group, caption, Rect2(213, y, 198, 25), size, fill)
+	var heading := _label(panel_group, caption, Rect2(194, y, 198, 25), size, fill)
 	_style_section_heading(heading, fill)
 
 func _submenu_button(caption: String, y: float) -> Button:
-	var button := _menu_button(panel_group, caption, Rect2(217, y, 190, 20))
+	var button := _menu_button(panel_group, caption, Rect2(198, y, 190, 20))
 	button.focus_entered.connect(_highlight_menu_entry.bind(button))
 	return button
 
