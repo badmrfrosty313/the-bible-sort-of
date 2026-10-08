@@ -349,7 +349,7 @@ func _open_rock() -> void:
 	for i in range(rock_topics.size()):
 		if i < rock_topics_seen:
 			continue
-		var topic := rock_topics[i]
+		var topic: String = str(rock_topics[i])
 		_choice("EXPLAIN " + topic, _rock_topic.bind(i))
 		if i >= rock_topics_seen + 2:
 			break
@@ -360,7 +360,7 @@ func _rock_topic(index: int) -> void:
 		_show_dialogue("GOD", "\"That's a rock, Adam.\"")
 		_choice("SMILE AND NOD", _close_dialogue)
 		return
-	var topic := rock_topics[index].to_lower()
+	var topic: String = str(rock_topics[index]).to_lower()
 	_show_dialogue("ADAM → ROCK", "Adam explains " + topic + " with the absolute confidence of a man who has existed for less than a day.")
 	_choice("KEEP TALKING TO THE ROCK", _open_rock)
 	_choice("MAYBE LATER", _close_dialogue)
@@ -393,9 +393,9 @@ func _show_naming_choice() -> void:
 	if naming_index >= naming_order.size():
 		_finish_naming()
 		return
-	var id_value := naming_order[naming_index]
-	var animal := _animal_by_id(id_value)
-	var options := _name_options(id_value)
+	var id_value: String = str(naming_order[naming_index])
+	var animal: Dictionary = _animal_by_id(id_value)
+	var options: Array = _name_options(id_value)
 	_show_dialogue("NAME THE " + animal["kind"], "Pick the name Adam believes is obviously correct.")
 	for option in options:
 		_choice(option, _select_name.bind(id_value, option))
