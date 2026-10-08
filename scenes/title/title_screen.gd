@@ -2,6 +2,9 @@ extends Node2D
 
 const BEACH_PLATE := preload("res://art/title/beach_title_plate.png")
 const TITLE_ART := preload("res://art/title/approved_title.webp")
+# Prefer the exact full-size approved concept when present in this project.
+# The small WebP remains a portable fallback so CI and cloned projects boot.
+const FULL_RES_TITLE_PATH := "res://art/title/approved_title_original.png"
 const SLOT_COUNT := 3
 const LAYOUT_SIZE := Vector2(480, 360)
 const RENDER_SIZE := Vector2i(1200, 900)
@@ -52,12 +55,18 @@ func _build_background() -> void:
 	title_background.name = "ApprovedIllustratedTitle"
 	# One high-quality Lanczos reconstruction. At native resolution, Godot
 	# no longer performs fractional bilinear scaling on the entire game.
-	var approved_image := TITLE_ART.get_image()
+	var image_source: Texture2D = TITLE_ART
+	if ResourceLoader.exists(FULL_RES_TITLE_PATH):
+		var full_res := load(FULL_RES_TITLE_PATH) as Texture2D
+		if full_res != null:
+			image_source = full_res
+	var approved_image := image_source.get_image()
 	if approved_image != null and not approved_image.is_empty():
-		approved_image.resize(RENDER_SIZE.x, RENDER_SIZE.y, Image.INTERPOLATE_LANCZOS)
+		if approved_image.get_size() != RENDER_SIZE:
+			approved_image.resize(RENDER_SIZE.x, RENDER_SIZE.y, Image.INTERPOLATE_LANCZOS)
 		title_background.texture = ImageTexture.create_from_image(approved_image)
 	else:
-		title_background.texture = TITLE_ART
+		title_background.texture = image_source
 	title_background.position = Vector2(240, 180)
 	title_background.scale = Vector2(
 		480.0 / float(title_background.texture.get_width()),
