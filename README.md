@@ -4,7 +4,7 @@ A narrative game in Godot. The beach opening and title screen are the new starti
 
 ## Run
 
-Open `project.godot` in Godot 4.7.2 and press Play. The beach intro uses cinematic framing: a quiet shot of God, a camera reveal of Adam already caught in the vines, God's reaction framing and his authored punchline, then the title menu. Press a key or click to skip the intro.
+Open `project.godot` in Godot 4.7.2 and press Play. The game currently starts immediately on a **static illustrated beach title screen**, with no camera pan, Adam-fall sequence, or thought bubble. The original animated concept remains documented for later production.
 
 - **New Game** chooses one of three local save slots and starts the prologue.
 - **Continue** opens the most recently used slot.
@@ -12,6 +12,10 @@ Open `project.godot` in Godot 4.7.2 and press Play. The beach intro uses cinemat
 - **Chapter Selection** currently contains the prologue.
 - **Options** toggles fullscreen.
 
-The title art is a clean background plate; logo, menu, focus states, and save slot controls are native Godot UI. The beach background remains a single illustrated plate already containing God, Adam, the vines, and the mug. The camera moves across that image without duplicating characters. A real animated fall, vine catch, eye roll, and independent environmental motion require separate transparent artwork; full chapter gameplay is also unfinished. The Google Doc **The Bible: Sort Of Game Scripting** governs the story, with the current outline reflected in `docs/game-script.md`.
+The title art is a clean background plate; logo, menu, focus states, and save slot controls are native Godot UI. The beach background remains a single illustrated plate already containing God, Adam, the vines, and the mug. All title and submenu actions use consistent, unboxed text over the scene. Actual character animation, environmental motion, and full chapter gameplay remain future work. The previous animatic script is retained in the repository but is not loaded by the title scene. The Google Doc **The Bible: Sort Of Game Scripting** governs the story, with the current outline reflected in `docs/game-script.md`.
 
 The previous theater/Burning Bush prototype remains in Git history. The current main scene is `scenes/title/title_screen.tscn`.
+
+## Visual checks
+
+The Godot CI workflow captures the title screen, new-game slots, prologue placeholder, load slots, chapter selection, options, and a return to title. It also tests navigation through New Game, Continue, Load, Chapters, Options and Back without requiring an interactive desktop.
