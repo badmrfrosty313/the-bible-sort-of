@@ -1,117 +1,75 @@
 extends Node2D
-## Temporary, independently animated foreground for the authored beach cold open.
-## All coordinates are in the project's 480x270 design space.
-## The background plate remains untouched; replace these drawn actors with
-## dedicated transparent sprite sheets when the final character art is ready.
+## Cinematic staging for the authored beach cold open.
+##
+## The original beach illustration already contains BOTH Father and Adam, as
+## well as the vines and the mug. It is a flattened plate, so adding a second
+## Adam or redrawing the Father produces visible duplicates. Until separate
+## transparent animation cels are approved, frame the existing illustration
+## using a moving camera. This preserves the approved art intact.
+##
+## Positions below are design-space coordinates (480x270).
 
-const SKIN := Color("#E6AF83")
-const SKIN_SHADE := Color("#BC7958")
-const HAIR := Color("#533528")
-const LEAF := Color("#44864A")
-const LEAF_LIGHT := Color("#76A45B")
-const VINE := Color("#496435")
-const VINE_HIGHLIGHT := Color("#96B968")
-const INK := Color("#31281F")
+const CENTER := Vector2(240.0, 135.0)
+const FATHER_FOCUS := Vector2(152.0, 151.0)
+const ADAM_FOCUS := Vector2(438.0, 85.0)
+const FATHER_ANCHOR := Vector2(210.0, 144.0)
+const ADAM_ANCHOR := Vector2(300.0, 119.0)
+const INITIAL_ZOOM := 1.43
+const ADAM_ZOOM := 1.44
+const REACTION_ZOOM := 1.53
 
-enum Beat { REST, FALLING, CAUGHT, EYE_ROLL }
-var beat := Beat.REST
-var elapsed := 0.0
-var fall_progress := 0.0
-var eye_roll_elapsed := 0.0
+var backdrop: Sprite2D
+var original_position := CENTER
+var original_scale := Vector2.ONE
+var active_tween: Tween
 
-func _process(delta: float) -> void:
-	elapsed += delta
-	if beat == Beat.EYE_ROLL:
-		eye_roll_elapsed += delta
-	queue_redraw()
+func configure(sprite: Sprite2D) -> void:
+	backdrop = sprite
+	original_position = sprite.position
+	original_scale = sprite.scale
+	# Start on Father's quiet day off. Adam sits outside the first crop.
+	_set_frame(FATHER_FOCUS, FATHER_ANCHOR, INITIAL_ZOOM)
 
-func start_fall() -> void:
-	beat = Beat.FALLING
-	fall_progress = 0.0
-	queue_redraw()
+func show_adam() -> void:
+	# Pan across the scene to reveal the commotion already painted in the plate.
+	# This is an animatic reveal, not a fabricated character-fall animation.
+	_tween_frame(ADAM_FOCUS, ADAM_ANCHOR, ADAM_ZOOM, 0.8)
 
-func set_fall_progress(value: float) -> void:
-	fall_progress = clampf(value, 0.0, 1.0)
-	queue_redraw()
+func show_father_reaction() -> void:
+	# Bring the viewer back to Father's expression before the spoken punchline.
+	_tween_frame(FATHER_FOCUS, FATHER_ANCHOR, REACTION_ZOOM, 0.75)
 
-func catch_adam() -> void:
-	fall_progress = 1.0
-	beat = Beat.CAUGHT
-	queue_redraw()
+func reveal_full_beach() -> void:
+	_kill_active_tween()
+	active_tween = create_tween()
+	active_tween.set_trans(Tween.TRANS_SINE)
+	active_tween.set_ease(Tween.EASE_IN_OUT)
+	active_tween.tween_property(backdrop, "position", original_position, 0.65)
+	active_tween.parallel().tween_property(backdrop, "scale", original_scale, 0.65)
 
-func begin_eye_roll() -> void:
-	beat = Beat.EYE_ROLL
-	eye_roll_elapsed = 0.0
-	queue_redraw()
+func reset_immediately() -> void:
+	_kill_active_tween()
+	if backdrop != null:
+		backdrop.position = original_position
+		backdrop.scale = original_scale
 
-func _draw() -> void:
-	# Small shifting foam highlights lend movement to the existing still plate.
-	for i in range(4):
-		var phase := elapsed * 0.65 + float(i) * 1.7
-		var x := 48.0 + float(i) * 111.0 + sin(phase) * 10.0
-		var y := 210.0 + float(i % 2) * 9.0
-		draw_line(Vector2(x, y), Vector2(x + 13.0, y), Color(1.0, 0.97, 0.88, 0.21), 1.5)
+func _set_frame(focus: Vector2, anchor: Vector2, zoom: float) -> void:
+	backdrop.position = _frame_position(focus, anchor, zoom)
+	backdrop.scale = original_scale * zoom
 
-	if beat == Beat.REST:
-		return
+func _tween_frame(focus: Vector2, anchor: Vector2, zoom: float, duration: float) -> void:
+	_kill_active_tween()
+	active_tween = create_tween()
+	active_tween.set_trans(Tween.TRANS_CUBIC)
+	active_tween.set_ease(Tween.EASE_IN_OUT)
+	active_tween.tween_property(backdrop, "position", _frame_position(focus, anchor, zoom), duration)
+	active_tween.parallel().tween_property(backdrop, "scale", original_scale * zoom, duration)
 
-	# Adam enters from above the shot. He stops far short of the ground.
-	var final_x := 157.0
-	var final_y := 142.0
-	var x := lerpf(125.0, final_x, fall_progress)
-	var y := lerpf(-42.0, final_y, fall_progress)
-	if beat == Beat.CAUGHT or beat == Beat.EYE_ROLL:
-		var swing := sin(elapsed * 4.0) * 3.0
-		x += swing
-		y += absf(swing) * 0.35
-		_draw_vines(Vector2(x, y))
-	_draw_adam(Vector2(x, y))
+func _frame_position(focus: Vector2, anchor: Vector2, zoom: float) -> Vector2:
+	# Move a point in the original 480x270 image to the target screen anchor
+	# while zooming about the original texture's center.
+	return anchor - (focus - CENTER) * zoom
 
-	if beat == Beat.EYE_ROLL:
-		_draw_eye_roll()
-
-func _draw_vines(adam_position: Vector2) -> void:
-	var root := Vector2(108, 33)
-	var shoulder := adam_position + Vector2(-10, -7)
-	var waist := adam_position + Vector2(8, 18)
-	draw_line(root, Vector2(124, 73), VINE, 3.0, true)
-	draw_line(Vector2(124, 73), shoulder, VINE, 3.0, true)
-	draw_line(Vector2(124, 73), waist, VINE_HIGHLIGHT, 2.0, true)
-	for point in [Vector2(119, 62), Vector2(138, 95), Vector2(142, 118)]:
-		draw_colored_polygon(PackedVector2Array([
-			point, point + Vector2(12, -5), point + Vector2(4, 5)
-		]), LEAF)
-
-func _draw_adam(center: Vector2) -> void:
-	# Character is deliberately an animation stand-in, not final pixel artwork.
-	var bob := sin(elapsed * 5.0) * 1.1 if beat != Beat.FALLING else 0.0
-	var p := center + Vector2(0, bob)
-	# Hair, face, torso, limbs, and an appropriately placed fig leaf.
-	draw_line(p + Vector2(-5, 7), p + Vector2(-12, 23), SKIN_SHADE, 5.0, true)
-	draw_line(p + Vector2(5, 7), p + Vector2(14, 18), SKIN, 5.0, true)
-	draw_line(p + Vector2(-5, 25), p + Vector2(-12, 38), SKIN_SHADE, 5.0, true)
-	draw_line(p + Vector2(5, 25), p + Vector2(12, 38), SKIN, 5.0, true)
-	draw_rect(Rect2(p + Vector2(-7, 4), Vector2(14, 23)), SKIN)
-	draw_circle(p + Vector2(0, -7), 10.0, SKIN)
-	draw_arc(p + Vector2(-1, -9), 10.0, PI, TAU, 12, HAIR, 4.0)
-	draw_circle(p + Vector2(-3.5, -8), 1.2, INK)
-	draw_circle(p + Vector2(3.5, -8), 1.2, INK)
-	draw_line(p + Vector2(-2, -2), p + Vector2(3, -2), INK, 1.2)
-	draw_colored_polygon(PackedVector2Array([
-		p + Vector2(-9, 23), p + Vector2(8, 20),
-		p + Vector2(7, 30), p + Vector2(-2, 33)
-	]), LEAF)
-	draw_line(p + Vector2(-3, 25), p + Vector2(3, 29), LEAF_LIGHT, 1.0)
-
-func _draw_eye_roll() -> void:
-	# Reaction animatic marker. A future transparent Father face sheet replaces it.
-	var c := Vector2(317, 82)
-	var outline := Color("#594A44")
-	draw_circle(c, 18.0, outline)
-	draw_circle(c, 16.5, Color("#FFF2DC"))
-	var roll := clampf(eye_roll_elapsed / 0.55, 0.0, 1.0)
-	var pupil_y := lerpf(2.0, -3.0, roll)
-	for dx in [-6.0, 6.0]:
-		draw_circle(c + Vector2(dx, -1), 5.0, Color("#FDFDF8"))
-		draw_circle(c + Vector2(dx, pupil_y), 2.0, INK)
-	draw_arc(c + Vector2(0, 10), 6.0, PI, TAU, 10, outline, 1.5)
+func _kill_active_tween() -> void:
+	if active_tween != null and active_tween.is_running():
+		active_tween.kill()
