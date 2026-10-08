@@ -95,7 +95,7 @@ func _build_intro() -> void:
 
 	# God's punchline belongs near his head, not in a bottom-of-screen RPG box.
 	var bubble := _thought_shape(intro_group, Rect2(154, 34, 177, 59))
-	var line := _label(bubble, "I guess my break\\nis over.", Rect2(13, 9, 151, 40), 11, BUBBLE_INK)
+	var line := _label(bubble, "I guess my break\nis over.", Rect2(13, 9, 151, 40), 11, BUBBLE_INK)
 	line.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
 	line.add_theme_constant_override("shadow_offset_x", 0)
 	line.add_theme_constant_override("shadow_offset_y", 0)
