@@ -72,7 +72,10 @@ jobs:
             --rendering-method gl_compatibility \
             --script ci/capture_title.gd \
             2>&1 | tee godot-visual.log
-          test -f ci_artifacts/02_title_menu.png
+          test -f ci_artifacts/02_adam_falls.png
+          test -f ci_artifacts/03_vines_catch_adam.png
+          test -f ci_artifacts/04_gods_punchline.png
+          test -f ci_artifacts/05_title_menu.png
 
       - name: Upload Godot logs
         if: always()
