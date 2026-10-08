@@ -10,6 +10,14 @@ const BUBBLE_FILL := Color("#FFF5E1")
 const BUBBLE_EDGE := Color("#654632")
 const BUBBLE_INK := Color("#362719")
 
+# Shared typography for this one screen. Sizing and positions remain unchanged.
+const MENU_TEXT := Color("#F6E7C8")
+const MENU_SELECTED := Color("#FFD77A")
+const MENU_DISABLED := Color("#B9B1A2")
+const MENU_OUTLINE := Color("#2E1B16")
+const MENU_SHADOW := Color("#20110E")
+const MENU_OUTLINE_SIZE := 3
+
 enum Screen { INTRO, MENU, SLOTS, PROLOGUE, OPTIONS }
 
 var screen := Screen.INTRO
@@ -63,9 +71,9 @@ func _build_title() -> void:
 	ui.add_child(title_group)
 
 	# No tinted card behind the logo or the menu: let the beach illustration show.
-	_label(title_group, "THE", Rect2(252, 37, 120, 15), 11, GOLD)
-	_label(title_group, "BIBLE:", Rect2(248, 49, 132, 39), 29, GOLD)
-	_label(title_group, "SORT OF", Rect2(254, 85, 120, 22), 16, CREAM)
+	_style_title_label(_label(title_group, "THE", Rect2(252, 37, 120, 15), 11, MENU_TEXT))
+	_style_title_label(_label(title_group, "BIBLE:", Rect2(248, 49, 132, 39), 29, MENU_TEXT))
+	_style_title_label(_label(title_group, "SORT OF", Rect2(254, 85, 120, 22), 16, MENU_TEXT))
 
 	menu_group = Control.new()
 	menu_group.position = Vector2(258, 116)
@@ -81,7 +89,8 @@ func _build_title() -> void:
 			continue_button = button
 
 	# An unobtrusive gold chevron replaces the old focus rectangle.
-	menu_marker = _label(menu_group, "›", Rect2(-11, 0, 11, 17), 14, GOLD)
+	menu_marker = _label(menu_group, "›", Rect2(-11, 0, 11, 17), 14, MENU_SELECTED)
+	_style_title_label(menu_marker, MENU_SELECTED)
 	menu_marker.visible = false
 	menu_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -291,20 +300,30 @@ func _thought_dot(parent: Control, center: Vector2, diameter: int) -> void:
 	dot.add_theme_stylebox_override("panel", style)
 	parent.add_child(dot)
 
+func _style_title_label(label: Label, fill: Color = MENU_TEXT) -> void:
+	# Identical silhouette and shadow across the logo and menu.
+	label.add_theme_color_override("font_color", fill)
+	label.add_theme_color_override("font_outline_color", MENU_OUTLINE)
+	label.add_theme_constant_override("outline_size", MENU_OUTLINE_SIZE)
+	label.add_theme_color_override("font_shadow_color", MENU_SHADOW)
+	label.add_theme_constant_override("shadow_offset_x", 2)
+	label.add_theme_constant_override("shadow_offset_y", 2)
+
 func _menu_button(parent: Control, caption: String, rect: Rect2) -> Button:
 	var button := _button(parent, caption, rect, 10)
 	button.flat = true
 	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	button.add_theme_color_override("font_pressed_color", GOLD)
-	button.add_theme_color_override("font_hover_color", GOLD)
-	button.add_theme_color_override("font_focus_color", GOLD)
-	button.add_theme_color_override("font_color", CREAM)
-	button.add_theme_color_override("font_disabled_color", Color("#A8A098"))
-	# Readable over the orange sunset and breaking waves, with no backing panel.
-	button.add_theme_color_override("font_outline_color", Color("#281623"))
-	button.add_theme_constant_override("outline_size", 2)
-	# Explicit transparent styles remove ALL default button and keyboard-focus
-	# rectangles while retaining clickable / keyboard-accessible hit targets.
+	button.add_theme_color_override("font_pressed_color", MENU_SELECTED)
+	button.add_theme_color_override("font_hover_color", MENU_SELECTED)
+	button.add_theme_color_override("font_focus_color", MENU_SELECTED)
+	button.add_theme_color_override("font_color", MENU_TEXT)
+	button.add_theme_color_override("font_disabled_color", MENU_DISABLED)
+	# Same outline and shadow as the title, no backing panels.
+	button.add_theme_color_override("font_outline_color", MENU_OUTLINE)
+	button.add_theme_constant_override("outline_size", MENU_OUTLINE_SIZE)
+	button.add_theme_color_override("font_shadow_color", MENU_SHADOW)
+	button.add_theme_constant_override("shadow_offset_x", 2)
+	button.add_theme_constant_override("shadow_offset_y", 2)
 	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
 		var style := StyleBoxEmpty.new()
 		button.add_theme_stylebox_override(state, style)
@@ -318,7 +337,7 @@ func _move_menu_marker(button: Button) -> void:
 	menu_marker.visible = true
 	for child in menu_group.get_children():
 		if child is Button and not child.disabled:
-			child.add_theme_color_override("font_color", GOLD if child == button else CREAM)
+			child.add_theme_color_override("font_color", MENU_SELECTED if child == button else MENU_TEXT)
 
 func _panel(parent: Control, rect: Rect2, color: Color) -> Panel:
 	var panel := Panel.new()
