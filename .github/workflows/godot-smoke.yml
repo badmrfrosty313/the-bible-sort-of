@@ -99,6 +99,8 @@ jobs:
           test -f ci_artifacts/12_eve_cow_payoff.png
           test -f ci_artifacts/13_eve_day.png
           test -f ci_artifacts/14_serpent_unlocked.png
+          test -f ci_artifacts/15_fall_black_boxes.png
+          test -f ci_artifacts/16_fall_leaves.png
 
       - name: Upload Godot logs
         if: always()
