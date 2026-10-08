@@ -20,12 +20,18 @@ func _run_capture() -> void:
 	var scene := packed.instantiate()
 	root.add_child(scene)
 	await create_timer(0.8).timeout
-	await _capture("01_opening.png")
-	await create_timer(3.2).timeout
-	await _capture("02_title_menu.png")
+	await _capture("01_rest_on_the_beach.png")
+	await create_timer(1.3).timeout
+	await _capture("02_adam_falls.png")
+	await create_timer(0.9).timeout
+	await _capture("03_vines_catch_adam.png")
+	await create_timer(1.3).timeout
+	await _capture("04_gods_punchline.png")
+	await create_timer(2.0).timeout
+	await _capture("05_title_menu.png")
 	scene._start_new_game(1)
 	await create_timer(0.3).timeout
-	await _capture("03_prologue.png")
+	await _capture("06_prologue.png")
 	quit()
 
 func _capture(file_name: String) -> void:
