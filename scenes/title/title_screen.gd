@@ -62,15 +62,15 @@ func _build_title() -> void:
 	ui.add_child(title_group)
 
 	# Fully path-based old-world adventure logo. No installed fonts needed.
-	var logo := TextureRect.new()
+	# Use explicit sprite scale: TextureRect was drawing at the SVG's 928x444
+	# source dimensions instead of the intended 232x111 display area.
+	var logo := Sprite2D.new()
 	logo.name = "GameLogo"
 	logo.texture = TITLE_LOGO
-	logo.position = Vector2(201, 6)
-	logo.size = Vector2(232, 111)
-	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	logo.stretch_mode = TextureRect.STRETCH_SCALE
+	logo.position = Vector2(317, 61.5)
+	logo.scale = Vector2(0.25, 0.25)
+	logo.centered = true
 	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	title_group.add_child(logo)
 
 	menu_group = Control.new()
