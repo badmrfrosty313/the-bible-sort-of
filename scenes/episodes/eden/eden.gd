@@ -555,8 +555,13 @@ func _eve_name_animal(animal: Dictionary) -> void:
 	queue_redraw()
 
 func _open_serpent() -> void:
-	_show_dialogue("SERPENT ENCOUNTER", "The next authored beat is the temptation. This vertical slice stops here rather than inventing finished serpent dialogue.")
+	_show_dialogue("SERPENT ENCOUNTER", "The temptation beat is ready. Finished serpent dialogue remains intentionally unwritten.")
+	_choice("CONTINUE TO THE FALL", _start_fall)
 	_choice("RETURN TO EDEN", _close_dialogue)
+
+func _start_fall() -> void:
+	_close_dialogue()
+	get_tree().change_scene_to_file("res://scenes/episodes/eden/fall.tscn")
 
 func _open_naming_intro() -> void:
 	if naming_complete:
