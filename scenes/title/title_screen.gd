@@ -300,6 +300,9 @@ func _menu_button(parent: Control, caption: String, rect: Rect2) -> Button:
 	button.add_theme_color_override("font_focus_color", GOLD)
 	button.add_theme_color_override("font_color", CREAM)
 	button.add_theme_color_override("font_disabled_color", Color("#A8A098"))
+	# Readable over the orange sunset and breaking waves, with no backing panel.
+	button.add_theme_color_override("font_outline_color", Color("#281623"))
+	button.add_theme_constant_override("outline_size", 2)
 	# Explicit transparent styles remove ALL default button and keyboard-focus
 	# rectangles while retaining clickable / keyboard-accessible hit targets.
 	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -310,8 +313,12 @@ func _menu_button(parent: Control, caption: String, rect: Rect2) -> Button:
 func _move_menu_marker(button: Button) -> void:
 	if menu_marker == null:
 		return
-	menu_marker.position = Vector2(-11, button.position.y)
+	# Keep the indicator close to the centered labels rather than off in the palm trees.
+	menu_marker.position = Vector2(20, button.position.y)
 	menu_marker.visible = true
+	for child in menu_group.get_children():
+		if child is Button and not child.disabled:
+			child.add_theme_color_override("font_color", GOLD if child == button else CREAM)
 
 func _panel(parent: Control, rect: Rect2, color: Color) -> Panel:
 	var panel := Panel.new()
