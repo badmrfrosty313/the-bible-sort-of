@@ -16,6 +16,7 @@ var menu_group: Control
 var panel_group: Control
 var intro_group: Control
 var beach_intro
+var beach_plate: Sprite2D
 var continue_button: Button
 var last_slot := 0
 var active_slot := 0
@@ -41,12 +42,14 @@ func _build_background() -> void:
 	beach.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	beach.position = Vector2(240, 135)
 	beach.scale = Vector2(480.0 / float(BEACH_PLATE.get_width()), 270.0 / float(BEACH_PLATE.get_height()))
+	beach_plate = beach
 	add_child(beach)
 
 func _build_beach_intro() -> void:
 	beach_intro = BEACH_INTRO_SCRIPT.new()
 	beach_intro.name = "BeachIntro"
 	add_child(beach_intro)
+	beach_intro.configure(beach_plate)
 
 func _build_title() -> void:
 	title_group = Control.new()
@@ -88,29 +91,29 @@ func _build_panel_group() -> void:
 	ui.add_child(panel_group)
 
 func _play_intro() -> void:
-	# Source: "The Bible: Sort Of Game Scripting" in Google Docs.
-	# Silence first, THEN Adam falls, THEN the punchline, THEN the menu.
-	await get_tree().create_timer(1.7).timeout
+	# The existing art is a full composite, so this first animatic uses
+	# cinematic framing until Father/Adam/vines are supplied as layered art.
+	await get_tree().create_timer(1.55).timeout
 	if screen != Screen.INTRO:
 		return
-	beach_intro.start_fall()
-	var fall_tween := create_tween()
-	fall_tween.set_trans(Tween.TRANS_CUBIC)
-	fall_tween.set_ease(Tween.EASE_IN)
-	fall_tween.tween_method(beach_intro.set_fall_progress, 0.0, 1.0, 1.0)
-	await fall_tween.finished
+	beach_intro.show_adam()
+	await get_tree().create_timer(0.8).timeout
 	if screen != Screen.INTRO:
 		return
-	beach_intro.catch_adam()
-	await get_tree().create_timer(0.6).timeout
+	await get_tree().create_timer(0.65).timeout
 	if screen != Screen.INTRO:
 		return
-	beach_intro.begin_eye_roll()
-	await get_tree().create_timer(0.6).timeout
+	beach_intro.show_father_reaction()
+	await get_tree().create_timer(0.75).timeout
 	if screen != Screen.INTRO:
 		return
 	intro_group.visible = true
-	await get_tree().create_timer(1.75).timeout
+	await get_tree().create_timer(1.65).timeout
+	if screen != Screen.INTRO:
+		return
+	intro_group.visible = false
+	beach_intro.reveal_full_beach()
+	await get_tree().create_timer(0.65).timeout
 	if screen == Screen.INTRO:
 		_show_menu()
 
@@ -118,7 +121,7 @@ func _show_menu() -> void:
 	screen = Screen.MENU
 	intro_group.visible = false
 	if beach_intro != null:
-		beach_intro.visible = false
+		beach_intro.reset_immediately()
 	panel_group.visible = false
 	title_group.visible = true
 	title_group.modulate.a = 0.0
