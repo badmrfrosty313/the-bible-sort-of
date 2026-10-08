@@ -95,6 +95,8 @@ jobs:
           test -f ci_artifacts/08_eden_free_roam.png
           test -f ci_artifacts/09_eden_rock.png
           test -f ci_artifacts/10_eden_first_jeff.png
+          test -f ci_artifacts/11_eve_sleep_line.png
+          test -f ci_artifacts/12_eve_cow_payoff.png
 
       - name: Upload Godot logs
         if: always()
