@@ -15,8 +15,7 @@ const MENU_TEXT := Color("#F6E7C8")
 const MENU_SELECTED := Color("#FFD77A")
 const MENU_DISABLED := Color("#B9B1A2")
 const MENU_OUTLINE := Color("#2E1B16")
-const MENU_SHADOW := Color("#20110E")
-const MENU_OUTLINE_SIZE := 3
+const MENU_OUTLINE_SIZE := 2
 
 enum Screen { INTRO, MENU, SLOTS, PROLOGUE, OPTIONS }
 
@@ -26,7 +25,6 @@ var title_group: Control
 var menu_group: Control
 var panel_group: Control
 var intro_group: Control
-var menu_marker: Label
 var beach_intro
 var beach_plate: Sprite2D
 var continue_button: Button
@@ -76,23 +74,19 @@ func _build_title() -> void:
 	_style_title_label(_label(title_group, "SORT OF", Rect2(254, 85, 120, 22), 16, MENU_TEXT))
 
 	menu_group = Control.new()
-	menu_group.position = Vector2(258, 116)
-	menu_group.size = Vector2(140, 94)
+	# Widen to fit CHAPTER SELECTION and center every row on x=312.
+	menu_group.position = Vector2(217, 116)
+	menu_group.size = Vector2(190, 94)
 	title_group.add_child(menu_group)
 
 	var entries := ["NEW GAME", "CONTINUE", "LOAD", "CHAPTER SELECTION", "OPTIONS"]
 	for i in range(entries.size()):
-		var button := _menu_button(menu_group, entries[i], Rect2(0, i * 18, 140, 17))
+		var button := _menu_button(menu_group, entries[i], Rect2(0, i * 18, 190, 17))
 		button.pressed.connect(_on_menu_pressed.bind(entries[i]))
-		button.focus_entered.connect(_move_menu_marker.bind(button))
+		button.focus_entered.connect(_highlight_menu_entry.bind(button))
 		if entries[i] == "CONTINUE":
 			continue_button = button
 
-	# An unobtrusive gold chevron replaces the old focus rectangle.
-	menu_marker = _label(menu_group, "›", Rect2(-11, 0, 11, 17), 14, MENU_SELECTED)
-	_style_title_label(menu_marker, MENU_SELECTED)
-	menu_marker.visible = false
-	menu_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _build_intro() -> void:
 	intro_group = Control.new()
@@ -301,13 +295,13 @@ func _thought_dot(parent: Control, center: Vector2, diameter: int) -> void:
 	parent.add_child(dot)
 
 func _style_title_label(label: Label, fill: Color = MENU_TEXT) -> void:
-	# Identical silhouette and shadow across the logo and menu.
+	# A single clean edge without an offset double shadow.
 	label.add_theme_color_override("font_color", fill)
 	label.add_theme_color_override("font_outline_color", MENU_OUTLINE)
 	label.add_theme_constant_override("outline_size", MENU_OUTLINE_SIZE)
-	label.add_theme_color_override("font_shadow_color", MENU_SHADOW)
-	label.add_theme_constant_override("shadow_offset_x", 2)
-	label.add_theme_constant_override("shadow_offset_y", 2)
+	label.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
+	label.add_theme_constant_override("shadow_offset_x", 0)
+	label.add_theme_constant_override("shadow_offset_y", 0)
 
 func _menu_button(parent: Control, caption: String, rect: Rect2) -> Button:
 	var button := _button(parent, caption, rect, 10)
@@ -318,23 +312,19 @@ func _menu_button(parent: Control, caption: String, rect: Rect2) -> Button:
 	button.add_theme_color_override("font_focus_color", MENU_SELECTED)
 	button.add_theme_color_override("font_color", MENU_TEXT)
 	button.add_theme_color_override("font_disabled_color", MENU_DISABLED)
-	# Same outline and shadow as the title, no backing panels.
+	# Same exact stroke as title labels, and no offset shadow.
 	button.add_theme_color_override("font_outline_color", MENU_OUTLINE)
 	button.add_theme_constant_override("outline_size", MENU_OUTLINE_SIZE)
-	button.add_theme_color_override("font_shadow_color", MENU_SHADOW)
-	button.add_theme_constant_override("shadow_offset_x", 2)
-	button.add_theme_constant_override("shadow_offset_y", 2)
+	button.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
+	button.add_theme_constant_override("shadow_offset_x", 0)
+	button.add_theme_constant_override("shadow_offset_y", 0)
 	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
 		var style := StyleBoxEmpty.new()
 		button.add_theme_stylebox_override(state, style)
 	return button
 
-func _move_menu_marker(button: Button) -> void:
-	if menu_marker == null:
-		return
-	# Keep the indicator close to the centered labels rather than off in the palm trees.
-	menu_marker.position = Vector2(20, button.position.y)
-	menu_marker.visible = true
+func _highlight_menu_entry(button: Button) -> void:
+	# All items stay aligned; selection is gold text, never a floating marker.
 	for child in menu_group.get_children():
 		if child is Button and not child.disabled:
 			child.add_theme_color_override("font_color", MENU_SELECTED if child == button else MENU_TEXT)
