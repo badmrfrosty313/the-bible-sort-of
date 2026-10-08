@@ -63,12 +63,12 @@ func _build_title() -> void:
 
 	# Move the main logo left into the open sky. Keep its last punctuation
 	# clear of Adam and his hanging vines.
-	# The asset's source size is 928x444; 0.25 restores the 232x111 canvas.
+	# The asset's source size is 928x444; display at 80% of the old size.
 	var logo := Sprite2D.new()
 	logo.name = "GameLogo"
 	logo.texture = TITLE_LOGO
 	logo.position = Vector2(293, 61.5)
-	logo.scale = Vector2(0.25, 0.25)
+	logo.scale = Vector2(0.20, 0.20)
 	logo.centered = true
 	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	title_group.add_child(logo)
