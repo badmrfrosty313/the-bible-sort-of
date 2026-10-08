@@ -1,7 +1,7 @@
 extends Node2D
 
 const BEACH_PLATE := preload("res://art/title/beach_title_plate.png")
-const TITLE_LOGO := preload("res://art/title/bible_logo.svg")
+const TITLE_ART := preload("res://art/title/approved_title.webp")
 const SLOT_COUNT := 3
 
 # Independent treatments: the title is vector artwork, navigation is live UI.
@@ -19,6 +19,9 @@ var title_group: Control
 var menu_group: Control
 var panel_group: Control
 var ui_font: FontVariation
+var title_background: Sprite2D
+var submenu_background: Sprite2D
+var title_focus_marker: Label
 var continue_button: Button
 var last_slot := 0
 var active_slot := 0
@@ -27,7 +30,7 @@ func _ready() -> void:
 	_build_background()
 	ui = Control.new()
 	ui.name = "Interface"
-	ui.size = Vector2(480, 270)
+	ui.size = Vector2(480, 360)
 	add_child(ui)
 	_load_profile()
 	_build_ui_font()
@@ -36,15 +39,31 @@ func _ready() -> void:
 	_show_menu()
 
 func _build_background() -> void:
-	var beach := Sprite2D.new()
-	beach.name = "BeachPlate"
-	beach.texture = BEACH_PLATE
-	beach.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	beach.position = Vector2(240, 135)
-	beach.scale = Vector2(480.0 / float(BEACH_PLATE.get_width()), 270.0 / float(BEACH_PLATE.get_height()))
-	add_child(beach)
+	# This is the actual approved concept image. Keep all of it visible at 4:3.
+	title_background = Sprite2D.new()
+	title_background.name = "ApprovedIllustratedTitle"
+	title_background.texture = TITLE_ART
+	title_background.position = Vector2(240, 180)
+	title_background.scale = Vector2(
+		480.0 / float(TITLE_ART.get_width()),
+		360.0 / float(TITLE_ART.get_height())
+	)
+	title_background.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	add_child(title_background)
 
-
+	# The baked title/menu art must NOT remain behind submenu text.
+	submenu_background = Sprite2D.new()
+	submenu_background.name = "CleanBeachForSubmenus"
+	submenu_background.texture = BEACH_PLATE
+	submenu_background.position = Vector2(240, 180)
+	var cover := maxf(
+		480.0 / float(BEACH_PLATE.get_width()),
+		360.0 / float(BEACH_PLATE.get_height())
+	)
+	submenu_background.scale = Vector2.ONE * cover
+	submenu_background.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	submenu_background.visible = false
+	add_child(submenu_background)
 
 func _build_ui_font() -> void:
 	# Platform-neutral Godot font, slightly emboldened for the bright sunset.
@@ -57,39 +76,60 @@ func _build_ui_font() -> void:
 func _build_title() -> void:
 	title_group = Control.new()
 	title_group.name = "TitleMenu"
-	title_group.size = Vector2(480, 270)
+	title_group.size = Vector2(480, 360)
 	title_group.visible = false
 	ui.add_child(title_group)
 
-	# Gold fantasy wordmark is an actual SVG texture, not screen text.
-	# Keep it clear of Adam on the right and leave room for five live buttons.
-	var logo := Sprite2D.new()
-	logo.name = "GameLogo"
-	logo.texture = TITLE_LOGO
-	logo.position = Vector2(252, 63)
-	logo.scale = Vector2(0.275, 0.275)
-	logo.centered = true
-	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	title_group.add_child(logo)
-
+	# Every word and the logo are already in the approved picture.
+	# Native transparent Buttons provide mouse, keyboard, and controller input.
 	menu_group = Control.new()
-	menu_group.position = Vector2(145, 135)
-	menu_group.size = Vector2(190, 99)
+	menu_group.name = "InvisibleLiveMenu"
+	menu_group.size = Vector2(480, 360)
 	title_group.add_child(menu_group)
 
-	var entries := ["NEW GAME", "CONTINUE", "LOAD", "CHAPTER SELECTION", "OPTIONS"]
-	for i in range(entries.size()):
-		var button := _menu_button(menu_group, entries[i], Rect2(0, i * 19, 190, 19))
-		button.pressed.connect(_on_menu_pressed.bind(entries[i]))
-		button.focus_entered.connect(_highlight_menu_entry.bind(button))
-		if entries[i] == "CONTINUE":
+	var entries := [
+		{"caption": "NEW GAME", "box": Rect2(166, 210, 148, 22)},
+		{"caption": "CONTINUE", "box": Rect2(166, 232, 148, 24)},
+		{"caption": "LOAD", "box": Rect2(177, 254, 126, 24)},
+		{"caption": "CHAPTER SELECTION", "box": Rect2(133, 278, 214, 24)},
+		{"caption": "OPTIONS", "box": Rect2(175, 301, 130, 24)}
+	]
+	for entry in entries:
+		var caption: String = entry["caption"]
+		var rect: Rect2 = entry["box"]
+		var button := Button.new()
+		button.text = caption
+		button.position = rect.position
+		button.size = rect.size
+		button.focus_mode = Control.FOCUS_ALL
+		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		button.flat = true
+		# Transparent hit area: do not paint duplicate menu lettering.
+		button.modulate.a = 0.0
+		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+			button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+		menu_group.add_child(button)
+		button.pressed.connect(_on_menu_pressed.bind(caption))
+		button.focus_entered.connect(_focus_baked_entry.bind(button))
+		button.mouse_entered.connect(_focus_baked_entry.bind(button))
+		if caption == "CONTINUE":
 			continue_button = button
 
+	# Visible only after moving focus; the untouched image is the initial state.
+	title_focus_marker = _label(title_group, "◆", Rect2(143, 209, 16, 19), 11, MENU_SELECTED)
+	title_focus_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	title_focus_marker.visible = false
+
+func _focus_baked_entry(button: Button) -> void:
+	if screen != Screen.MENU or title_focus_marker == null:
+		return
+	title_focus_marker.position.y = button.position.y + 1.0
+	title_focus_marker.visible = true
 
 func _build_panel_group() -> void:
 	panel_group = Control.new()
 	panel_group.name = "Subscreen"
-	panel_group.size = Vector2(480, 270)
+	panel_group.size = Vector2(480, 360)
 	panel_group.visible = false
 	ui.add_child(panel_group)
 
@@ -98,8 +138,11 @@ func _show_menu() -> void:
 	panel_group.visible = false
 	title_group.visible = true
 	menu_group.visible = true
+	title_background.visible = true
+	submenu_background.visible = false
 	_refresh_continue()
 	_focus_first(menu_group)
+	title_focus_marker.visible = false
 
 func _on_menu_pressed(entry: String) -> void:
 	match entry:
@@ -122,7 +165,7 @@ func _show_slots(new_game: bool) -> void:
 	for i in range(1, SLOT_COUNT + 1):
 		var occupied := _slot_exists(i)
 		var caption := "SLOT %d  -  PROLOGUE" % i if occupied else "SLOT %d  -  EMPTY" % i
-		var button := _submenu_button(caption, 170 + (i - 1) * 19)
+		var button := _submenu_button(caption, 184 + (i - 1) * 27)
 		button.disabled = not new_game and not occupied
 		if new_game:
 			button.pressed.connect(_start_new_game.bind(i))
@@ -150,15 +193,15 @@ func _open_prologue(slot: int) -> void:
 	_clear_panel()
 	_subtitle("PROLOGUE  /  SLOT %d" % slot)
 	# Scene content has not been authored yet. Keep this honest and unboxed.
-	_subtitle("STORY IN DEVELOPMENT", 176, 10, MENU_TEXT)
-	_submenu_button("RETURN TO TITLE", 230).pressed.connect(_show_menu)
+	_subtitle("STORY IN DEVELOPMENT", 198, 10, MENU_TEXT)
+	_submenu_button("RETURN TO TITLE", 268).pressed.connect(_show_menu)
 	_focus_first(panel_group)
 
 func _show_chapters() -> void:
 	screen = Screen.SLOTS
 	_clear_panel()
 	_subtitle("CHAPTER SELECTION")
-	_submenu_button("PROLOGUE", 179).pressed.connect(_open_prologue.bind(last_slot if last_slot > 0 else 1))
+	_submenu_button("PROLOGUE", 204).pressed.connect(_open_prologue.bind(last_slot if last_slot > 0 else 1))
 	_add_back_button()
 	_focus_first(panel_group)
 
@@ -166,7 +209,7 @@ func _show_options() -> void:
 	screen = Screen.OPTIONS
 	_clear_panel()
 	_subtitle("OPTIONS")
-	_submenu_button("TOGGLE FULLSCREEN", 179).pressed.connect(_toggle_fullscreen)
+	_submenu_button("TOGGLE FULLSCREEN", 204).pressed.connect(_toggle_fullscreen)
 	_add_back_button()
 	_focus_first(panel_group)
 
@@ -175,15 +218,17 @@ func _toggle_fullscreen() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if mode == DisplayServer.WINDOW_MODE_FULLSCREEN else DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 func _add_back_button() -> void:
-	_submenu_button("BACK", 235).pressed.connect(_show_menu)
+	_submenu_button("BACK", 286).pressed.connect(_show_menu)
 
 func _clear_panel() -> void:
 	for child in panel_group.get_children():
 		panel_group.remove_child(child)
 		child.queue_free()
 	panel_group.visible = true
-	title_group.visible = true
+	title_group.visible = false
 	menu_group.visible = false
+	title_background.visible = false
+	submenu_background.visible = true
 
 func _refresh_continue() -> void:
 	if continue_button != null:
@@ -209,7 +254,7 @@ func _save_profile() -> void:
 	if error != OK:
 		push_error("Unable to remember last save slot: %s" % error)
 
-func _subtitle(caption: String, y: float = 145.0, size: int = 13, fill: Color = MENU_SELECTED) -> void:
+func _subtitle(caption: String, y: float = 160.0, size: int = 13, fill: Color = MENU_SELECTED) -> void:
 	var heading := _label(panel_group, caption, Rect2(141, y, 198, 25), size, fill)
 	_style_section_heading(heading, fill)
 
