@@ -73,98 +73,200 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _draw() -> void:
-	# Garden boundary and surrounding wilderness.
-	draw_rect(Rect2(Vector2.ZERO, SCREEN_SIZE), Color("#163c31"))
-	draw_rect(GARDEN_RECT, Color("#79b85e"))
-	draw_rect(Rect2(130, 100, 940, 700), Color("#8bc86a"), true)
+	# A deliberately chunky 16-bit-RPG-ish garden. Gameplay geometry stays
+	# simple and readable while the presentation gets enough texture to feel alive.
+	draw_rect(Rect2(Vector2.ZERO, SCREEN_SIZE), Color("#0d3428"))
+	draw_rect(Rect2(90, 60, 1020, 780), Color("#214c34"))
+	draw_rect(GARDEN_RECT, Color("#8acb68"))
+	draw_rect(Rect2(125, 95, 950, 710), Color("#78bb5b"))
 
-	# Water and footpaths.
-	draw_circle(Vector2(815, 475), 118, Color("#4ba5b5"))
-	draw_circle(Vector2(815, 475), 101, Color("#70c7cb"))
-	var path_color := Color("#d6bd79")
-	draw_line(Vector2(600, 790), Vector2(600, 135), path_color, 45.0, true)
-	draw_line(Vector2(185, 485), Vector2(1015, 485), path_color, 38.0, true)
+	# Grass bands and tufts break up the giant green rectangle without adding assets.
+	for y in [150.0, 360.0, 585.0, 760.0]:
+		draw_line(Vector2(145, y), Vector2(1055, y), Color("#83c56555"), 3.0)
+	for p in [
+		Vector2(215,205), Vector2(430,170), Vector2(755,185), Vector2(970,215),
+		Vector2(195,585), Vector2(405,690), Vector2(760,705), Vector2(1000,610),
+		Vector2(370,405), Vector2(925,430), Vector2(235,430), Vector2(735,555)
+	]:
+		_draw_grass_tuft(p)
 
-	# Boundary trees.
+	# Dirt roads with a darker outer edge so they read like authored paths.
+	var outer_path := Color("#9c7b43")
+	var inner_path := Color("#ddc17b")
+	draw_line(Vector2(600, 785), Vector2(600, 135), outer_path, 58.0, true)
+	draw_line(Vector2(600, 785), Vector2(600, 135), inner_path, 42.0, true)
+	draw_line(Vector2(180, 485), Vector2(1020, 485), outer_path, 52.0, true)
+	draw_line(Vector2(180, 485), Vector2(1020, 485), inner_path, 38.0, true)
+	for p in [Vector2(600,760),Vector2(600,640),Vector2(600,355),Vector2(600,235),Vector2(350,485),Vector2(850,485)]:
+		draw_circle(p, 5, Color("#b6985b"))
+
+	# Pond with depth rings, highlight, reeds and lily pads.
+	var pond := Vector2(815, 480)
+	draw_circle(pond + Vector2(7, 10), 126, Color("#2b674d88"))
+	draw_circle(pond, 121, Color("#2c8394"))
+	draw_circle(pond, 107, Color("#62bec4"))
+	draw_circle(pond + Vector2(-22, -28), 55, Color("#7dd2cf55"))
+	for p in [pond + Vector2(-52,-16), pond + Vector2(38,34), pond + Vector2(10,-65)]:
+		draw_circle(p, 13, Color("#457d45"))
+		draw_line(p, p + Vector2(7,-8), Color("#315e34"), 3.0)
+	for x in [700.0, 715.0, 920.0, 936.0]:
+		draw_line(Vector2(x, 570), Vector2(x - 4, 535), Color("#416f39"), 5.0)
+
+	# Garden-border trees and hedges.
 	for p in [
 		Vector2(145, 135), Vector2(260, 120), Vector2(380, 118), Vector2(820, 120),
 		Vector2(945, 130), Vector2(1050, 175), Vector2(150, 750), Vector2(270, 775),
 		Vector2(930, 770), Vector2(1040, 735), Vector2(150, 350), Vector2(1050, 365)
 	]:
 		_draw_tree(p)
+	for p in [Vector2(475,115),Vector2(720,115),Vector2(155,510),Vector2(1040,530),Vector2(470,780),Vector2(750,780)]:
+		_draw_bush(p)
 
-	# The suspiciously obvious rock.
+	# Flower clusters are tiny landmarks for navigation.
+	for pair in [
+		[Vector2(360,320), Color("#f5d250")], [Vector2(975,330), Color("#f2a4c4")],
+		[Vector2(410,620), Color("#8e77d9")], [Vector2(875,690), Color("#f5d250")]
+	]:
+		_draw_flowers(pair[0], pair[1])
+
 	_draw_rock(Vector2(505, 540))
-
-	# God / quest giver.
 	_draw_god(Vector2(600, 145))
-
 	for animal in animals:
 		_draw_animal(animal)
-
 	_draw_adam(player_position)
 
+func _draw_grass_tuft(p: Vector2) -> void:
+	var c := Color("#4f963f")
+	draw_line(p, p + Vector2(-6, -12), c, 3.0)
+	draw_line(p, p + Vector2(0, -15), c, 3.0)
+	draw_line(p, p + Vector2(7, -10), c, 3.0)
+
+func _draw_bush(p: Vector2) -> void:
+	draw_circle(p + Vector2(3,7), 29, Color("#225a32"))
+	draw_circle(p + Vector2(-19,2), 20, Color("#347a3d"))
+	draw_circle(p + Vector2(20,2), 20, Color("#3f8b46"))
+	draw_circle(p + Vector2(0,-14), 22, Color("#3b8442"))
+
+func _draw_flowers(p: Vector2, petal: Color) -> void:
+	for off in [Vector2(-10,0), Vector2(10,0), Vector2(0,-10), Vector2(0,10)]:
+		draw_circle(p + off * 0.55, 5, petal)
+	draw_circle(p, 4, Color("#ffe68b"))
+
 func _draw_tree(p: Vector2) -> void:
-	draw_rect(Rect2(p + Vector2(-8, 5), Vector2(16, 45)), Color("#6c3e1f"))
-	draw_circle(p, 36, Color("#2f713a"))
-	draw_circle(p + Vector2(-25, 15), 23, Color("#3c8744"))
-	draw_circle(p + Vector2(25, 15), 23, Color("#3c8744"))
+	# Heavy outlines match the title art better than the old flat circles.
+	draw_circle(p + Vector2(8, 18), 42, Color("#153d27aa"))
+	draw_rect(Rect2(p + Vector2(-11, 3), Vector2(22, 55)), Color("#4b2b1a"))
+	draw_rect(Rect2(p + Vector2(-6, 3), Vector2(12, 55)), Color("#835027"))
+	for crown in [
+		[p + Vector2(-28,4), 27.0, Color("#245f33")],
+		[p + Vector2(28,6), 27.0, Color("#2f7839")],
+		[p + Vector2(0,-20), 34.0, Color("#2c6e37")],
+		[p + Vector2(0,10), 30.0, Color("#3d8640")]
+	]:
+		draw_circle(crown[0], crown[1] + 4.0, Color("#173f29"))
+		draw_circle(crown[0], crown[1], crown[2])
 
 func _draw_rock(p: Vector2) -> void:
+	var shadow := PackedVector2Array([
+		p + Vector2(-59, 38), p + Vector2(-47, -16), p + Vector2(-3, -37),
+		p + Vector2(53, -12), p + Vector2(65, 32), p + Vector2(28, 49),
+		p + Vector2(-34, 47)
+	])
+	draw_colored_polygon(shadow, Color("#273a35aa"))
 	var points := PackedVector2Array([
 		p + Vector2(-55, 30), p + Vector2(-42, -22), p + Vector2(0, -40),
 		p + Vector2(47, -17), p + Vector2(60, 25), p + Vector2(25, 42),
 		p + Vector2(-31, 40)
 	])
-	draw_colored_polygon(points, Color("#6d7375"))
-	draw_polyline(PackedVector2Array([points[0], points[1], points[2], points[3], points[4]]), Color("#a9aeaa"), 5.0)
-	draw_string(ThemeDB.fallback_font, p + Vector2(-58, 72), "VERY OBVIOUS ROCK", HORIZONTAL_ALIGNMENT_CENTER, 116, 16, Color("#fff4d2"))
+	draw_colored_polygon(points, Color("#717a7c"))
+	draw_polyline(PackedVector2Array([points[0], points[1], points[2], points[3], points[4]]), Color("#b8bdb5"), 5.0)
+	draw_line(p + Vector2(-10,-18), p + Vector2(8,0), Color("#51595b"), 4.0)
+	draw_line(p + Vector2(8,0), p + Vector2(-3,15), Color("#51595b"), 4.0)
+	draw_string(ThemeDB.fallback_font, p + Vector2(-75, 73), "VERY OBVIOUS ROCK", HORIZONTAL_ALIGNMENT_CENTER, 150, 15, Color("#fff4d2"))
 
 func _draw_god(p: Vector2) -> void:
-	draw_circle(p, 31, Color("#f1d18f"))
-	draw_circle(p + Vector2(0, 30), 31, Color("#f5f0da"))
-	draw_arc(p, 43, 0, TAU, 48, Color("#ffd45f"), 4.0)
-	draw_string(ThemeDB.fallback_font, p + Vector2(-60, 78), "GOD", HORIZONTAL_ALIGNMENT_CENTER, 120, 20, Color("#fff4d2"))
+	# Quest-giver God: halo, hair/beard, simple robe silhouette.
+	draw_circle(p + Vector2(5,10), 48, Color("#203c2d66"))
+	var robe := PackedVector2Array([
+		p + Vector2(-30,25), p + Vector2(30,25), p + Vector2(44,78), p + Vector2(-44,78)
+	])
+	draw_colored_polygon(robe, Color("#f0ead6"))
+	draw_polyline(PackedVector2Array([robe[0],robe[1],robe[2]]), Color("#c8ad67"), 4.0)
+	draw_circle(p, 29, Color("#d99a62"))
+	draw_arc(p, 44, 0, TAU, 48, Color("#ffd35a"), 6.0)
+	draw_arc(p, 49, 0, TAU, 48, Color("#fff0a0"), 2.0)
+	draw_arc(p + Vector2(0,-3), 29, PI, TAU, 20, Color("#f1eee1"), 13.0)
+	draw_circle(p + Vector2(-13,25), 18, Color("#f1eee1"))
+	draw_circle(p + Vector2(13,25), 18, Color("#f1eee1"))
+	draw_circle(p + Vector2(-8,-3), 3, Color("#31231d"))
+	draw_circle(p + Vector2(8,-3), 3, Color("#31231d"))
+	draw_string(ThemeDB.fallback_font, p + Vector2(-60, 105), "GOD", HORIZONTAL_ALIGNMENT_CENTER, 120, 19, Color("#fff4d2"))
 
 func _draw_adam(p: Vector2) -> void:
-	draw_circle(p + Vector2(0, -18), 19, Color("#bd7546"))
-	draw_circle(p + Vector2(0, 15), 25, Color("#c58251"))
-	draw_line(p + Vector2(-13, 30), p + Vector2(-18, 55), Color("#8f5b3e"), 9.0)
-	draw_line(p + Vector2(13, 30), p + Vector2(18, 55), Color("#8f5b3e"), 9.0)
-	draw_arc(p + Vector2(0, -18), 22, PI, TAU, 18, Color("#4a2b20"), 9.0)
-	draw_string(ThemeDB.fallback_font, p + Vector2(-45, 82), "ADAM", HORIZONTAL_ALIGNMENT_CENTER, 90, 18, Color("#fff4d2"))
+	# Chunky top-down Adam with a soft shadow and deliberately simple anatomy.
+	draw_circle(p + Vector2(7,44), 29, Color("#29433277"))
+	draw_circle(p + Vector2(0,-18), 21, Color("#c98758"))
+	draw_circle(p + Vector2(0,16), 27, Color("#bd7546"))
+	draw_line(p + Vector2(-18,5), p + Vector2(-36,24), Color("#a86443"), 10.0)
+	draw_line(p + Vector2(18,5), p + Vector2(36,24), Color("#a86443"), 10.0)
+	draw_line(p + Vector2(-12,34), p + Vector2(-17,60), Color("#8f5b3e"), 10.0)
+	draw_line(p + Vector2(12,34), p + Vector2(17,60), Color("#8f5b3e"), 10.0)
+	draw_arc(p + Vector2(0,-18), 24, PI, TAU, 18, Color("#43281e"), 10.0)
+	draw_circle(p + Vector2(-7,-18), 2.5, Color("#2e211b"))
+	draw_circle(p + Vector2(7,-18), 2.5, Color("#2e211b"))
+	# The pre-Fall modesty gag remains abstract rather than explicit.
+	for off in [Vector2(-7,26),Vector2(0,23),Vector2(7,27),Vector2(0,31)]:
+		draw_rect(Rect2(p + off - Vector2(5,5), Vector2(10,10)), Color("#b88a63"))
+	draw_string(ThemeDB.fallback_font, p + Vector2(-45, 87), "ADAM", HORIZONTAL_ALIGNMENT_CENTER, 90, 17, Color("#fff4d2"))
 
 func _draw_animal(animal: Dictionary) -> void:
 	var p: Vector2 = animal["pos"]
 	var id: String = animal["id"]
-	var body := Color("#e9e1c8")
+	var outline := Color("#2b3128")
 	match id:
 		"cow":
-			body = Color("#f2eee3")
-			draw_circle(p, 29, body)
-			draw_circle(p + Vector2(29, -10), 18, body)
-			draw_circle(p + Vector2(-10, -5), 8, Color("#4d352b"))
-			draw_circle(p + Vector2(10, 8), 7, Color("#4d352b"))
+			draw_circle(p, 33, outline)
+			draw_circle(p + Vector2(31,-10), 21, outline)
+			draw_circle(p, 28, Color("#eee8d9"))
+			draw_circle(p + Vector2(29,-10), 17, Color("#eee8d9"))
+			draw_circle(p + Vector2(-10,-5), 8, Color("#4d352b"))
+			draw_circle(p + Vector2(10,8), 7, Color("#4d352b"))
+			draw_circle(p + Vector2(34,-12), 3, Color("#241b18"))
 		"sheep":
-			for off in [Vector2(-18,0), Vector2(0,-12), Vector2(19,0), Vector2(0,12)]:
-				draw_circle(p + off, 20, Color("#fff6dd"))
-			draw_circle(p + Vector2(28, 3), 13, Color("#4b413a"))
+			for off in [Vector2(-18,0),Vector2(0,-12),Vector2(19,0),Vector2(0,12)]:
+				draw_circle(p + off, 23, outline)
+				draw_circle(p + off, 19, Color("#fff3d4"))
+			draw_circle(p + Vector2(29,3), 16, outline)
+			draw_circle(p + Vector2(29,3), 12, Color("#4b413a"))
 		"rabbit":
-			draw_circle(p, 22, Color("#d8c5b7"))
-			draw_circle(p + Vector2(17, -18), 14, Color("#d8c5b7"))
-			draw_line(p + Vector2(12, -27), p + Vector2(8, -52), Color("#d8c5b7"), 9.0)
-			draw_line(p + Vector2(23, -27), p + Vector2(27, -52), Color("#d8c5b7"), 9.0)
+			draw_circle(p, 26, outline)
+			draw_circle(p + Vector2(17,-18), 17, outline)
+			draw_circle(p, 22, Color("#d9c2b0"))
+			draw_circle(p + Vector2(17,-18), 13, Color("#d9c2b0"))
+			draw_line(p + Vector2(12,-27), p + Vector2(8,-52), outline, 12.0)
+			draw_line(p + Vector2(23,-27), p + Vector2(27,-52), outline, 12.0)
+			draw_line(p + Vector2(12,-27), p + Vector2(8,-52), Color("#d9c2b0"), 7.0)
+			draw_line(p + Vector2(23,-27), p + Vector2(27,-52), Color("#d9c2b0"), 7.0)
 		"turtle":
+			draw_circle(p, 31, outline)
+			draw_circle(p + Vector2(31,0), 14, outline)
 			draw_circle(p, 27, Color("#4d8449"))
-			draw_circle(p + Vector2(31, 0), 11, Color("#75a85d"))
+			draw_circle(p + Vector2(31,0), 10, Color("#75a85d"))
 			draw_arc(p, 18, 0, TAU, 24, Color("#2f5f37"), 4.0)
+			draw_line(p + Vector2(-12,-12), p + Vector2(12,12), Color("#315e34"), 3.0)
 		"eagle":
-			draw_circle(p, 19, Color("#704326"))
-			draw_circle(p + Vector2(0, -22), 13, Color("#eee5d0"))
-			draw_line(p + Vector2(-6, 4), p + Vector2(-38, 19), Color("#704326"), 14.0)
-			draw_line(p + Vector2(6, 4), p + Vector2(38, 19), Color("#704326"), 14.0)
+			draw_circle(p + Vector2(0,2), 23, outline)
+			draw_circle(p + Vector2(0,-23), 16, outline)
+			draw_circle(p + Vector2(0,2), 19, Color("#704326"))
+			draw_circle(p + Vector2(0,-23), 12, Color("#eee5d0"))
+			draw_line(p + Vector2(-5,5), p + Vector2(-42,20), outline, 18.0)
+			draw_line(p + Vector2(5,5), p + Vector2(42,20), outline, 18.0)
+			draw_line(p + Vector2(-5,5), p + Vector2(-40,19), Color("#704326"), 12.0)
+			draw_line(p + Vector2(5,5), p + Vector2(40,19), Color("#704326"), 12.0)
+			var beak := PackedVector2Array([p + Vector2(10,-24),p + Vector2(27,-18),p + Vector2(11,-13)])
+			draw_colored_polygon(beak, Color("#e0b447"))
 	var display_name: String = str(named_animals.get(id, animal["kind"]))
-	draw_string(ThemeDB.fallback_font, p + Vector2(-70, 63), display_name, HORIZONTAL_ALIGNMENT_CENTER, 140, 18, Color("#fff4d2"))
+	draw_string(ThemeDB.fallback_font, p + Vector2(-70, 67), display_name, HORIZONTAL_ALIGNMENT_CENTER, 140, 17, Color("#fff4d2"))
 
 func _build_ui() -> void:
 	var layer := CanvasLayer.new()
