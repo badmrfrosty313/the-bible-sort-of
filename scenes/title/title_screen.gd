@@ -3,6 +3,8 @@ extends Node2D
 const BEACH_PLATE := preload("res://art/title/beach_title_plate.png")
 const TITLE_ART := preload("res://art/title/approved_title.webp")
 const SLOT_COUNT := 3
+const LAYOUT_SIZE := Vector2(480, 360)
+const RENDER_SIZE := Vector2i(1200, 900)
 
 # Independent treatments: the title is vector artwork, navigation is live UI.
 const MENU_TEXT := Color("#FFF3DC")
@@ -27,6 +29,12 @@ var last_slot := 0
 var active_slot := 0
 
 func _ready() -> void:
+	# Render native 1200x900 instead of magnifying an already tiny viewport.
+	# Scale existing 480x360 UI geometry uniformly so the hitboxes still line up.
+	scale = Vector2(
+		float(RENDER_SIZE.x) / LAYOUT_SIZE.x,
+		float(RENDER_SIZE.y) / LAYOUT_SIZE.y
+	)
 	_build_background()
 	ui = Control.new()
 	ui.name = "Interface"
@@ -42,13 +50,20 @@ func _build_background() -> void:
 	# This is the actual approved concept image. Keep all of it visible at 4:3.
 	title_background = Sprite2D.new()
 	title_background.name = "ApprovedIllustratedTitle"
-	title_background.texture = TITLE_ART
+	# One high-quality Lanczos reconstruction. At native resolution, Godot
+	# no longer performs fractional bilinear scaling on the entire game.
+	var approved_image := TITLE_ART.get_image()
+	if approved_image != null and not approved_image.is_empty():
+		approved_image.resize(RENDER_SIZE.x, RENDER_SIZE.y, Image.INTERPOLATE_LANCZOS)
+		title_background.texture = ImageTexture.create_from_image(approved_image)
+	else:
+		title_background.texture = TITLE_ART
 	title_background.position = Vector2(240, 180)
 	title_background.scale = Vector2(
-		480.0 / float(TITLE_ART.get_width()),
-		360.0 / float(TITLE_ART.get_height())
+		480.0 / float(title_background.texture.get_width()),
+		360.0 / float(title_background.texture.get_height())
 	)
-	title_background.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	title_background.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(title_background)
 
 	# The baked title/menu art must NOT remain behind submenu text.
