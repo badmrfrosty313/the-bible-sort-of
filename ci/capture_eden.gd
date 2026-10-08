@@ -69,7 +69,27 @@ func _run() -> void:
 		push_error("Eve day did not unlock the serpent.")
 		quit(1)
 		return
-	print("Eden story check passed: free roam, rock gag, First Jeff, Eve creation, Eve day and serpent unlock.")
+	eve_day.queue_free()
+	await process_frame
+
+	var fall_packed := load("res://scenes/episodes/eden/fall.tscn") as PackedScene
+	if fall_packed == null:
+		push_error("Fall vertical slice missing.")
+		quit(1)
+		return
+	var fall_scene := fall_packed.instantiate()
+	root.add_child(fall_scene)
+	await create_timer(0.15).timeout
+	fall_scene.ci_after_fruit()
+	await _capture("15_fall_black_boxes.png")
+	fall_scene.ci_clothe_adam()
+	await _capture("16_fall_leaves.png")
+	if not fall_scene.adam_clothed:
+		push_error("Adam did not use the leaves.")
+		quit(1)
+		return
+
+	print("Eden story check passed through the Fall clothing mechanic.")
 	quit()
 
 func _capture(file_name: String) -> void:
