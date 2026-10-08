@@ -13,7 +13,13 @@ var rock_topics := ["THE SUN", "TREES", "THE GUY WITH THE MUG", "ADAM", "EXISTEN
 var naming_active := false
 var naming_complete := false
 var eve_created := false
+var eve_day_complete := false
+var god_left_for_theater := false
+var serpent_unlocked := false
 var naming_index := 0
+var player_role := "adam"
+var adam_follower_position := Vector2(535, 735)
+var proper_named_animals := {}
 var naming_order := ["cow", "sheep", "rabbit", "turtle", "eagle"]
 
 var dialogue_open := false
@@ -38,6 +44,10 @@ func _ready() -> void:
 	]
 	_build_ui()
 	_load_checkpoint()
+	if eve_created:
+		player_role = "eve"
+		player_position = Vector2(610, 690)
+		adam_follower_position = Vector2(535, 735)
 	queue_redraw()
 
 func _process(delta: float) -> void:
@@ -55,6 +65,10 @@ func _process(delta: float) -> void:
 			player_position += direction.normalized() * MOVE_SPEED * delta
 			player_position.x = clampf(player_position.x, GARDEN_RECT.position.x + 30.0, GARDEN_RECT.end.x - 30.0)
 			player_position.y = clampf(player_position.y, GARDEN_RECT.position.y + 30.0, GARDEN_RECT.end.y - 30.0)
+			queue_redraw()
+		if player_role == "eve":
+			var follow_target := player_position + Vector2(-62, 46)
+			adam_follower_position = adam_follower_position.lerp(follow_target, clampf(delta * 3.2, 0.0, 1.0))
 			queue_redraw()
 		_update_interaction_prompt()
 
@@ -131,10 +145,17 @@ func _draw() -> void:
 		_draw_flowers(pair[0], pair[1])
 
 	_draw_rock(Vector2(505, 540))
-	_draw_god(Vector2(600, 145))
+	if not god_left_for_theater:
+		_draw_god(Vector2(600, 145))
+	if serpent_unlocked:
+		_draw_serpent(Vector2(1015, 425))
 	for animal in animals:
 		_draw_animal(animal)
-	_draw_adam(player_position)
+	if player_role == "eve":
+		_draw_adam(adam_follower_position)
+		_draw_eve(player_position)
+	else:
+		_draw_adam(player_position)
 
 func _draw_grass_tuft(p: Vector2) -> void:
 	var c := Color("#4f963f")
@@ -219,6 +240,32 @@ func _draw_adam(p: Vector2) -> void:
 	for off in [Vector2(-7,26),Vector2(0,23),Vector2(7,27),Vector2(0,31)]:
 		draw_rect(Rect2(p + off - Vector2(5,5), Vector2(10,10)), Color("#b88a63"))
 	draw_string(ThemeDB.fallback_font, p + Vector2(-45, 87), "ADAM", HORIZONTAL_ALIGNMENT_CENTER, 90, 17, Color("#fff4d2"))
+
+func _draw_eve(p: Vector2) -> void:
+	draw_circle(p + Vector2(7,44), 29, Color("#29433277"))
+	draw_circle(p + Vector2(0,-18), 21, Color("#c98758"))
+	draw_circle(p + Vector2(0,16), 27, Color("#c88358"))
+	draw_line(p + Vector2(-18,5), p + Vector2(-36,24), Color("#a86443"), 10.0)
+	draw_line(p + Vector2(18,5), p + Vector2(36,24), Color("#a86443"), 10.0)
+	draw_line(p + Vector2(-12,34), p + Vector2(-17,60), Color("#8f5b3e"), 10.0)
+	draw_line(p + Vector2(12,34), p + Vector2(17,60), Color("#8f5b3e"), 10.0)
+	draw_arc(p + Vector2(0,-19), 24, PI, TAU, 18, Color("#5a3324"), 11.0)
+	draw_line(p + Vector2(-19,-15), p + Vector2(-29,20), Color("#5a3324"), 7.0)
+	draw_line(p + Vector2(19,-15), p + Vector2(29,20), Color("#5a3324"), 7.0)
+	draw_circle(p + Vector2(-7,-18), 2.5, Color("#2e211b"))
+	draw_circle(p + Vector2(7,-18), 2.5, Color("#2e211b"))
+	for off in [Vector2(-7,26),Vector2(0,23),Vector2(7,27),Vector2(0,31)]:
+		draw_rect(Rect2(p + off - Vector2(5,5), Vector2(10,10)), Color("#b88a63"))
+	draw_string(ThemeDB.fallback_font, p + Vector2(-45,87), "EVE", HORIZONTAL_ALIGNMENT_CENTER, 90, 17, Color("#fff4d2"))
+
+func _draw_serpent(p: Vector2) -> void:
+	draw_arc(p, 35, 0.2, TAU * 0.86, 32, Color("#173a24"), 18.0)
+	draw_arc(p, 35, 0.2, TAU * 0.86, 32, Color("#4c9b43"), 11.0)
+	draw_circle(p + Vector2(30,-27), 15, Color("#173a24"))
+	draw_circle(p + Vector2(30,-27), 11, Color("#5aa948"))
+	draw_circle(p + Vector2(35,-30), 2.5, Color("#f6db62"))
+	draw_line(p + Vector2(42,-24), p + Vector2(54,-20), Color("#c94c45"), 3.0)
+	draw_string(ThemeDB.fallback_font, p + Vector2(-65,70), "SERPENT", HORIZONTAL_ALIGNMENT_CENTER, 130, 17, Color("#fff4d2"))
 
 func _draw_animal(animal: Dictionary) -> void:
 	var p: Vector2 = animal["pos"]
@@ -411,15 +458,23 @@ func _update_interaction_prompt() -> void:
 			prompt_label.text = "E / ENTER  •  ANIMAL NAMING QUEST"
 		"animal":
 			var animal: Dictionary = current_target["animal"]
-			prompt_label.text = "E / ENTER  •  TALK TO " + str(named_animals.get(animal["id"], animal["kind"]))
+			if player_role == "eve" and not proper_named_animals.has(animal["id"]):
+				prompt_label.text = "E / ENTER  •  CORRECTLY NAME " + str(animal["kind"])
+			else:
+				prompt_label.text = "E / ENTER  •  TALK TO " + str(named_animals.get(animal["id"], animal["kind"]))
+		"serpent":
+			prompt_label.text = "E / ENTER  •  APPROACH THE SERPENT"
 
 func _nearest_target() -> Dictionary:
 	var best := {}
 	var best_distance := INTERACT_DISTANCE
 	var targets := [
-		{"type": "rock", "pos": Vector2(505, 540)},
-		{"type": "god", "pos": Vector2(600, 145)}
+		{"type": "rock", "pos": Vector2(505, 540)}
 	]
+	if not god_left_for_theater:
+		targets.append({"type": "god", "pos": Vector2(600, 145)})
+	if serpent_unlocked:
+		targets.append({"type": "serpent", "pos": Vector2(1015, 425)})
 	for animal in animals:
 		targets.append({"type": "animal", "pos": animal["pos"], "animal": animal})
 	for target in targets:
@@ -436,7 +491,12 @@ func _interact(target: Dictionary) -> void:
 		"god":
 			_open_naming_intro()
 		"animal":
-			_open_animal(target["animal"])
+			if player_role == "eve":
+				_eve_name_animal(target["animal"])
+			else:
+				_open_animal(target["animal"])
+		"serpent":
+			_open_serpent()
 
 func _open_animal(animal: Dictionary) -> void:
 	var display_name := str(named_animals.get(animal["id"], animal["kind"]))
@@ -467,6 +527,36 @@ func _rock_topic(index: int) -> void:
 	_show_dialogue("ADAM → ROCK", "Adam explains " + topic + " with the absolute confidence of a man who has existed for less than a day.")
 	_choice("KEEP TALKING TO THE ROCK", _open_rock)
 	_choice("MAYBE LATER", _close_dialogue)
+
+func _eve_name_animal(animal: Dictionary) -> void:
+	var id_value := str(animal["id"])
+	if proper_named_animals.has(id_value):
+		_open_animal(animal)
+		return
+	proper_named_animals[id_value] = true
+	named_animals[id_value] = str(animal["kind"])
+	var count := proper_named_animals.size()
+	if count >= 2:
+		god_left_for_theater = true
+	if id_value == "cow":
+		_show_dialogue("EVE", "\"That's a cow.\"")
+	else:
+		_show_dialogue("EVE", "Eve correctly names the " + str(animal["kind"]).to_lower() + ".")
+	_choice("CONTINUE", _close_dialogue)
+	if count >= animals.size():
+		eve_day_complete = true
+		serpent_unlocked = true
+		quest_label.text = "ALL ANIMALS NAMED  •  SOMETHING IS MOVING NEAR THE EASTERN TREES"
+	elif god_left_for_theater:
+		quest_label.text = "EVE'S NAMING ROUND  •  %d / 5  •  GOD RETURNS TO THE THEATER" % count
+	else:
+		quest_label.text = "EVE'S NAMING ROUND  •  %d / 5" % count
+	_save_checkpoint()
+	queue_redraw()
+
+func _open_serpent() -> void:
+	_show_dialogue("SERPENT ENCOUNTER", "The next authored beat is the temptation. This vertical slice stops here rather than inventing finished serpent dialogue.")
+	_choice("RETURN TO EDEN", _close_dialogue)
 
 func _open_naming_intro() -> void:
 	if naming_complete:
@@ -568,12 +658,25 @@ func _load_checkpoint() -> void:
 		return
 	naming_complete = bool(save.get_value("progress", "naming_complete", false))
 	eve_created = bool(save.get_value("progress", "eve_created", false))
+	eve_day_complete = bool(save.get_value("progress", "eve_day_complete", false))
+	god_left_for_theater = bool(save.get_value("progress", "god_left_for_theater", false))
+	serpent_unlocked = bool(save.get_value("progress", "serpent_unlocked", false))
 	rock_topics_seen = int(save.get_value("progress", "rock_topics_seen", 0))
 	for id_value in naming_order:
 		if save.has_section_key("names", id_value):
 			named_animals[id_value] = str(save.get_value("names", id_value, ""))
-	if eve_created:
-		quest_label.text = "EVE CREATED  •  NEXT DAY STORY BEAT NOT YET BUILT"
+		if save.has_section_key("eve_names", id_value) and bool(save.get_value("eve_names", id_value, false)):
+			proper_named_animals[id_value] = true
+			named_animals[id_value] = str(_animal_by_id(id_value).get("kind", id_value.to_upper()))
+	if eve_day_complete:
+		player_role = "eve"
+		god_left_for_theater = true
+		serpent_unlocked = true
+		quest_label.text = "ALL ANIMALS NAMED  •  SOMETHING IS MOVING NEAR THE EASTERN TREES"
+	elif eve_created:
+		player_role = "eve"
+		var count := proper_named_animals.size()
+		quest_label.text = "EVE'S NAMING ROUND  •  %d / 5" % count
 	elif naming_complete:
 		quest_label.text = "ANIMAL NAMING QUEST COMPLETE  •  FIRST JEFF"
 
@@ -590,9 +693,14 @@ func _save_checkpoint() -> void:
 	save.set_value("progress", "naming_complete", naming_complete)
 	save.set_value("progress", "first_jeff", naming_complete)
 	save.set_value("progress", "eve_created", eve_created)
+	save.set_value("progress", "eve_day_complete", eve_day_complete)
+	save.set_value("progress", "god_left_for_theater", god_left_for_theater)
+	save.set_value("progress", "serpent_unlocked", serpent_unlocked)
 	save.set_value("progress", "rock_topics_seen", rock_topics_seen)
 	for id_value in named_animals.keys():
 		save.set_value("names", str(id_value), str(named_animals[id_value]))
+	for id_value in proper_named_animals.keys():
+		save.set_value("eve_names", str(id_value), bool(proper_named_animals[id_value]))
 	save.save("user://slot_%d.cfg" % slot)
 
 # CI hooks: intentionally tiny public helpers so the automated build can
@@ -606,3 +714,27 @@ func ci_complete_naming() -> void:
 	naming_index = naming_order.size() - 1
 	_show_naming_choice()
 	_select_name("eagle", "JEFF")
+
+func ci_start_eve_day() -> void:
+	eve_created = true
+	player_role = "eve"
+	player_position = Vector2(610, 690)
+	adam_follower_position = Vector2(535, 735)
+	proper_named_animals.clear()
+	god_left_for_theater = false
+	serpent_unlocked = false
+	eve_day_complete = false
+	quest_label.text = "EVE'S NAMING ROUND  •  0 / 5"
+	queue_redraw()
+
+func ci_complete_eve_day() -> void:
+	ci_start_eve_day()
+	for animal in animals:
+		var id_value := str(animal["id"])
+		proper_named_animals[id_value] = true
+		named_animals[id_value] = str(animal["kind"])
+	god_left_for_theater = true
+	serpent_unlocked = true
+	eve_day_complete = true
+	quest_label.text = "ALL ANIMALS NAMED  •  SOMETHING IS MOVING NEAR THE EASTERN TREES"
+	queue_redraw()
