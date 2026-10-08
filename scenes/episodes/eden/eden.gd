@@ -36,6 +36,7 @@ func _ready() -> void:
 		{"id": "eagle", "kind": "EAGLE", "pos": Vector2(680, 245), "noise": "SCREE!"}
 	]
 	_build_ui()
+	_load_checkpoint()
 	queue_redraw()
 
 func _process(delta: float) -> void:
@@ -440,6 +441,26 @@ func _unlock_first_jeff() -> void:
 	var timer := get_tree().create_timer(4.0)
 	timer.timeout.connect(func(): achievement_panel.visible = false)
 
+func _load_checkpoint() -> void:
+	var profile := ConfigFile.new()
+	if profile.load("user://profile.cfg") != OK:
+		return
+	var slot := int(profile.get_value("save", "last_slot", 0))
+	if slot < 1:
+		return
+	var save := ConfigFile.new()
+	if save.load("user://slot_%d.cfg" % slot) != OK:
+		return
+	if str(save.get_value("progress", "chapter", "prologue")) != "eden":
+		return
+	naming_complete = bool(save.get_value("progress", "naming_complete", false))
+	rock_topics_seen = int(save.get_value("progress", "rock_topics_seen", 0))
+	for id_value in naming_order:
+		if save.has_section_key("names", id_value):
+			named_animals[id_value] = str(save.get_value("names", id_value, ""))
+	if naming_complete:
+		quest_label.text = "ANIMAL NAMING QUEST COMPLETE  •  FIRST JEFF"
+
 func _save_checkpoint() -> void:
 	var profile := ConfigFile.new()
 	if profile.load("user://profile.cfg") != OK:
@@ -452,6 +473,9 @@ func _save_checkpoint() -> void:
 	save.set_value("progress", "chapter", "eden")
 	save.set_value("progress", "naming_complete", naming_complete)
 	save.set_value("progress", "first_jeff", naming_complete)
+	save.set_value("progress", "rock_topics_seen", rock_topics_seen)
+	for id_value in named_animals.keys():
+		save.set_value("names", str(id_value), str(named_animals[id_value]))
 	save.save("user://slot_%d.cfg" % slot)
 
 # CI hooks: intentionally tiny public helpers so the automated build can
