@@ -1,14 +1,15 @@
 extends Node2D
 
 const BEACH_PLATE := preload("res://art/title/beach_title_plate.png")
+const TITLE_LOGO := preload("res://art/title/bible_logo.svg")
 const SLOT_COUNT := 3
 
-# Shared typography for this one screen. Sizing and positions remain unchanged.
-const MENU_TEXT := Color("#F6E7C8")
-const MENU_SELECTED := Color("#FFD77A")
-const MENU_DISABLED := Color("#B9B1A2")
-const MENU_OUTLINE := Color("#2E1B16")
-const MENU_OUTLINE_SIZE := 2
+# Independent treatments: the title is vector artwork, navigation is live UI.
+const MENU_TEXT := Color("#FFF3DC")
+const MENU_SELECTED := Color("#FFD477")
+const MENU_DISABLED := Color("#C2B5A4")
+const MENU_OUTLINE := Color("#21131B")
+const MENU_OUTLINE_SIZE := 3
 
 enum Screen { MENU, SLOTS, PROLOGUE, OPTIONS }
 
@@ -17,6 +18,7 @@ var ui: Control
 var title_group: Control
 var menu_group: Control
 var panel_group: Control
+var ui_font: FontVariation
 var continue_button: Button
 var last_slot := 0
 var active_slot := 0
@@ -28,6 +30,7 @@ func _ready() -> void:
 	ui.size = Vector2(480, 270)
 	add_child(ui)
 	_load_profile()
+	_build_ui_font()
 	_build_title()
 	_build_panel_group()
 	_show_menu()
@@ -43,6 +46,14 @@ func _build_background() -> void:
 
 
 
+func _build_ui_font() -> void:
+	# Platform-neutral Godot font, slightly emboldened for the bright sunset.
+	# Separate from the serif artwork and still editable in live menu controls.
+	ui_font = FontVariation.new()
+	ui_font.variation_embolden = 0.55
+	ui_font.spacing_glyph = 0
+
+
 func _build_title() -> void:
 	title_group = Control.new()
 	title_group.name = "TitleMenu"
@@ -50,26 +61,30 @@ func _build_title() -> void:
 	title_group.visible = false
 	ui.add_child(title_group)
 
-	# No tinted card behind the logo or the menu: let the beach illustration show.
-	_style_title_label(_label(title_group, "THE", Rect2(252, 37, 120, 15), 11, MENU_TEXT))
-	_style_title_label(_label(title_group, "BIBLE:", Rect2(248, 49, 132, 39), 29, MENU_TEXT))
-	_style_title_label(_label(title_group, "SORT OF", Rect2(254, 85, 120, 22), 16, MENU_TEXT))
+	# Fully path-based old-world adventure logo. No installed fonts needed.
+	var logo := TextureRect.new()
+	logo.name = "GameLogo"
+	logo.texture = TITLE_LOGO
+	logo.position = Vector2(201, 6)
+	logo.size = Vector2(232, 111)
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.stretch_mode = TextureRect.STRETCH_SCALE
+	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	title_group.add_child(logo)
 
 	menu_group = Control.new()
-	# Widen to fit CHAPTER SELECTION and center every row on x=312.
 	menu_group.position = Vector2(217, 116)
-	menu_group.size = Vector2(190, 94)
+	menu_group.size = Vector2(190, 99)
 	title_group.add_child(menu_group)
 
 	var entries := ["NEW GAME", "CONTINUE", "LOAD", "CHAPTER SELECTION", "OPTIONS"]
 	for i in range(entries.size()):
-		var button := _menu_button(menu_group, entries[i], Rect2(0, i * 18, 190, 17))
+		var button := _menu_button(menu_group, entries[i], Rect2(0, i * 19, 190, 19))
 		button.pressed.connect(_on_menu_pressed.bind(entries[i]))
 		button.focus_entered.connect(_highlight_menu_entry.bind(button))
 		if entries[i] == "CONTINUE":
 			continue_button = button
-
-
 
 
 func _build_panel_group() -> void:
@@ -197,15 +212,15 @@ func _save_profile() -> void:
 
 func _subtitle(caption: String, y: float = 112.0, size: int = 13, fill: Color = MENU_SELECTED) -> void:
 	var heading := _label(panel_group, caption, Rect2(213, y, 198, 25), size, fill)
-	_style_title_label(heading, fill)
+	_style_section_heading(heading, fill)
 
 func _submenu_button(caption: String, y: float) -> Button:
 	var button := _menu_button(panel_group, caption, Rect2(217, y, 190, 20))
 	button.focus_entered.connect(_highlight_menu_entry.bind(button))
 	return button
 
-func _style_title_label(label: Label, fill: Color = MENU_TEXT) -> void:
-	# A single clean edge without an offset double shadow.
+func _style_section_heading(label: Label, fill: Color) -> void:
+	label.add_theme_font_override("font", ui_font)
 	label.add_theme_color_override("font_color", fill)
 	label.add_theme_color_override("font_outline_color", MENU_OUTLINE)
 	label.add_theme_constant_override("outline_size", MENU_OUTLINE_SIZE)
@@ -214,23 +229,23 @@ func _style_title_label(label: Label, fill: Color = MENU_TEXT) -> void:
 	label.add_theme_constant_override("shadow_offset_y", 0)
 
 func _menu_button(parent: Control, caption: String, rect: Rect2) -> Button:
-	var button := _button(parent, caption, rect, 10)
+	var button := _button(parent, caption, rect, 11)
 	button.flat = true
 	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	button.add_theme_font_override("font", ui_font)
 	button.add_theme_color_override("font_pressed_color", MENU_SELECTED)
 	button.add_theme_color_override("font_hover_color", MENU_SELECTED)
 	button.add_theme_color_override("font_focus_color", MENU_SELECTED)
 	button.add_theme_color_override("font_color", MENU_TEXT)
 	button.add_theme_color_override("font_disabled_color", MENU_DISABLED)
-	# Same exact stroke as title labels, and no offset shadow.
 	button.add_theme_color_override("font_outline_color", MENU_OUTLINE)
 	button.add_theme_constant_override("outline_size", MENU_OUTLINE_SIZE)
 	button.add_theme_color_override("font_shadow_color", Color.TRANSPARENT)
 	button.add_theme_constant_override("shadow_offset_x", 0)
 	button.add_theme_constant_override("shadow_offset_y", 0)
+	# Both mouse and keyboard focus stay fully unboxed.
 	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
-		var style := StyleBoxEmpty.new()
-		button.add_theme_stylebox_override(state, style)
+		button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 	return button
 
 func _highlight_menu_entry(button: Button) -> void:
