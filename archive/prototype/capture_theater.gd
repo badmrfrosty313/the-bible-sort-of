@@ -11,7 +11,7 @@ func _run_capture() -> void:
 		quit(1)
 		return
 
-	var packed := load("res://scenes/theater/theater.tscn") as PackedScene
+	var packed := load("res://archive/prototype/theater/theater.tscn") as PackedScene
 	if packed == null:
 		push_error("Could not load theater scene for visual capture.")
 		quit(1)

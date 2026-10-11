@@ -7,6 +7,8 @@
 
 # Generated CI capture output
 ci/captures/
+ci_artifacts/
+godot-*.log
 
 # Mono/C# generated files
 .mono/

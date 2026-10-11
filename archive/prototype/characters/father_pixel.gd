@@ -1,5 +1,5 @@
 extends Node2D
-class_name Father
+class_name PrototypeFather
 
 enum State { IDLE, WALKING, STANDING, SITTING, WATCHING, REACTING }
 

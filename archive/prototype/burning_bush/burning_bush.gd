@@ -1,5 +1,5 @@
 extends Node2D
-class_name BurningBushEpisode
+class_name PrototypeBurningBushEpisode
 
 signal episode_finished
 

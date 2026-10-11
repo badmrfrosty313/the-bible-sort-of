@@ -1,0 +1,111 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://episodes/development/development.gd" id="1"]
+[ext_resource type="Theme" path="res://ui/shared/game_theme.tres" id="2"]
+[ext_resource type="PackedScene" path="res://ui/dialogue/dialogue_box.tscn" id="3"]
+[ext_resource type="Script" path="res://narrative/dialogue_line.gd" id="4"]
+
+[sub_resource type="Resource" id="Line1"]
+script = ExtResource("4")
+speaker = "DEVELOPMENT NOTE"
+text = "This room tests the game foundation. The first story has not been written yet."
+
+[sub_resource type="Resource" id="Line2"]
+script = ExtResource("4")
+speaker = "ALSO A DEVELOPMENT NOTE"
+text = "Every great undertaking begins somewhere. This one begins with functioning buttons."
+
+[sub_resource type="Resource" id="Line3"]
+script = ExtResource("4")
+speaker = "CHECKPOINT"
+text = "Finish this exchange to save. Return to the title screen and choose Continue to resume here."
+
+[node name="DevelopmentEpisode" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2")
+script = ExtResource("1")
+introduction = Array[ExtResource("4")]([SubResource("Line1"), SubResource("Line2"), SubResource("Line3")])
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.06, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Column" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Eyebrow" type="Label" parent="Margin/Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.97, 0.80, 0.49, 1)
+theme_override_font_sizes/font_size = 10
+text = "FOUNDATION / DEVELOPMENT ROOM"
+
+[node name="Heading" type="Label" parent="Margin/Column"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "In the beginning..."
+
+[node name="Description" type="Label" parent="Margin/Column"]
+layout_mode = 2
+text = "A place to test dialogue and progress.\nFuture episodes bring their own scenes, characters and stories."
+autowrap_mode = 2
+
+[node name="Separator" type="HSeparator" parent="Margin/Column"]
+layout_mode = 2
+
+[node name="Status" type="Label" parent="Margin/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.59, 0.61, 1)
+autowrap_mode = 2
+
+[node name="Space" type="Control" parent="Margin/Column"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Actions" type="HBoxContainer" parent="Margin/Column"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Read" type="Button" parent="Margin/Column/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 26)
+layout_mode = 2
+focus_neighbor_right = NodePath("../Return")
+focus_neighbor_left = NodePath("../Return")
+text = "Read exchange"
+
+[node name="Return" type="Button" parent="Margin/Column/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 26)
+layout_mode = 2
+focus_neighbor_right = NodePath("../Read")
+focus_neighbor_left = NodePath("../Read")
+text = "Return to title"
+
+[node name="Dialogue" parent="." instance=ExtResource("3")]
+unique_name_in_owner = true

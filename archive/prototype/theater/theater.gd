@@ -1,7 +1,7 @@
 extends Node2D
 
-const FATHER_SCENE := preload("res://scenes/characters/father.tscn")
-const BURNING_BUSH_SCENE := preload("res://scenes/episodes/burning_bush/burning_bush.tscn")
+const FATHER_SCENE := preload("res://archive/prototype/characters/father.tscn")
+const BURNING_BUSH_SCENE := preload("res://archive/prototype/burning_bush/burning_bush.tscn")
 
 const COLOR_BACKGROUND := Color("#08070B")
 const COLOR_WALL := Color("#141018")
@@ -35,7 +35,7 @@ var left_aisle_anchor: Marker2D
 var center_aisle_anchor: Marker2D
 var right_aisle_anchor: Marker2D
 var episode_portal: Marker2D
-var father: Father
+var father: PrototypeFather
 var father_location := FatherLocation.THEATER
 var current_episode
 var father_dialogue_panel: Panel
@@ -282,7 +282,7 @@ func _build_father_dialogue() -> void:
 	father_dialogue_panel.add_child(father_dialogue_label)
 
 func _spawn_father() -> void:
-	father = FATHER_SCENE.instantiate() as Father
+	father = FATHER_SCENE.instantiate() as PrototypeFather
 	if father == null:
 		push_error("Father scene could not be instantiated.")
 		return
@@ -304,7 +304,7 @@ func _run_intro() -> void:
 	await _episode_pre_roll()
 
 func _episode_pre_roll(line: String = "I wonder what my creation is doing.") -> void:
-	# Reusable beat before every episode: Father is seated at the console,
+	# Reusable beat before every episode: PrototypeFather is seated at the console,
 	# then wonders what creation is up to before the episode begins.
 	if father == null:
 		return
@@ -328,7 +328,7 @@ func father_speak(text: String,duration: float=1.0) -> void:
 	father_dialogue_label.text = text
 	if father_location == FatherLocation.EPISODE:
 		father_dialogue_panel.position = Vector2(270,68)
-		if father != null and father.state != Father.State.WALKING:
+		if father != null and father.state != PrototypeFather.State.WALKING:
 			father.react()
 	else:
 		father_dialogue_panel.position = Vector2(274,141)

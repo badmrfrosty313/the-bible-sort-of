@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="EpisodeDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://episodes/episode_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"development"
+title = "Development room"
+scene_path = "res://episodes/development/development.tscn"
+last_checkpoint = 1
