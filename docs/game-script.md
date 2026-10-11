@@ -1,359 +1,532 @@
-# The Bible: Sort Of — Game Scripting
+# The Bible: Sort Of
 
-> Synced from the Google Doc **The Bible: Sort Of Game Scripting** on October 11, 2026.
-> This file is a repository mirror for implementation work. The Google Doc remains the narrative source of truth.
+## Game Script & Narrative Design
 
-## Opening Screen
+> **Source of truth:** This document defines the authored story beats, dialogue, gameplay flow, and canonical comedy for the game. Implementation can prototype mechanics and staging, but unscripted material should not silently become canon.
 
-God sits on a beach after Creation, drinking from a **World's Greatest Creator** mug and enjoying His day of rest. Palm trees behind Him, waves rolling in.
+# Opening — Day Seven
 
-### Opening Scene Script
+## Scene Setup
+
+God sits on a beach after Creation, drinking from a **World's Greatest Creator** mug and enjoying His day of rest. Palm trees sit behind Him while waves roll in.
+
+## Scene Script
 
 Soft surf.
-
 Fade in on an absurdly peaceful beach.
-
 God is sitting in a chair facing the water, sandals kicked off, robe sleeves rolled slightly, holding the mug.
-
 God takes a drink.
-
 Long pause.
-
 Another wave rolls in.
-
-**God:** "This is nice."
-
+**GOD:** This is nice.
 He takes another drink.
-
-**God:** "I should do absolutely nothing more often."
-
+**GOD:** I should do absolutely nothing more often.
 A rustling noise comes from somewhere behind Him.
-
 God freezes and looks over one shoulder.
-
 Silence.
-
 He turns back toward the ocean.
-
 Another rustle.
-
-**God:** "No."
-
+**GOD:** No.
 A much louder series of snapping branches.
-
 God slowly closes His eyes.
-
-**God:** "Please no."
-
+**GOD:** Please no.
 Adam drops violently out of a tree behind Him and gets caught upside-down in a mess of vines a few feet above the ground.
-
 Silence.
-
 Adam swings gently.
-
 God does not turn around.
-
-**Adam:** "...Adam."
-
+**ADAM:** ...Adam.
 God opens His eyes, slowly looks toward the player, takes one final drink from the mug, and sets it down.
+**GOD:** I guess my break is over.
+Cut to title.
 
-**God:** "I guess my break is over."
+# Title Screen
 
-Cut to title:
+**THE BIBLE: SORT OF**
+Menu:
+- New Game
+- Continue — resumes the last game played
+- Load — three save slots
+- Chapter Selection
+- Options
 
-# **THE BIBLE: SORT OF**
-- Screen shows:
-  - The Bible: Sort Of logo
-  - New Game
-  - Continue
-    - Continues from the last game played.
-  - Load
-    - 3 save slots
-  - Chapter Selection
-  - Options
+# Episode One — Adam & Eve
 
-## Adam and Eve's Story
+# Adam Introduction
 
-- Initial cut scenes showing the creation story.
-- God goes to speak to Adam who, being born 5 minutes ago, is a bit of a dumb ass.
-### Adam Introduction Script
+## Scene Setup
+
+Initial cutscenes establish the Creation story. God then goes to speak to Adam, who has existed for roughly five minutes and understands almost nothing.
+
+## Scene Script
 
 Fade in.
-
 Adam is standing in Eden.
-
 God stands across from him.
-
 Adam is staring intensely at his own hand.
-
 God waits.
-
 Adam rotates his hand, then opens and closes his fingers.
-
-**God:** "Adam."
-
+**GOD:** Adam.
 Adam looks up.
-
-**Adam:** "Adam."
-
-**God:** "Yes. You're Adam."
-
+**ADAM:** Adam.
+**GOD:** Yes. You're Adam.
 Adam smiles proudly.
-
-**Adam:** "Adam."
-
-**God:** "Right."
-
+**ADAM:** Adam.
+**GOD:** Right.
 God points to Himself.
-
-**God:** "God."
-
+**GOD:** God.
 Adam studies Him.
-
-**Adam:** "Adam."
-
+**ADAM:** Adam.
 God pauses.
-
-**God:** "No, you're Adam."
-
+**GOD:** No, you're Adam.
 God points to Adam.
-
-**God:** "Adam."
-
+**GOD:** Adam.
 God points to Himself.
-
-**God:** "God."
-
+**GOD:** God.
 Adam thinks very hard, then points at God.
-
-**Adam:** "Adam?"
-
+**ADAM:** Adam?
 God looks away for a moment.
-
-**God:** "We have time."
-
+**GOD:** We have time.
 Cut to black.
 
-### FIVE HOURS LATER
+## Five Hours Later
 
 Fade back in.
-
 God looks considerably less rested.
-
 Adam is sitting happily on the ground.
-
-**God:** "Okay."
-
+**GOD:** Okay.
 God crouches in front of him.
-
-**God:** "Tell me something you've learned."
-
+**GOD:** Tell me something you've learned.
 Adam thinks very hard.
-
 God waits.
-
 Adam suddenly lights up.
-
-**Adam:** "Adam!"
-
+**ADAM:** Adam!
 Long silence.
-
 God stares at him.
-
 Adam beams.
-
-**God:** "Fantastic."
-
+**GOD:** Fantastic.
 Beat.
-
-**God:** "Five hours."
-
+**GOD:** Five hours.
 Adam gives Him a thumbs-up despite nobody having taught him what a thumbs-up is.
-
 God looks directly at the player.
+**GOD:** I made that.
 
-**God:** "I made that."
-
-### Teaching Montage
-
-Quick cuts:
+## Teaching Montage
 
 God holds up a rock.
-
-**God:** "Rock."
-
-**Adam:** "Adam."
-
+**GOD:** Rock.
+**ADAM:** Adam.
 God holds up an apple.
-
-**God:** "Apple."
-
-**Adam:** "Rock."
-
+**GOD:** Apple.
+**ADAM:** Rock.
 God points at a tree.
-
-**God:** "Tree."
-
-**Adam:** "Apple."
-
+**GOD:** Tree.
+**ADAM:** Apple.
 God points to Himself.
-
-**God:** "God."
-
+**GOD:** God.
 Adam pauses.
-
-**Adam:** "...God."
-
+**ADAM:** ...God.
 God's eyes widen.
-
-**God:** "YES."
-
+**GOD:** YES.
 Adam immediately points at the tree.
-
-**Adam:** "God."
-
+**ADAM:** God.
 God's shoulders drop.
-
 Cut.
-
 God is drawing simple pictures in the dirt.
-
 Adam is eating the stick.
-
 Cut.
-
 God demonstrates walking around a rock.
-
 Adam walks directly into it.
-
 Cut.
-
 God points toward several animals in the distance.
-
-**God:** "You know what?"
-
+**GOD:** You know what?
 Adam looks at Him.
-
-**God:** "Go explore."
-
+**GOD:** Go explore.
 Adam smiles.
-
-**Adam:** "Adam."
-
-**God:** "Sure."
-
+**ADAM:** Adam.
+**GOD:** Sure.
 Control passes to the player.
 
-### Free-roam Garden
+# Gameplay — Explore Eden
 
-- Ability to free roam the Garden area before the naming quest.
-- Reasonable size map.
-- Make it so Adam can try to talk to animals and they just make noises at him.
-- Eden should be set up as a square to keep boundaries with the animals inside.
-- Almost like a top-down view like a Pokémon game with better sprites.
+## Purpose
 
-### The Rock
+This is the first open gameplay section. Adam can wander the Garden, meet the animals, and discover the obvious Rock in any reasonable order.
+The Garden should be a reasonable-sized square area with clear natural boundaries, broadly top-down like a classic creature-collecting RPG overworld, but with better sprites and its own visual identity.
 
-If Adam speaks to the very obvious rock, create a giant dialogue tree where he tells it everything he thinks and knows of his short existence.
+## State Rule — Rock Discovery
 
-After enough, God steps in and says:
+Track whether Adam has interacted with the specific obvious Rock in Eden.
+This state does not mean whether Adam has ever seen the concept of a rock during the earlier teaching montage.
+The Turtle's dialogue and later naming choices change depending on this state. The callback should feel earned, not psychic.
 
-> **God:** "That's a rock, Adam."
+## Cow — Free-roam
 
-Adam just smiles and nods.
+**ADAM:** Hello.
+**COW:** Moooooo.
+Adam waits.
+**ADAM:** ...Adam.
+**COW:** Moo.
+Adam nods.
+**ADAM:** Good.
+Beat.
+**ADAM:** We understand each other.
+Repeat interaction:
+**COW:** Moooo.
+**ADAM:** You already told me that.
 
-### Animal Naming Quest
+## Turtle — Before Rock Discovery
 
-Adam keeps saying random words or phrases, exasperating God.
+Adam crouches beside the turtle.
+**ADAM:** Hello.
+The turtle pulls its head into its shell.
+Adam waits.
+**ADAM:** Gone?
+The turtle slowly pokes its head back out.
+**ADAM:** Not gone.
+The turtle takes one tiny step.
+Adam follows it with his eyes.
+**ADAM:** Slow.
+Another tiny step.
+**ADAM:** Very slow.
+Adam crouches lower and studies the shell.
+**ADAM:** You carry this?
+The turtle keeps walking.
+Adam thinks about this.
+**ADAM:** That seems heavy.
 
-Use a group of five animals with names available to pick from, but they are all nonsense except the eagle.
+## Turtle — After Rock Discovery
 
-When Adam gets to the eagle, all four choices are **Jeff**.
+The turtle takes one tiny step.
+Adam's eyes widen.
+**ADAM:** Rock moves.
+The turtle takes another step.
+Adam follows it.
+**ADAM:** Rock?
+No answer.
+**ADAM:** Moving rock.
+Repeat interaction after the Rock conversation:
+**ADAM:** You are confusing.
 
-God says:
+## Lion — Free-roam
 
-> **God:** "You know what? That's Jeff."
+The lion growls.
+Adam stops.
+**ADAM:** Hello.
+The lion ROARS.
+Adam takes several steps backward.
+Long pause.
+**ADAM:** No.
+Second interaction:
+**ADAM:** We have spoken.
+The lion growls.
+**ADAM:** We disagree.
+Third interaction:
+Adam begins approaching.
+The lion raises its head.
+Adam immediately stops.
+**ADAM:** Goodbye.
 
-**Achievement: First Jeff**
+## Elephant — Free-roam
 
-This is an actual gameplay section.
+Adam stares upward.
+The elephant trumpets.
+Adam jumps.
+**ADAM:** Why are you so much?
+He walks around it.
+**ADAM:** You have...
+He counts the legs.
+**ADAM:** One.
+**ADAM:** Two.
+Pause.
+**ADAM:** Three.
+Moves around.
+**ADAM:** Four.
+He sees the trunk.
+Long pause.
+**ADAM:** Five?
+The elephant trumpets.
+**ADAM:** I knew it.
 
-### Creation of Eve
+## Eagle — Free-roam
 
-God realizes Adam needs help, so he knocks him out.
+The eagle is perched slightly above Adam.
+**ADAM:** Hello.
+The eagle screeches.
+Adam waves.
+**ADAM:** Come down.
+Nothing.
+**ADAM:** I am down.
+Beat.
+**ADAM:** Down is good.
+The eagle flies to another perch.
+Adam watches it.
+**ADAM:** Show-off.
 
-- God picks up a log.
-- Screen goes to black.
-- When the image returns, Adam is clearly knocked out.
-- God very seriously looks at the screen and says:
+# Optional Interaction — The Rock
 
-> **God:** "And I PUT HIM TO SLEEP."
+The Rock exists in the same Garden sandbox as the animals.
+If Adam talks to the very obvious Rock, begin a disproportionately long optional conversation in which he tells it everything he thinks and knows about his extremely short existence.
+The interaction eventually resolves with God stepping in.
+**GOD:** That's a rock, Adam.
+Adam smiles and nods.
+The full Rock dialogue will be expanded separately. Its existence and resolution are canonical.
 
-God takes Adam's rib and creates a woman, who will be named Eve.
+# Quest — Name the Animals
 
-He immediately asks her what the name of an animal is. It is a cow.
+## Quest Start
 
-> **Eve:** "That's a cow."
+After enough exploration, God calls Adam over.
+**GOD:** Adam.
+Adam approaches.
+**ADAM:** God.
+God is pleased he got that right.
+**GOD:** Very good.
+Adam smiles.
+**GOD:** I've got something for you to do.
+Adam looks concerned.
+**ADAM:** Do?
+**GOD:** A job.
+Adam stares.
+**ADAM:** Job.
+**GOD:** We're going to learn that one the hard way.
+God gestures toward the Garden.
+**GOD:** All of these creatures need names.
+Adam looks around.
+**ADAM:** Names.
+**GOD:** Exactly.
+God points to Adam.
+**GOD:** Adam.
+God points to Himself.
+**GOD:** God.
+God gestures toward the animals.
+**GOD:** And now you get to decide what they're called.
+For possibly the first time in his existence, power enters Adam's tiny brain.
+**ADAM:** I decide?
+God hesitates just long enough to realize He may have made a terrible mistake.
+**GOD:** ...Yes.
+Quest begins.
 
-God states that he likes this one, then turns around, looks at Adam, and shakes his head.
+## Cow — Naming
 
+**COW:** Moooo.
+**ADAM:** I know this one.
+**GOD:** Really?
+Choices:
+- Moo
+- Grass Dog
+- Big
+- Wednesday
+If **Moo**:
+**GOD:** You named it after the noise it makes?
+**COW:** Moo.
+**ADAM:** Yes.
+God considers it.
+**GOD:** Actually, that one's defensible.
+If **Wednesday**:
+**ADAM:** Wednesday.
+**GOD:** Wednesday?
+**ADAM:** Wednesday.
+God starts to object, realizes days do not technically have names yet either, then stops.
+**GOD:** Never mind.
+Other choices can receive short appropriate reactions without turning each branch into a separate scene.
+
+## Turtle — Naming Before Rock Discovery
+
+If the naming quest begins before Adam discovers the Rock, do not use Moving Rock or Other Rock callbacks.
+Choices:
+- Slow
+- Shell
+- Round
+- Small
+Adam confidently announces the selected name.
+God may react briefly, but this version must not imply Adam has already had the Rock interaction.
+
+## Turtle — Naming After Rock Discovery
+
+If Adam has already discovered the Rock, the choices become:
+- Moving Rock
+- Small Ground
+- Round
+- Other Rock
+If the player chooses something other than Moving Rock, Adam can still look at the turtle afterward.
+**ADAM:** Moving rock.
+**GOD:** That's not what you picked.
+**ADAM:** Moving rock.
+If the player chooses **Moving Rock**:
+God looks toward the player for a beat.
+**GOD:** Of course you did.
+The chosen animal name can persist as its interaction label for the rest of the chapter.
+
+## Lion — Naming
+
+The lion growls.
+**ADAM:** No.
+**GOD:** It still needs a name.
+Choices:
+- No
+- Loud
+- Hair Mouth
+- Do Not
+If **Do Not**:
+**ADAM:** Do Not.
+**GOD:** That's an instruction.
+**ADAM:** Do Not.
+The lion ROARS.
+Adam points at it.
+**ADAM:** See?
+**GOD:** ...Fine.
+If **Hair Mouth**:
+God starts to object, looks at the mane, then the mouth.
+**GOD:** I hate that I understand it.
+
+## Elephant — Naming
+
+Adam looks up at the elephant.
+**ADAM:** Big.
+**GOD:** We've already established that.
+Choices:
+- Very Big
+- Five Legs
+- Long Face
+- Kevin
+If **Five Legs**:
+**GOD:** Four.
+Adam points to the trunk.
+**ADAM:** Five.
+**GOD:** That's its nose.
+Adam studies the trunk.
+**ADAM:** That is too much nose.
+If **Kevin**:
+**GOD:** Where did you get Kevin?
+Adam shrugs.
+Never explain Kevin.
+
+## Eagle — First Jeff
+
+The eagle screeches.
+**GOD:** All right.
+Beat.
+**GOD:** Last one.
+Choices:
+- Jeff
+- Jeff
+- Jeff
+- Jeff
+All four choices genuinely display Jeff.
+If the player backs out and reopens the menu, all four are still Jeff.
+If the player waits too long:
+**ADAM:** Jeff.
+**GOD:** You haven't picked yet.
+Adam looks at the eagle.
+**ADAM:** Jeff.
+After the player selects any Jeff:
+**GOD:** Adam...
+Adam smiles.
+**ADAM:** Jeff.
+God looks at the eagle.
+The eagle looks back.
+God looks at Adam.
+**GOD:** You know what?
+God gestures toward the eagle.
+**GOD:** That's Jeff.
+**Achievement unlocked: FIRST JEFF**
+**ADAM:** Jeff!
+The eagle screeches.
+**ADAM:** Jeff.
+Afterward:
+**ADAM:** Jeff.
+**JEFF:** *screech*
+**ADAM:** Yes.
+
+## Rock Callback During Naming Quest
+
+If Adam has received naming authority and returns to the Rock:
+**ADAM:** I can name things now.
+Silence.
+Adam looks at the Rock.
+A naming menu begins to appear:
+- Rock
+- Friend
+- Adam
+- Jeff
+Before the player can commit:
+**GOD, OFFSCREEN:** DON'T.
+This is a callback only. The Rock's long conversation and **“That's a rock, Adam.”** resolution remain their own optional interaction chain.
+
+# Scene — Creation of Eve
+
+God realizes Adam needs help.
+God picks up a log.
+Cut to black.
+When the image returns, Adam is clearly unconscious.
+God looks directly toward the player and speaks very seriously.
+**GOD:** And I PUT HIM TO SLEEP.
+God takes Adam's rib and creates the woman who will be Eve.
+He immediately tests her with a cow.
+**GOD:** What is this?
+**EVE:** That's a cow.
+God indicates that He likes this one, then turns toward unconscious Adam and shakes His head.
 End scene.
 
-### Eve Gameplay
+# Gameplay — Eve in Eden
 
-The next day Adam wakes up and sees Eve, who we are playing as at this point, and follows her around as she properly names the animals.
+The next day, Adam wakes up and sees Eve.
+Control switches to Eve.
+Adam follows her around while she properly names the animals.
+God sees that Eve is doing well and Adam is occupied, so He returns to the theater.
 
-God sees that she is doing good and Adam is occupied, so he goes back to the theater.
+# Serpent & Fall
 
-She eventually meets the serpent who tempts her to eat the fruit.
+Eve eventually encounters the serpent, who tempts her to eat the fruit.
+The exact serpent conversation is not yet fully authored. Keep this section minimal until its dialogue is written.
+Adam eats the fruit because the pretty lady told him to.
+Before eating the fruit, Adam and Eve's nude regions use a blurred visual treatment.
+After eating, the blur gradually becomes obvious black censorship boxes.
+Eve notices and covers herself with leaves.
 
-Adam eats it because the pretty lady told him to.
+# Gameplay — Adam & the Leaves
 
-### Fall / Modesty Gag
+Control returns to Adam.
+The player can open the inventory, select leaves, and cover him.
+If the player refuses and leaves Adam standing there, God is outside the story in the theater and keeps making comments until Adam finally clothes himself.
+The joke should increasingly feel like God is speaking partly to the player, not only to Adam.
 
-Both characters will have blurred-out nude regions until after eating the apple, as they slowly turn to blacked-out boxes.
+# Prototype Story Boundary
 
-Eve realizes this and covers herself with leaves.
+The currently authored Adam-and-Eve material stops after the leaves interaction.
+Do not invent the exile or consequence sequence as finished canon until it is written.
 
-While you are in control of Adam, the player has the option to go into inventory, pick leaves, and cover up.
+# Future Episode Notes
 
-If the player does not and Adam just keeps standing there, God, who is outside the story and in the theater at this point, will keep making comments until Adam is clothed.
+## Noah
 
-This should feel almost like God is talking to the player instead of only to Adam.
-
-## Noah's Story
-
-> "Gameplay ideas: Matching Game something something figure it the fuck out"
+Gameplay concept:
+> Matching game. Something something. Figure it the fuck out.
+Still open for design.
 
 ## Tower of Babel
 
-- Tetris-esque game.
-- Easy at first, which allows the tower to get way too close for comfort.
-- A button appears on God's desk that makes the game extremely hard.
-- Commands are no longer in a language the other characters can understand.
-- Chaos ensues.
-- Everyone gives up and goes their separate ways.
+Core gameplay: Tetris-esque tower-building game.
+The game begins easy, allowing the tower to become uncomfortably tall.
+A button appears on God's desk.
+Pressing it makes the game extremely difficult.
+Commands are no longer understandable to the other characters.
+Chaos follows.
+Everyone gives up and goes their separate ways.
 
 ## Jonah and the Whale
 
-- Dungeon crawler platformer.
+Core gameplay: dungeon-crawler platformer.
 
-## DLC (New Testament)
+## New Testament DLC — Gospels
 
-### Gospels
+When Jesus prays to the Father, He uses an earpiece to communicate with the Father.
+Establish the device throughout gameplay so the later payoff is already understood.
+At **“Father, Father, why have you forsaken me?”** the player should still understand that the Father can hear Him.
+Father is visible at the control desk, with visible distress in His posture.
 
-When Jesus prays to the Father, he has an earpiece that he can communicate to the Father through.
+# God in the Theater — Staging Rule
 
-Establish throughout gameplay that this is a thing so when we get to:
-
-> **"Father, Father, why have you forsaken me?"**
-
-we can still tell God hears him.
-
-Show visible distress in Father's posture while he sits at the control desk.
-
-## God in Theater Scripting
-
-### God in Theater Basic Scripting
-
-If God is not in the field of play, he will return to the theater by walking out of the scene and back through the door on either side of the stage depending on which way we need him to enter and exit from.
+When God is not physically in the field of play, He returns to the theater.
+He exits the active story scene and re-enters the theater through the stage door on whichever side best matches the direction needed for His next entrance or exit.
+The theater is a story location and staging device, not the application controller.
