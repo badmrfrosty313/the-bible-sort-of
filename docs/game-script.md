@@ -5,10 +5,63 @@
 
 ## Opening Screen
 
-- God sitting on a beach post creation, drinking out of a World's Greatest Creator mug, enjoying his day of rest.
-- Palm trees behind him as waves crash in.
-- After a few seconds Adam falls from a tree, caught by vines on the way down.
-- God rolls his eyes and says: **"I guess my break is over."**
+God sits on a beach after Creation, drinking from a **World's Greatest Creator** mug and enjoying His day of rest. Palm trees behind Him, waves rolling in.
+
+### Opening Scene Script
+
+Soft surf.
+
+Fade in on an absurdly peaceful beach.
+
+God is sitting in a chair facing the water, sandals kicked off, robe sleeves rolled slightly, holding the mug.
+
+God takes a drink.
+
+Long pause.
+
+Another wave rolls in.
+
+**God:** "This is nice."
+
+He takes another drink.
+
+**God:** "I should do absolutely nothing more often."
+
+A rustling noise comes from somewhere behind Him.
+
+God freezes and looks over one shoulder.
+
+Silence.
+
+He turns back toward the ocean.
+
+Another rustle.
+
+**God:** "No."
+
+A much louder series of snapping branches.
+
+God slowly closes His eyes.
+
+**God:** "Please no."
+
+Adam drops violently out of a tree behind Him and gets caught upside-down in a mess of vines a few feet above the ground.
+
+Silence.
+
+Adam swings gently.
+
+God does not turn around.
+
+**Adam:** "...Adam."
+
+God opens His eyes, slowly looks toward the player, takes one final drink from the mug, and sets it down.
+
+**God:** "I guess my break is over."
+
+Cut to title:
+
+# **THE BIBLE: SORT OF**
 - Screen shows:
   - The Bible: Sort Of logo
   - New Game
@@ -23,11 +76,173 @@
 
 - Initial cut scenes showing the creation story.
 - God goes to speak to Adam who, being born 5 minutes ago, is a bit of a dumb ass.
-- Attempt to speak with him. He cannot figure out anything.
-- Cue to five hours later.
-- God asks him what he has learned.
-- Adam says **"Adam"** proudly.
-- God shakes his head and we get a montage of God teaching him basic ass words.
+### Adam Introduction Script
+
+Fade in.
+
+Adam is standing in Eden.
+
+God stands across from him.
+
+Adam is staring intensely at his own hand.
+
+God waits.
+
+Adam rotates his hand, then opens and closes his fingers.
+
+**God:** "Adam."
+
+Adam looks up.
+
+**Adam:** "Adam."
+
+**God:** "Yes. You're Adam."
+
+Adam smiles proudly.
+
+**Adam:** "Adam."
+
+**God:** "Right."
+
+God points to Himself.
+
+**God:** "God."
+
+Adam studies Him.
+
+**Adam:** "Adam."
+
+God pauses.
+
+**God:** "No, you're Adam."
+
+God points to Adam.
+
+**God:** "Adam."
+
+God points to Himself.
+
+**God:** "God."
+
+Adam thinks very hard, then points at God.
+
+**Adam:** "Adam?"
+
+God looks away for a moment.
+
+**God:** "We have time."
+
+Cut to black.
+
+### FIVE HOURS LATER
+
+Fade back in.
+
+God looks considerably less rested.
+
+Adam is sitting happily on the ground.
+
+**God:** "Okay."
+
+God crouches in front of him.
+
+**God:** "Tell me something you've learned."
+
+Adam thinks very hard.
+
+God waits.
+
+Adam suddenly lights up.
+
+**Adam:** "Adam!"
+
+Long silence.
+
+God stares at him.
+
+Adam beams.
+
+**God:** "Fantastic."
+
+Beat.
+
+**God:** "Five hours."
+
+Adam gives Him a thumbs-up despite nobody having taught him what a thumbs-up is.
+
+God looks directly at the player.
+
+**God:** "I made that."
+
+### Teaching Montage
+
+Quick cuts:
+
+God holds up a rock.
+
+**God:** "Rock."
+
+**Adam:** "Adam."
+
+God holds up an apple.
+
+**God:** "Apple."
+
+**Adam:** "Rock."
+
+God points at a tree.
+
+**God:** "Tree."
+
+**Adam:** "Apple."
+
+God points to Himself.
+
+**God:** "God."
+
+Adam pauses.
+
+**Adam:** "...God."
+
+God's eyes widen.
+
+**God:** "YES."
+
+Adam immediately points at the tree.
+
+**Adam:** "God."
+
+God's shoulders drop.
+
+Cut.
+
+God is drawing simple pictures in the dirt.
+
+Adam is eating the stick.
+
+Cut.
+
+God demonstrates walking around a rock.
+
+Adam walks directly into it.
+
+Cut.
+
+God points toward several animals in the distance.
+
+**God:** "You know what?"
+
+Adam looks at Him.
+
+**God:** "Go explore."
+
+Adam smiles.
+
+**Adam:** "Adam."
+
+**God:** "Sure."
+
+Control passes to the player.
 
 ### Free-roam Garden
 
