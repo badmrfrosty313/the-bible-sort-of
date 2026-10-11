@@ -66,8 +66,10 @@ func _process(_delta: float) -> void:
 	else:
 		player.set_move_intent(Vector2.ZERO)
 	if follower != null:
-		var target := player.global_position - player.facing * 18.0
-		follower.global_position = follower.global_position.lerp(target, 0.12)
+		var offset := player.global_position - follower.global_position
+		follower.set_move_intent(offset.normalized() * minf((offset.length() - 28.0) / 12.0, 1.0) if offset.length() > 30.0 and not dialogue.active else Vector2.ZERO)
+		follower.z_index = 2 if follower.position.y > player.position.y else 1
+		player.z_index = 1 if follower.position.y > player.position.y else 2
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -166,6 +168,8 @@ func _restore_or_begin() -> void:
 
 func _begin_intro() -> void:
 	intro_playing = true
+	player.position = Vector2(195, 94)
+	god_actor.position = Vector2(285, 94)
 	dialogue_after = &"intro_complete"
 	dialogue.start(_lines([
 		["STORY", "Adam stares intensely at his own hand, opens and closes his fingers, and thinks very hard."],
@@ -193,6 +197,8 @@ func _begin_intro() -> void:
 func _on_dialogue_finished() -> void:
 	if dialogue_after == &"intro_complete":
 		intro_playing = false
+		player.position = Vector2(240, 205)
+		god_actor.position = Vector2(240, 55)
 		dialogue_after = &""
 		_commit(CHECKPOINT_EDEN, {})
 		_update_objective()
@@ -249,6 +255,7 @@ func _open_animal(id: StringName) -> void:
 		if count >= 2:
 			god_in_garden = false
 			interactables["god"].visible = false
+			god_actor.hide()
 		if count == ANIMALS.size():
 			serpent_unlocked = true
 			interactables["serpent"].visible = true
@@ -329,7 +336,7 @@ func _activate_eve() -> void:
 	player.display_name = "EVE"
 	if follower == null:
 		follower = _make_actor(&"adam", "ADAM", player.position + Vector2(-16, 12))
-		follower.movement_enabled = false
+		follower.speed = player.speed + 8.0
 		add_child(follower)
 	if eve_named.size() >= 2:
 		god_in_garden = false
@@ -351,6 +358,8 @@ func _activate_adam_after_fall() -> void:
 	follower.display_name = "EVE"
 	follower.global_position = eve_position
 	role = &"adam"
+	player.presentation = TopDownActor.Presentation.POST_FALL_CENSOR
+	follower.presentation = TopDownActor.Presentation.LEAVES
 	queue_redraw()
 
 func _open_serpent() -> void:
@@ -374,6 +383,7 @@ func _use_leaves() -> void:
 	if not fall_started or adam_clothed:
 		return
 	adam_clothed = true
+	player.presentation = TopDownActor.Presentation.LEAVES
 	inventory.visible = false
 	_commit(CHECKPOINT_LEAVES, {"eden_adam_clothed": true})
 	dialogue.start(_lines([
