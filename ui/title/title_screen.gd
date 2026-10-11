@@ -1,6 +1,7 @@
 extends Control
 
-const TITLE_ART_PATH := "res://art/title/gods_beach_day_adams_tumble_clean.png"
+const TITLE_ART_PATH := "res://art/title/gods_beach_day_adams_tumble.png"
+const BAKED_SELECTOR := Rect2i(925, 418, 35, 37)
 const TITLE_RENDER_SIZE := Vector2i(1440, 810)
 const TITLE_SOURCE_SIZE := Vector2(1672, 941)
 const SETTINGS_PATH := "user://settings.json"
@@ -22,6 +23,8 @@ var panel_title: Label
 var panel_body: Label
 var panel_list: VBoxContainer
 var pending_new_game := false
+var main_focus_index := 0
+var fallback_active := false
 var settings := {"fullscreen": false, "master_volume": 1.0}
 
 @onready var approved_art: TextureRect = $ApprovedArt
@@ -55,14 +58,39 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _load_approved_art() -> void:
-	var source := load(TITLE_ART_PATH) as Texture2D
+	approved_art.texture = null
+	var source := RuntimeTexture.load_texture(TITLE_ART_PATH, Vector2i(TITLE_SOURCE_SIZE))
 	if source != null:
 		var image := source.get_image()
 		if image != null and not image.is_empty():
+			image.convert(Image.FORMAT_RGBA8)
+			var marker := Image.create(35, 37, false, Image.FORMAT_RGBA8)
+			marker.fill(Color.TRANSPARENT)
+			for y in range(418, 455):
+				var left := image.get_pixel(924, y)
+				var right := image.get_pixel(960, y)
+				for x in range(925, 960):
+					var background := left.lerp(right, float(x - 924) / 36.0)
+					var original := image.get_pixel(x, y)
+					if Vector3(original.r, original.g, original.b).distance_to(Vector3(background.r, background.g, background.b)) > 0.15:
+						marker.set_pixel(x - 925, y - 418, original)
+					image.set_pixel(x, y, background)
+			focus_marker.texture = ImageTexture.create_from_image(marker)
+			focus_marker.size = Vector2(BAKED_SELECTOR.size) * (Vector2(TITLE_RENDER_SIZE) / TITLE_SOURCE_SIZE)
 			image.resize(TITLE_RENDER_SIZE.x, TITLE_RENDER_SIZE.y, Image.INTERPOLATE_LANCZOS)
 			approved_art.texture = ImageTexture.create_from_image(image)
-	if approved_art.texture == null:
+	fallback_active = approved_art.texture == null
+	quit_button.visible = fallback_active
+	quit_button.focus_mode = Control.FOCUS_ALL if fallback_active else Control.FOCUS_NONE
+	quit_button.modulate.a = 1.0
+	if fallback_active:
 		fallback_menu.show()
+		focus_marker.hide()
+		for index in menu_buttons.size():
+			menu_buttons[index].text = MENU_ENTRIES[index]
+			menu_buttons[index].modulate.a = 1.0
+			menu_buttons[index].add_theme_font_size_override("font_size", 24)
+		menu_buttons.append(quit_button)
 		status.text = "Title artwork unavailable"
 		status.show()
 	else:
@@ -83,7 +111,8 @@ func _build_menu() -> void:
 		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
 			button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 		button.focus_entered.connect(_move_marker.bind(button))
-		button.mouse_entered.connect(func() -> void: button.grab_focus())
+		button.mouse_entered.connect(func() -> void:
+			if not button.disabled: button.grab_focus())
 		button.pressed.connect(_menu_pressed.bind(MENU_ENTRIES[index]))
 		menu_buttons.append(button)
 	_refresh_neighbors()
@@ -106,8 +135,10 @@ func _next_enabled(index: int, direction: int) -> int:
 
 func _move_marker(button: Button) -> void:
 	var index := menu_buttons.find(button)
+	main_focus_index = index
+	if fallback_active: return
 	var row: Rect2 = SOURCE_MENU_RECTS[index]
-	focus_marker.position = _source_to_title(Vector2(SOURCE_SELECTOR_X, row.get_center().y - 15.0))
+	focus_marker.position = _source_to_title(Vector2(SOURCE_SELECTOR_X, row.get_center().y - 18.5))
 	focus_marker.show()
 
 func _source_to_title(point: Vector2) -> Vector2:
@@ -146,7 +177,7 @@ func _confirm_new_game() -> void:
 
 func _restore_focus() -> void:
 	if menu_buttons.size() > 0:
-		menu_buttons[0].grab_focus()
+		menu_buttons[main_focus_index].grab_focus()
 
 func _on_quit_pressed() -> void:
 	quit_dialog.popup_centered()
@@ -157,6 +188,7 @@ func _show_main_menu() -> void:
 		panel = null
 	for button in menu_buttons:
 		button.show()
+	if not fallback_active: focus_marker.show()
 	_restore_focus()
 
 func _make_panel(title: String) -> void:
@@ -183,12 +215,13 @@ func _make_panel(title: String) -> void:
 	panel_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	panel.add_child(panel_body)
 	panel_list = VBoxContainer.new()
-	panel_list.position = Vector2(35, 330)
+	panel_list.position = Vector2(35, 240)
 	panel_list.size = Vector2(650, 170)
 	panel_list.add_theme_constant_override("separation", 8)
 	panel.add_child(panel_list)
 	for button in menu_buttons:
 		button.hide()
+	focus_marker.hide()
 
 func _panel_button(text: String, action: Callable, disabled := false) -> Button:
 	var button := Button.new()
@@ -198,10 +231,19 @@ func _panel_button(text: String, action: Callable, disabled := false) -> Button:
 	if action.is_valid():
 		button.pressed.connect(action)
 	panel_list.add_child(button)
+	button.add_theme_font_size_override("font_size", 22)
+	if not disabled and panel_list.get_child_count() == 1: button.grab_focus()
 	return button
 
 func _back_button() -> void:
 	_panel_button("BACK", _show_main_menu)
+	var enabled: Array[Control] = []
+	for child in panel_list.get_children():
+		if child is Button and child.disabled: continue
+		if child.focus_mode != Control.FOCUS_NONE: enabled.append(child)
+	for index in enabled.size():
+		enabled[index].focus_neighbor_bottom = enabled[index].get_path_to(enabled[(index + 1) % enabled.size()])
+		enabled[index].focus_neighbor_top = enabled[index].get_path_to(enabled[posmod(index - 1, enabled.size())])
 
 func _show_load() -> void:
 	_make_panel("LOAD")
