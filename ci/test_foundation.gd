@@ -93,7 +93,7 @@ func _run() -> void:
 	await _key(KEY_E)
 	_check(eden.dialogue.active, "Rock opens shared dialogue")
 	await _snapshot("03_rock_conversation.png")
-	eden.ci_complete_rock()
+	await _play_rock()
 	_check(state.checkpoint == 2 and bool(state.get_flag(&"eden_rock_complete")), "Rock milestone saves")
 	eden.ci_complete_naming()
 	_check(state.checkpoint == 4 and bool(state.get_flag(&"eden_first_jeff")), "Naming quest reaches First Jeff")
@@ -222,6 +222,40 @@ func _visible_actor(actor: TopDownActor, label: String) -> void:
 			for x in before.get_width():
 				if before.get_pixel(x, y) != hidden.get_pixel(x, y): changed += 1
 		_check(changed > 30, label + " changes actual rendered pixels when hidden")
+
+func _play_rock() -> void:
+	var spoken: Array[String] = []
+	var guard := 0
+	while eden.dialogue.active and guard < 600:
+		guard += 1
+		if eden.dialogue.choices.get_child_count() > 0:
+			if eden.rock_node == "opening_choice":
+				eden.dialogue.choices.get_child(1).pressed.emit()
+				_check(not eden.dialogue.active and state.get_flag(&"eden_rock_resume") == "opening_choice", "Rock Leave saves the exact choice boundary")
+				eden._open_rock()
+				_check(eden.rock_node == "opening_choice", "Returning to Rock resumes the saved choice")
+			var choice := 0
+			if eden.rock_node in ["stop_choice", "sky_choice", "friend_choice"]: choice = 1
+			eden.dialogue.choices.get_child(choice).pressed.emit()
+		else:
+			spoken.append(eden.dialogue.text_label.text)
+			eden.dialogue.advance()
+	_check(guard < 600 and eden.rock_complete, "Full Rock branching conversation reaches its authored payoff")
+	for text in ["Stop.", "What are you?", "He is busy.", "It isn't.", "Everything happened before me.", "Are we friends?", "That's a rock, Adam.", "You do.", "Bye, Rock."]:
+		_check(text in spoken, "Rock performs authored line: " + text)
+	eden._open_rock()
+	_check(eden.rock_node == "repeat_first", "First Rock repeat uses distant NO callback")
+	while eden.dialogue.active: eden.dialogue.advance()
+	eden._open_rock()
+	_check(eden.rock_node == "repeat_later", "Subsequent Rock repeat stays short")
+	while eden.dialogue.active: eden.dialogue.advance()
+	eden.naming_authority = true
+	eden._open_rock()
+	_check(eden.rock_node == "authority" and eden.dialogue.choices.get_child_count() == 0, "Rock naming callback prevents selecting a rename")
+	while eden.dialogue.active:
+		spoken.append(eden.dialogue.text_label.text)
+		eden.dialogue.advance()
+	_check("DON'T." in spoken and not state.get_flag(&"eden_named_animals", {}).has("rock"), "God interrupts Rock renaming before a name can be committed")
 
 func _check(condition: bool, message: String) -> void:
 	checks += 1

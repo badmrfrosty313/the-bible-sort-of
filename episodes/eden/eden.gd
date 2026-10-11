@@ -40,6 +40,12 @@ var naming_index := 0
 var named_animals: Dictionary = {}
 var eve_named: Dictionary = {}
 var rock_complete := false
+var rock_discovered := false
+var rock_resume := "opening"
+var rock_repeats := 0
+var naming_authority := false
+var rock_node := ""
+var animal_visits: Dictionary = {}
 var first_jeff := false
 var eve_created := false
 var serpent_unlocked := false
@@ -54,6 +60,7 @@ func _ready() -> void:
 	_spawn_actors()
 	dialogue.finished.connect(_on_dialogue_finished)
 	dialogue.choice_selected.connect(_on_choice_selected)
+	dialogue.canceled.connect(_on_dialogue_canceled)
 	leaves_button.pressed.connect(_use_leaves)
 	_restore_or_begin()
 	queue_redraw()
@@ -73,6 +80,12 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"ui_cancel") and dialogue.active:
+		if dialogue.cancelable:
+			dialogue.close()
+			_on_dialogue_canceled()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed(&"ui_cancel") and not dialogue.active:
 		get_viewport().set_input_as_handled()
 		return_to_title_requested.emit()
@@ -150,6 +163,11 @@ func _make_actor(actor_role: StringName, display: String, position: Vector2) -> 
 
 func _restore_or_begin() -> void:
 	rock_complete = bool(GameState.get_flag(&"eden_rock_complete", false))
+	rock_discovered = bool(GameState.get_flag(&"eden_rock_discovered", rock_complete))
+	rock_resume = str(GameState.get_flag(&"eden_rock_resume", "opening"))
+	if not RockDialogue.NODES.has(rock_resume): rock_resume = "opening"
+	rock_repeats = int(GameState.get_flag(&"eden_rock_repeats", 0))
+	naming_authority = bool(GameState.get_flag(&"eden_naming_authority", not GameState.get_flag(&"eden_named_animals", {}).is_empty()))
 	first_jeff = bool(GameState.get_flag(&"eden_first_jeff", false))
 	named_animals = GameState.get_flag(&"eden_named_animals", {}).duplicate(true)
 	eve_named = GameState.get_flag(&"eden_eve_named", {}).duplicate(true)
@@ -195,6 +213,11 @@ func _begin_intro() -> void:
 	]))
 
 func _on_dialogue_finished() -> void:
+	if String(dialogue_after).begins_with("rock:"):
+		var next := String(dialogue_after).trim_prefix("rock:")
+		dialogue_after = &""
+		_rock_step(next)
+		return
 	if dialogue_after == &"intro_complete":
 		intro_playing = false
 		player.position = Vector2(240, 205)
@@ -222,12 +245,19 @@ func _on_dialogue_finished() -> void:
 		_update_objective()
 
 func _on_choice_selected(id: StringName) -> void:
+	if String(id).begins_with("rock:"):
+		var target := String(id).trim_prefix("rock:")
+		if target != "leave": _rock_step(target)
+		else: _on_dialogue_canceled()
+		return
 	if String(id).begins_with("name_"):
 		var parts := String(id).split("_", false, 2)
 		_select_name(StringName(parts[1]), parts[2])
 		return
 	match id:
 		&"start_naming":
+			naming_authority = true
+			_commit(GameState.checkpoint, {"eden_naming_authority": true})
 			naming_index = 0
 			_show_naming_choice()
 		&"eve_cutscene":
@@ -266,21 +296,61 @@ func _open_animal(id: StringName) -> void:
 		_update_objective()
 		return
 	dialogue.start(_lines([[String(animal["name"]), String(animal["noise"])]]))
+	if id == &"turtle" and role == &"adam":
+		if rock_discovered:
+			dialogue.start(_lines([["STORY", "The turtle takes one tiny step."], ["ADAM", "Rock moves."], ["STORY", "The turtle takes another step."], ["ADAM", "Rock?"], ["ADAM", "Moving rock."]] if not rock_complete else [["ADAM", "You are confusing."]]))
+		else:
+			dialogue.start(_lines([["STORY", "Adam crouches beside the turtle."], ["ADAM", "Hello."], ["STORY", "The turtle pulls its head into its shell. Adam waits."], ["ADAM", "Gone?"], ["STORY", "The turtle slowly pokes its head back out."], ["ADAM", "Not gone."], ["STORY", "The turtle takes one tiny step."], ["ADAM", "Slow."], ["STORY", "Another tiny step."], ["ADAM", "Very slow."], ["ADAM", "You carry this?"], ["STORY", "The turtle keeps walking."], ["ADAM", "That seems heavy."]]))
 
 func _open_rock() -> void:
-	if rock_complete:
-		dialogue.start(_lines([["GOD", "That's a rock, Adam."], ["ADAM", "I know. We're friends."]]))
+	if role != &"adam":
+		dialogue.start(_lines([["EVE", "Rock."]]))
 		return
-	dialogue_after = &"rock_complete"
-	dialogue.start(_lines([
-		["ADAM → ROCK", "Hi. I am Adam. I learned that is my name."],
-		["ADAM → ROCK", "There is a sun. It is very bright. I have decided it is doing a good job."],
-		["ADAM → ROCK", "God said you are a rock. That means you are excellent at listening."],
-		["ADAM → ROCK", "I met a cow. It had thoughts. I think. It said moo."],
-		["ADAM → ROCK", "Anyway, I have existed for one day. It has been a lot."],
-		["GOD", "That's a rock, Adam."],
-		["ADAM", "I know."],
-	]))
+	rock_discovered = true
+	_commit(GameState.checkpoint, {"eden_rock_discovered": true})
+	if naming_authority and not bool(GameState.get_flag(&"eden_rock_authority_seen", false)):
+		_commit(GameState.checkpoint, {"eden_rock_authority_seen": true})
+		_rock_step("authority")
+	elif rock_complete:
+		_rock_step("repeat_first" if rock_repeats == 0 else "repeat_later")
+		rock_repeats += 1
+		_commit(GameState.checkpoint, {"eden_rock_repeats": rock_repeats})
+	else:
+		_rock_step(rock_resume)
+
+func _rock_step(id: String) -> void:
+	if id == "complete":
+		rock_complete = true
+		_commit(maxi(GameState.checkpoint, CHECKPOINT_ROCK), {"eden_rock_complete": true})
+		_update_objective()
+		_on_dialogue_canceled()
+		return
+	if id == "end":
+		_on_dialogue_canceled()
+		return
+	var node: Dictionary = RockDialogue.NODES[id]
+	rock_node = id
+	if not rock_complete and id != "authority":
+		rock_resume = id
+		_commit(GameState.checkpoint, {"eden_rock_resume": id})
+	dialogue.cancelable = true
+	if node.has("choices"):
+		var choices: Array[Dictionary] = []
+		for choice in node.choices:
+			choices.append({"id": StringName("rock:" + choice.target), "label": choice.label})
+		dialogue.ask("ADAM & THE ROCK", "", choices)
+	else:
+		dialogue_after = StringName("rock:" + node.next)
+		if id == "payoff" and god_in_garden:
+			god_actor.position = Vector2(265, 94)
+		dialogue.start(_lines(node.lines))
+
+func _on_dialogue_canceled() -> void:
+	dialogue_after = &""
+	dialogue.cancelable = false
+	rock_node = ""
+	if god_in_garden: god_actor.position = Vector2(240, 55)
+	_update_objective()
 
 func _open_god() -> void:
 	if not first_jeff:

@@ -4,10 +4,13 @@ class_name DialogueBox
 
 signal finished
 signal choice_selected(id: StringName)
+signal canceled
+signal line_changed(speaker: String, text: String)
 
 var _lines: Array[DialogueLine] = []
 var _index: int = 0
 var active: bool = false
+var cancelable := false
 
 @onready var speaker_label: Label = %Speaker
 @onready var text_label: Label = %Line
@@ -46,6 +49,14 @@ func _show_line() -> void:
 	speaker_label.text = _lines[_index].speaker
 	text_label.text = _lines[_index].text
 	next_button.text = "Finish" if _index == _lines.size() - 1 else "Next"
+	line_changed.emit(speaker_label.text, text_label.text)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if active and event.is_action_pressed(&"ui_cancel"):
+		get_viewport().set_input_as_handled()
+		if cancelable:
+			close()
+			canceled.emit()
 
 func ask(speaker: String, text: String, options: Array[Dictionary]) -> void:
 	_lines = []
