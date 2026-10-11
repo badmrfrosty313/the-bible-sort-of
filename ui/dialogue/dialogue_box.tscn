@@ -9,9 +9,9 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 18.0
-offset_top = -114.0
+offset_top = -148.0
 offset_right = -18.0
-offset_bottom = -18.0
+offset_bottom = -22.0
 grow_horizontal = 2
 grow_vertical = 0
 theme = ExtResource("2")
@@ -33,9 +33,14 @@ layout_mode = 2
 size_flags_vertical = 3
 autowrap_mode = 2
 
+[node name="Choices" type="VBoxContainer" parent="Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 3
+
 [node name="Next" type="Button" parent="Column"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(76, 24)
+custom_minimum_size = Vector2(76, 20)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Next"

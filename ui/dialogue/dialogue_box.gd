@@ -3,6 +3,7 @@ class_name DialogueBox
 ## A reusable, player-paced sequence. Cutscenes can await `finished`.
 
 signal finished
+signal choice_selected(id: StringName)
 
 var _lines: Array[DialogueLine] = []
 var _index: int = 0
@@ -11,12 +12,15 @@ var active: bool = false
 @onready var speaker_label: Label = %Speaker
 @onready var text_label: Label = %Line
 @onready var next_button: Button = %Next
+@onready var choices: VBoxContainer = %Choices
 
 func _ready() -> void:
 	next_button.pressed.connect(advance)
 	hide()
 
 func start(lines: Array[DialogueLine]) -> void:
+	_clear_choices()
+	next_button.show()
 	_lines = lines
 	_index = 0
 	active = not _lines.is_empty()
@@ -42,3 +46,34 @@ func _show_line() -> void:
 	speaker_label.text = _lines[_index].speaker
 	text_label.text = _lines[_index].text
 	next_button.text = "Finish" if _index == _lines.size() - 1 else "Next"
+
+func ask(speaker: String, text: String, options: Array[Dictionary]) -> void:
+	_lines = []
+	active = true
+	speaker_label.text = speaker
+	text_label.text = text
+	next_button.hide()
+	_clear_choices()
+	for option in options:
+		var button := Button.new()
+		button.text = str(option.get("label", "Continue"))
+		button.custom_minimum_size = Vector2(0, 22)
+		button.pressed.connect(_select_choice.bind(StringName(option.get("id", "continue"))))
+		choices.add_child(button)
+	show()
+	if choices.get_child_count() > 0:
+		choices.get_child(0).grab_focus()
+
+func close() -> void:
+	active = false
+	_clear_choices()
+	hide()
+
+func _select_choice(id: StringName) -> void:
+	close()
+	choice_selected.emit(id)
+
+func _clear_choices() -> void:
+	for child in choices.get_children():
+		choices.remove_child(child)
+		child.queue_free()

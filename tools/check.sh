@@ -26,14 +26,18 @@ run_check godot-quit.log timeout 10s "$godot_bin" --headless --path . --script c
 
 if [[ "${1:-}" == "--visual" ]]; then
   # A fresh isolated save makes captures deterministic; do not reuse player data.
-  export XDG_DATA_HOME="$test_root/visual-data"
-  mkdir -p "$XDG_DATA_HOME"
+  visual_root="$(mktemp -d)"
+  trap 'rm -rf "$test_root" "$visual_root"' EXIT
+  export XDG_DATA_HOME="$visual_root/data"
+  export XDG_CONFIG_HOME="$visual_root/config"
+  export XDG_CACHE_HOME="$visual_root/cache"
+  mkdir -p "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME"
   export LIBGL_ALWAYS_SOFTWARE=1
   mkdir -p ci_artifacts
   run_check godot-visual.log timeout 50s xvfb-run -a "$godot_bin" --path . \
     --rendering-method gl_compatibility --audio-driver Dummy --disable-vsync \
     --script ci/test_foundation.gd -- --capture
-  for capture in 01_title_native 02_episode_native 03_dialogue_native 04_continued_native 05_continued_3x 06_replace_save_native; do
+  for capture in 01_approved_title 02_adam_intro 03_rock_conversation 04_first_jeff 05_eve_gameplay 06_fall_boxes 07_leaves_used; do
     test -s "ci_artifacts/$capture.png"
   done
 fi

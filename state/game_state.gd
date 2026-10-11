@@ -42,6 +42,27 @@ func set_checkpoint(value: int) -> Error:
 		checkpoint = previous
 	return error
 
+func get_flag(id: StringName, fallback: Variant = null) -> Variant:
+	return flags.get(String(id), fallback)
+
+func commit_progress(value: int, changes: Dictionary = {}) -> Error:
+	## Saves a coherent milestone: callers never need to save a checkpoint and
+	## its episode flags separately.
+	var definition := EpisodeCatalog.find_episode(episode_id)
+	if definition == null or value < 0 or value > definition.last_checkpoint:
+		last_error = "This checkpoint does not belong to the current episode."
+		return ERR_INVALID_PARAMETER
+	var previous_checkpoint := checkpoint
+	var previous_flags := flags.duplicate(true)
+	checkpoint = value
+	for key in changes:
+		flags[str(key)] = changes[key]
+	var error := save_progress()
+	if error != OK:
+		checkpoint = previous_checkpoint
+		flags = previous_flags
+	return error
+
 func save_progress() -> Error:
 	last_error = ""
 	if not has_progress():

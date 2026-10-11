@@ -1,8 +1,8 @@
 extends RefCounted
 class_name EpisodeCatalog
 
-const FIRST_EPISODE: StringName = &"development"
-const DEFINITIONS: Array[String] = ["res://episodes/development/episode.tres"]
+const FIRST_EPISODE: StringName = &"eden"
+const DEFINITIONS: Array[String] = ["res://episodes/eden/episode.tres"]
 
 static func find_episode(id: StringName) -> EpisodeDefinition:
 	for path in DEFINITIONS:
