@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://ui/title/title_screen.gd" id="1"]
 [ext_resource type="Theme" path="res://ui/shared/game_theme.tres" id="2"]
-[ext_resource type="Texture2D" path="res://art/title/approved_title_original.png" id="3"]
+[ext_resource type="Texture2D" path="res://art/title/approved_title.webp" id="3"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -24,86 +24,130 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.035, 0.025, 0.055, 1)
 
-[node name="ApprovedArt" type="TextureRect" parent="."]
+[node name="TitleCanvas" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 60.0
-offset_right = -60.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="Presentation" type="Control" parent="TitleCanvas"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 900.0
+mouse_filter = 2
+
+[node name="ApprovedArt" type="TextureRect" parent="TitleCanvas/Presentation"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 900.0
+mouse_filter = 2
 texture = ExtResource("3")
 expand_mode = 1
-stretch_mode = 5
+stretch_mode = 0
+texture_filter = 1
 
-[node name="Menu" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 60.0
-offset_right = -60.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="FallbackMenu" type="Control" parent="TitleCanvas/Presentation"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 900.0
+visible = false
+mouse_filter = 2
 
-[node name="NewGame" type="Button" parent="Menu"]
+[node name="Heading" type="Label" parent="TitleCanvas/Presentation/FallbackMenu"]
+layout_mode = 0
+offset_left = 180.0
+offset_top = 245.0
+offset_right = 1020.0
+offset_bottom = 320.0
+theme_override_colors/font_color = Color(1, 0.87, 0.58, 1)
+theme_override_font_sizes/font_size = 42
+text = "THE BIBLE: SORT OF"
+horizontal_alignment = 1
+
+[node name="NewGameText" type="Label" parent="TitleCanvas/Presentation/FallbackMenu"]
+layout_mode = 0
+offset_left = 415.0
+offset_top = 525.0
+offset_right = 785.0
+offset_bottom = 580.0
+theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
+theme_override_font_sizes/font_size = 28
+text = "NEW GAME"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ContinueText" type="Label" parent="TitleCanvas/Presentation/FallbackMenu"]
+layout_mode = 0
+offset_left = 415.0
+offset_top = 580.0
+offset_right = 785.0
+offset_bottom = 640.0
+theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
+theme_override_font_sizes/font_size = 28
+text = "CONTINUE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NewGame" type="Button" parent="TitleCanvas/Presentation"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 115.0
-offset_top = 166.0
-offset_right = 245.0
-offset_bottom = 184.0
+offset_left = 415.0
+offset_top = 525.0
+offset_right = 785.0
+offset_bottom = 580.0
 modulate = Color(1, 1, 1, 0)
 tooltip_text = "New Game"
 focus_neighbor_top = NodePath("../Quit")
 focus_neighbor_bottom = NodePath("../Continue")
 
-[node name="Continue" type="Button" parent="Menu"]
+[node name="Continue" type="Button" parent="TitleCanvas/Presentation"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 115.0
-offset_top = 185.0
-offset_right = 245.0
-offset_bottom = 203.0
+offset_left = 415.0
+offset_top = 580.0
+offset_right = 785.0
+offset_bottom = 640.0
 modulate = Color(1, 1, 1, 0)
 tooltip_text = "Continue"
 focus_neighbor_top = NodePath("../NewGame")
 focus_neighbor_bottom = NodePath("../Quit")
 
-[node name="Quit" type="Button" parent="Menu"]
+[node name="FocusMarker" type="Label" parent="TitleCanvas/Presentation"]
+layout_mode = 0
+offset_left = 357.5
+offset_top = 522.5
+offset_right = 397.5
+offset_bottom = 570.0
+theme_override_colors/font_color = Color(1, 0.83, 0.35, 1)
+theme_override_font_sizes/font_size = 28
+text = "◆"
+mouse_filter = 2
+visible = false
+
+[node name="Quit" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 125.0
+offset_left = 4.0
 offset_top = 244.0
-offset_right = 235.0
-offset_bottom = 264.0
+offset_right = 56.0
+offset_bottom = 266.0
 theme_override_colors/font_color = Color(1, 0.85, 0.47, 1)
 theme_override_colors/font_hover_color = Color(1, 0.95, 0.72, 1)
 theme_override_font_sizes/font_size = 9
 text = "QUIT"
-focus_neighbor_top = NodePath("../Continue")
-focus_neighbor_bottom = NodePath("../NewGame")
-
-[node name="FocusMarker" type="Label" parent="Menu"]
-layout_mode = 0
-offset_left = 99.0
-offset_top = 166.0
-offset_right = 112.0
-offset_bottom = 184.0
-theme_override_colors/font_color = Color(1, 0.83, 0.35, 1)
-theme_override_font_sizes/font_size = 11
-text = "◆"
-mouse_filter = 2
+focus_neighbor_top = NodePath("TitleCanvas/Presentation/Continue")
+focus_neighbor_bottom = NodePath("TitleCanvas/Presentation/NewGame")
 
 [node name="Status" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 5.0
-offset_top = 228.0
-offset_right = 55.0
-offset_bottom = 264.0
+offset_left = 4.0
+offset_top = 210.0
+offset_right = 56.0
+offset_bottom = 240.0
 theme_override_colors/font_color = Color(1, 0.78, 0.58, 1)
 theme_override_font_sizes/font_size = 7
 autowrap_mode = 2
@@ -112,9 +156,9 @@ vertical_alignment = 1
 
 [node name="Help" type="Label" parent="."]
 layout_mode = 0
-offset_left = 5.0
+offset_left = 4.0
 offset_top = 8.0
-offset_right = 55.0
+offset_right = 56.0
 offset_bottom = 35.0
 theme_override_colors/font_color = Color(0.97, 0.84, 0.57, 1)
 theme_override_font_sizes/font_size = 7

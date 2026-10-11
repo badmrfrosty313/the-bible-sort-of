@@ -33,8 +33,10 @@ func _run() -> void:
 		_finish()
 		return
 	_check(_screen().name == &"TitleScreen", "Boot mounts approved title presentation")
-	_check(_screen().get_node("ApprovedArt").texture != null, "Approved title artwork is mounted")
-	_check(_screen().get_node("ApprovedArt").size == Vector2(360, 270), "4:3 title is pillarboxed without distortion")
+	_check(_screen().get_node("TitleCanvas/Presentation/ApprovedArt").texture != null, "Approved title artwork is mounted")
+	var presentation := _screen().get_node("TitleCanvas/Presentation") as Control
+	_check(presentation.size == Vector2(1200, 900) and presentation.scale == Vector2(0.3, 0.3) and presentation.position == Vector2(60, 0), "4:3 title presentation is centered and uniformly pillarboxed")
+	_check(_screen().get_node("%NewGame").position == Vector2(415, 525) and _screen().get_node("%Continue").position == Vector2(415, 580), "Live title hitboxes align with the approved baked menu")
 	_check(_screen().get_node("%Continue").disabled, "Continue disabled without save")
 	await _snapshot("01_approved_title.png")
 	await _key(KEY_ENTER)
