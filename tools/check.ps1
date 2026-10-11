@@ -12,6 +12,7 @@ function Invoke-Check([string[]]$Arguments) {
 }
 Invoke-Check @('--headless', '--editor', '--path', '.', '--quit')
 Invoke-Check @('--headless', '--path', '.', '--script', 'ci/test_resources.gd')
+Invoke-Check @('--headless', '--path', '.', '--script', 'ci/test_content.gd')
 $previousAppData = $env:APPDATA
 $testData = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString())
 New-Item -ItemType Directory -Path $testData | Out-Null

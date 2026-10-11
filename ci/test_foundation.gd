@@ -74,9 +74,10 @@ func _run() -> void:
 	await _visible_actor(eden.player, "Initial Adam")
 	await _visible_actor(eden.god_actor, "Initial God")
 	await _snapshot("02_adam_intro.png")
-	for step in range(20): await _key(KEY_ENTER)
+	for step in EdenDialogue.INTRO.size(): await _key(KEY_ENTER)
 	_check(not eden.dialogue.active and state.checkpoint == 1, "Intro completes and saves Eden checkpoint")
 	_check(eden.objective.text.begins_with("EDEN"), "Free roam objective is visible")
+	_play_animals()
 	var start: Vector2 = eden.player.global_position
 	await _hold_key(KEY_D, 10)
 	_check(eden.player.global_position.x > start.x, "Keyboard movement moves Adam")
@@ -95,12 +96,14 @@ func _run() -> void:
 	await _snapshot("03_rock_conversation.png")
 	await _play_rock()
 	_check(state.checkpoint == 2 and bool(state.get_flag(&"eden_rock_complete")), "Rock milestone saves")
-	eden.ci_complete_naming()
+	await _play_naming()
 	_check(state.checkpoint == 4 and bool(state.get_flag(&"eden_first_jeff")), "Naming quest reaches First Jeff")
 	_check(eden.toast.visible, "First Jeff produces achievement notification")
 	await _snapshot("04_first_jeff.png")
 	eden.toast.hide()
-	eden.ci_activate_eve()
+	eden._open_god()
+	var eve_lines := _drain_lines()
+	_check("And I PUT HIM TO SLEEP." in eve_lines and "What is this?" in eve_lines and "That's a cow." in eve_lines, "Eve creation performs authored log, sleep and cow test")
 	_check(eden.role == &"eve" and eden.follower != null, "Eve becomes player and Adam follows")
 	_check((eden.player.get_node("Sprite") as AnimatedSprite2D).sprite_frames.has_animation(&"walk_down") and (eden.follower.get_node("Sprite") as AnimatedSprite2D).visible, "Eve and Adam follower use covered walk sprites")
 	await _visible_actor(eden.player, "Eve")
@@ -110,9 +113,14 @@ func _run() -> void:
 	await _settle()
 	_check(eden.follower.global_position.distance_to(follower_start) > 0.1, "Follower responds to Eve movement")
 	await _snapshot("05_eve_gameplay.png")
-	eden.ci_unlock_serpent()
+	for animal in eden.ANIMALS:
+		eden._open_animal(animal.id)
+		_drain_lines()
+	_check(not eden.god_actor.visible and not eden.god_in_garden, "God intentionally leaves during Eve naming")
 	_check(bool(state.get_flag(&"eden_serpent_unlocked")), "Eve naming unlocks serpent encounter")
-	eden.ci_start_fall()
+	eden._open_serpent()
+	eden.dialogue.choices.get_child(0).pressed.emit()
+	_drain_lines()
 	_check(eden.fall_started and eden.role == &"adam" and state.checkpoint == 6,
 		"Fall returns control to Adam and saves checkpoint")
 	await _visible_actor(eden.player, "Adam after Fall")
@@ -256,6 +264,63 @@ func _play_rock() -> void:
 		spoken.append(eden.dialogue.text_label.text)
 		eden.dialogue.advance()
 	_check("DON'T." in spoken and not state.get_flag(&"eden_named_animals", {}).has("rock"), "God interrupts Rock renaming before a name can be committed")
+	eden.naming_authority = false
+
+func _drain_lines() -> Array[String]:
+	var spoken: Array[String] = []
+	var guard := 0
+	while eden.dialogue.active and eden.dialogue.choices.get_child_count() == 0 and guard < 400:
+		guard += 1
+		spoken.append(eden.dialogue.text_label.text)
+		if eden.stage_blackout.visible: _check(eden.dialogue.visible, "Cut to black preserves readable player-paced dialogue")
+		eden.dialogue.advance()
+	_check(guard < 400, "Authored dialogue reaches a choice or ending")
+	return spoken
+
+func _play_animals() -> void:
+	eden._open_animal(&"turtle")
+	var turtle := _drain_lines()
+	_check("Gone?" in turtle and "That seems heavy." in turtle and "Moving rock." not in turtle, "Turtle before Rock uses authored discovery-safe dialogue")
+	eden._open_animal(&"cow")
+	_check("We understand each other." in _drain_lines(), "Cow first meeting uses authored dialogue")
+	eden._open_animal(&"cow")
+	_check("You already told me that." in _drain_lines(), "Cow repeat uses authored callback")
+	var lion_lines := ["No.", "We disagree.", "Goodbye."]
+	for expected in lion_lines:
+		eden._open_animal(&"lion")
+		_check(expected in _drain_lines(), "Lion escalating repeat: " + expected)
+	eden._open_animal(&"elephant")
+	_check("Five?" in _drain_lines(), "Elephant counts its trunk as a fifth leg")
+	eden._open_animal(&"eagle")
+	_check("Show-off." in _drain_lines(), "Eagle free-roam dialogue is authored")
+	_check(eden._name_options(&"turtle") == ["Slow", "Shell", "Round", "Small"], "Turtle naming before discovery contains no Rock callbacks")
+
+func _play_naming() -> void:
+	eden._open_animal(&"turtle")
+	_check("You are confusing." in _drain_lines(), "Turtle remembers completed Rock conversation")
+	eden._open_god()
+	var spoken := _drain_lines()
+	_check("I decide?" in spoken and eden.naming_authority, "God grants naming authority through the authored quest scene")
+	var selected := ["Moo", "Other Rock", "Do Not", "Kevin", "Jeff"]
+	for index in 5:
+		var expected: Array = eden._name_options(eden.NAMING_ORDER[index])
+		var labels: Array[String] = []
+		for button in eden.dialogue.choices.get_children(): labels.append(button.text)
+		_check(labels == expected, "Authored naming choices for " + String(eden.NAMING_ORDER[index]))
+		if index == 4:
+			await _key(KEY_ESCAPE)
+			_check(not eden.dialogue.active and not eden.first_jeff, "Eagle naming can be backed out without awarding First Jeff")
+			eden._open_god()
+			_drain_lines()
+			_check(eden.dialogue.choices.get_child_count() == 4, "Reopening Eagle still presents four Jeffs")
+			eden.jeff_wait = 8.0
+			eden._process(1.0)
+			_check("You haven't picked yet." in _drain_lines(), "Eagle hesitation performs the authored Jeff payoff")
+		var button_index := expected.find(selected[index])
+		eden.dialogue.choices.get_child(button_index).pressed.emit()
+		spoken.append_array(_drain_lines())
+	for text in ["Actually, that one's defensible.", "That's not what you picked.", "That's an instruction.", "Where did you get Kevin?", "That's Jeff."]:
+		_check(text in spoken, "Naming performs authored reaction: " + text)
 
 func _check(condition: bool, message: String) -> void:
 	checks += 1

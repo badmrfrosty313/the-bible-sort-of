@@ -7,12 +7,12 @@ signal return_to_title_requested
 const GARDEN := Rect2(24, 35, 432, 206)
 const ANIMALS := [
 	{"id": &"cow", "name": "COW", "at": Vector2(112, 82), "noise": "MOO."},
-	{"id": &"sheep", "name": "SHEEP", "at": Vector2(346, 74), "noise": "BAAA."},
-	{"id": &"rabbit", "name": "RABBIT", "at": Vector2(370, 179), "noise": "*sniff sniff*"},
+	{"id": &"lion", "name": "LION", "at": Vector2(346, 74), "noise": "ROAR."},
+	{"id": &"elephant", "name": "ELEPHANT", "at": Vector2(370, 179), "noise": "*trumpet*"},
 	{"id": &"turtle", "name": "TURTLE", "at": Vector2(108, 188), "noise": "..."},
 	{"id": &"eagle", "name": "EAGLE", "at": Vector2(246, 78), "noise": "SCREE!"},
 ]
-const NAMING_ORDER: Array[StringName] = [&"cow", &"sheep", &"rabbit", &"turtle", &"eagle"]
+const NAMING_ORDER: Array[StringName] = [&"cow", &"turtle", &"lion", &"elephant", &"eagle"]
 const CHECKPOINT_EDEN := 1
 const CHECKPOINT_ROCK := 2
 const CHECKPOINT_NAMING := 3
@@ -46,6 +46,11 @@ var rock_repeats := 0
 var naming_authority := false
 var rock_node := ""
 var animal_visits: Dictionary = {}
+var jeff_wait := 0.0
+var jeff_hesitated := false
+var stage_blackout: ColorRect
+var stage_log := false
+var cutscene_eve: TopDownActor
 var first_jeff := false
 var eve_created := false
 var serpent_unlocked := false
@@ -61,11 +66,25 @@ func _ready() -> void:
 	dialogue.finished.connect(_on_dialogue_finished)
 	dialogue.choice_selected.connect(_on_choice_selected)
 	dialogue.canceled.connect(_on_dialogue_canceled)
+	dialogue.line_changed.connect(_on_staging_line)
+	stage_blackout = ColorRect.new()
+	stage_blackout.color = Color.BLACK
+	stage_blackout.size = Vector2(480, 270)
+	stage_blackout.z_index = 100
+	stage_blackout.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage_blackout.hide()
+	add_child(stage_blackout)
 	leaves_button.pressed.connect(_use_leaves)
 	_restore_or_begin()
 	queue_redraw()
 
 func _process(_delta: float) -> void:
+	if dialogue.active and dialogue.choices.get_child_count() == 4 and naming_authority and not first_jeff and NAMING_ORDER[naming_index] == &"eagle" and rock_node.is_empty():
+		jeff_wait += _delta
+		if jeff_wait > 8.0 and not jeff_hesitated:
+			jeff_hesitated = true
+			dialogue_after = &"name_choice"
+			dialogue.start(_lines(EdenDialogue.JEFF_HESITATION))
 	if not dialogue.active and not intro_playing:
 		player.set_move_intent(_movement_intent())
 		current_interactable = interaction_system.nearest(player.global_position, self)
@@ -170,6 +189,7 @@ func _restore_or_begin() -> void:
 	naming_authority = bool(GameState.get_flag(&"eden_naming_authority", not GameState.get_flag(&"eden_named_animals", {}).is_empty()))
 	first_jeff = bool(GameState.get_flag(&"eden_first_jeff", false))
 	named_animals = GameState.get_flag(&"eden_named_animals", {}).duplicate(true)
+	animal_visits = GameState.get_flag(&"eden_animal_visits", {}).duplicate(true)
 	eve_named = GameState.get_flag(&"eden_eve_named", {}).duplicate(true)
 	eve_created = bool(GameState.get_flag(&"eden_eve_created", false))
 	serpent_unlocked = bool(GameState.get_flag(&"eden_serpent_unlocked", false))
@@ -189,30 +209,21 @@ func _begin_intro() -> void:
 	player.position = Vector2(195, 94)
 	god_actor.position = Vector2(285, 94)
 	dialogue_after = &"intro_complete"
-	dialogue.start(_lines([
-		["STORY", "Adam stares intensely at his own hand, opens and closes his fingers, and thinks very hard."],
-		["GOD", "Adam."],
-		["ADAM", "Adam."],
-		["GOD", "Yes. You're Adam."],
-		["ADAM", "Adam."],
-		["GOD", "Right."],
-		["GOD", "God."],
-		["ADAM", "Adam."],
-		["GOD", "No, you're Adam. I'm God."],
-		["ADAM", "Adam?"],
-		["GOD", "We have time."],
-		["STORY", "Five hours later."],
-		["GOD", "Tell me something you've learned."],
-		["ADAM", "Adam!"],
-		["GOD", "Fantastic. Five hours."],
-		["GOD", "I made that."],
-		["STORY", "God shows Adam a rock, an apple, a tree, and eventually Himself. Adam gets nearly every one wrong."],
-		["GOD", "You know what? Go explore."],
-		["ADAM", "Adam."],
-		["GOD", "Sure."],
-	]))
+	dialogue.cancelable = false
+	dialogue.start(_lines(EdenDialogue.INTRO))
 
 func _on_dialogue_finished() -> void:
+	if dialogue_after == &"naming_start":
+		naming_authority = true
+		_commit(GameState.checkpoint, {"eden_naming_authority": true})
+		_resume_naming()
+		return
+	if dialogue_after in [&"name_choice", &"name_next"]:
+		var show_choice := dialogue_after == &"name_choice"
+		dialogue_after = &""
+		if show_choice: _show_naming_choice()
+		else: _resume_naming()
+		return
 	if String(dialogue_after).begins_with("rock:"):
 		var next := String(dialogue_after).trim_prefix("rock:")
 		dialogue_after = &""
@@ -232,6 +243,14 @@ func _on_dialogue_finished() -> void:
 		_update_objective()
 	elif dialogue_after == &"eve_created":
 		dialogue_after = &""
+		stage_blackout.hide()
+		stage_log = false
+		player.rotation = 0.0
+		if cutscene_eve != null:
+			cutscene_eve.queue_free()
+			cutscene_eve = null
+		player.position = Vector2(240, 205)
+		god_actor.position = Vector2(240, 55)
 		eve_created = true
 		_activate_eve()
 		_commit(CHECKPOINT_EVE, {"eden_eve_created": true})
@@ -278,29 +297,36 @@ func _interact(id: StringName) -> void:
 		_open_animal(id)
 
 func _open_animal(id: StringName) -> void:
+	dialogue.cancelable = true
 	var animal := _animal(id)
-	if role == &"eve" and not eve_named.has(String(id)):
-		eve_named[String(id)] = true
-		var count := eve_named.size()
-		if count >= 2:
-			god_in_garden = false
-			interactables["god"].visible = false
-			god_actor.hide()
-		if count == ANIMALS.size():
-			serpent_unlocked = true
-			interactables["serpent"].visible = true
-		_commit(CHECKPOINT_EVE if not serpent_unlocked else CHECKPOINT_SERPENT, {
-			"eden_eve_named": eve_named, "eden_serpent_unlocked": serpent_unlocked,
-		})
+	if role == &"eve":
+		if not eve_named.has(String(id)):
+			eve_named[String(id)] = true
+			var count := eve_named.size()
+			if count >= 2:
+				god_in_garden = false
+				interactables["god"].visible = false
+				god_actor.hide()
+			if count == ANIMALS.size():
+				serpent_unlocked = true
+				interactables["serpent"].visible = true
+			_commit(maxi(GameState.checkpoint, CHECKPOINT_EVE if not serpent_unlocked else CHECKPOINT_SERPENT), {
+				"eden_eve_named": eve_named, "eden_serpent_unlocked": serpent_unlocked,
+			})
 		dialogue.start(_lines([["EVE", "That's a " + String(animal["name"]).to_lower() + "."]]))
 		_update_objective()
 		return
-	dialogue.start(_lines([[String(animal["name"]), String(animal["noise"])]]))
-	if id == &"turtle" and role == &"adam":
-		if rock_discovered:
-			dialogue.start(_lines([["STORY", "The turtle takes one tiny step."], ["ADAM", "Rock moves."], ["STORY", "The turtle takes another step."], ["ADAM", "Rock?"], ["ADAM", "Moving rock."]] if not rock_complete else [["ADAM", "You are confusing."]]))
-		else:
-			dialogue.start(_lines([["STORY", "Adam crouches beside the turtle."], ["ADAM", "Hello."], ["STORY", "The turtle pulls its head into its shell. Adam waits."], ["ADAM", "Gone?"], ["STORY", "The turtle slowly pokes its head back out."], ["ADAM", "Not gone."], ["STORY", "The turtle takes one tiny step."], ["ADAM", "Slow."], ["STORY", "Another tiny step."], ["ADAM", "Very slow."], ["ADAM", "You carry this?"], ["STORY", "The turtle keeps walking."], ["ADAM", "That seems heavy."]]))
+	var key := String(id)
+	var visits := int(animal_visits.get(key, 0))
+	animal_visits[key] = visits + 1
+	_commit(GameState.checkpoint, {"eden_animal_visits": animal_visits})
+	if id == &"cow" and visits > 0: key = "cow_repeat"
+	if id == &"lion" and visits == 1: key = "lion_second"
+	elif id == &"lion" and visits > 1: key = "lion_repeat"
+	if id == &"turtle" and rock_discovered:
+		key = "turtle_repeat" if rock_complete and visits > 0 else "turtle_rock"
+	if id == &"eagle" and first_jeff: key = "eagle_jeff"
+	dialogue.start(_lines(EdenDialogue.FREE_ROAM[key]))
 
 func _open_rock() -> void:
 	if role != &"adam":
@@ -353,52 +379,68 @@ func _on_dialogue_canceled() -> void:
 	_update_objective()
 
 func _open_god() -> void:
-	if not first_jeff:
-		dialogue.ask("GOD", "Adam, it is time to name the animals. Please take this seriously.", [
-			{"id": &"start_naming", "label": "I will do my best."},
-			{"id": &"later", "label": "I need to talk to a rock first."},
-		])
+	dialogue.cancelable = false
+	if not naming_authority:
+		dialogue_after = &"naming_start"
+		dialogue.start(_lines(EdenDialogue.QUEST_START))
+	elif not first_jeff:
+		_resume_naming()
 	elif not eve_created:
-		dialogue.ask("GOD", "Five animals have names. One is Jeff. I may need to intervene.", [
-			{"id": &"eve_cutscene", "label": "Continue story"}, {"id": &"later", "label": "Wander Eden"},
-		])
+		_start_eve_cutscene()
 	else:
-		dialogue.start(_lines([["GOD", "Eve is doing very well. I am going to let you two handle this."]]))
+		dialogue.start(_lines([["STORY", "God sees that Eve is doing well and Adam is occupied, so He returns to the theater."]]))
 
 func _show_naming_choice() -> void:
-	if naming_index >= NAMING_ORDER.size():
-		return
+	if naming_index >= NAMING_ORDER.size(): return
 	var id := NAMING_ORDER[naming_index]
 	var options := _name_options(id)
 	var choices: Array[Dictionary] = []
 	for index in options.size():
 		choices.append({"id": StringName("name_%s_%s" % [id, options[index]]), "label": options[index]})
-	dialogue.ask("NAME THE " + _animal(id)["name"], "Pick the name Adam believes is obviously correct.", choices)
+	dialogue_after = &""
+	dialogue.cancelable = true
+	jeff_wait = 0.0
+	dialogue.ask("NAME THE " + _animal(id)["name"], "", choices)
+
+func _resume_naming() -> void:
+	naming_index = 0
+	while naming_index < NAMING_ORDER.size() and named_animals.has(String(NAMING_ORDER[naming_index])):
+		naming_index += 1
+	if naming_index >= NAMING_ORDER.size(): return
+	var id := NAMING_ORDER[naming_index]
+	var rows: Array = EdenDialogue.NAMING_INTRO[String(id)]
+	dialogue.cancelable = true
+	dialogue_after = &"name_choice"
+	if rows.is_empty(): _show_naming_choice()
+	else: dialogue.start(_lines(rows))
 
 func _select_name(id: StringName, value: String) -> void:
 	named_animals[String(id)] = value
-	naming_index += 1
+	var key := String(id) + "_" + value.replace(" ", "_")
+	var rows: Array = [["ADAM", value + "."]]
+	if EdenDialogue.REACTIONS.has(key):
+		rows = EdenDialogue.REACTIONS[key]
+	elif id == &"turtle" and rock_discovered:
+		rows += EdenDialogue.REACTIONS.turtle_other
+	dialogue.cancelable = false
 	if id == &"eagle":
 		first_jeff = true
 		_commit(CHECKPOINT_JEFF, {"eden_named_animals": named_animals, "eden_first_jeff": true})
 		toast.show_event("FIRST JEFF")
 		dialogue_after = &""
-		dialogue.start(_lines([["GOD", "You know what? That's Jeff."], ["STORY", "Achievement unlocked: First Jeff."]]))
-		_update_objective()
-		return
-	_commit(CHECKPOINT_NAMING, {"eden_named_animals": named_animals})
-	_show_naming_choice()
+	else:
+		_commit(maxi(GameState.checkpoint, CHECKPOINT_NAMING), {"eden_named_animals": named_animals})
+		dialogue_after = &"name_next"
+	dialogue.start(_lines(rows))
+	_update_objective()
+	queue_redraw()
 
 func _start_eve_cutscene() -> void:
 	dialogue_after = &"eve_created"
-	dialogue.start(_lines([
-		["STORY", "God picks up a log. The screen cuts to black."],
-		["STORY", "When the image returns, Adam is very clearly unconscious."],
-		["GOD", "And I PUT HIM TO SLEEP."],
-		["GOD", "What is this animal called?"],
-		["EVE", "That's a cow."],
-		["GOD", "I like this one."],
-	]))
+	dialogue.cancelable = false
+	player.position = Vector2(190, 94)
+	god_actor.position = Vector2(285, 94)
+	dialogue.start(_lines(EdenDialogue.EVE_CREATION))
 
 func _activate_eve() -> void:
 	role = &"eve"
@@ -436,7 +478,8 @@ func _open_serpent() -> void:
 	if fall_started:
 		dialogue.start(_lines([["GOD — FROM THE THEATER", "The leaves are in your inventory. I am not repeating myself."]]))
 		return
-	dialogue.ask("SERPENT", "The temptation beat is ready. Finished serpent dialogue remains intentionally unwritten.", [
+	dialogue.cancelable = true
+	dialogue.ask("STORY", "Eve encounters the serpent, who tempts her to eat the fruit.", [
 		{"id": &"fruit", "label": "Eat the fruit"}, {"id": &"later", "label": "Not yet"},
 	])
 
@@ -475,6 +518,10 @@ func _update_objective() -> void:
 		objective.text = "EVE'S NAMING ROUND  •  %d / 5" % eve_named.size()
 	elif first_jeff:
 		objective.text = "FIRST JEFF COMPLETE  •  TALK TO GOD"
+	elif naming_authority:
+		objective.text = "NAME THE ANIMALS  •  TALK TO GOD TO RESUME"
+	elif animal_visits.size() >= 3:
+		objective.text = "GOD IS CALLING  •  TALK TO GOD"
 	else:
 		objective.text = "EDEN  •  Explore, talk, or find God"
 
@@ -490,10 +537,12 @@ func _animal(id: StringName) -> Dictionary:
 
 func _name_options(id: StringName) -> Array[String]:
 	match id:
-		&"cow": return ["Moo Rectangle", "Beef Pillow", "Grumbles", "Milk Horse"]
-		&"sheep": return ["Cloud Dog", "Baa Ball", "Floof Unit", "Wool Thing"]
-		&"rabbit": return ["Fast Potato", "Ear Beast", "Hop Chunk", "Ground Bird"]
-		&"turtle": return ["Rock With Legs", "Slow Plate", "Shell Blob", "Pond Rock"]
+		&"cow": return ["Moo", "Grass Dog", "Big", "Wednesday"]
+		&"turtle":
+			if rock_discovered: return ["Moving Rock", "Small Ground", "Round", "Other Rock"]
+			return ["Slow", "Shell", "Round", "Small"]
+		&"lion": return ["No", "Loud", "Hair Mouth", "Do Not"]
+		&"elephant": return ["Very Big", "Five Legs", "Long Face", "Kevin"]
 		&"eagle": return ["Jeff", "Jeff", "Jeff", "Jeff"]
 	return ["Thing"]
 
@@ -556,6 +605,19 @@ func _draw() -> void:
 	_draw_rock(Vector2(202, 159))
 	for animal in ANIMALS: _draw_animal(animal)
 	if serpent_unlocked or fall_started: _draw_serpent(Vector2(415, 134))
+	if stage_log: draw_rect(Rect2(270, 57, 30, 9), Color("#70431f"))
+
+func _on_staging_line(_speaker: String, text: String) -> void:
+	stage_blackout.visible = text.contains("Cut to black.")
+	if dialogue_after == &"eve_created":
+		if text.contains("picks up a log"): stage_log = true
+		if text.contains("unconscious"):
+			stage_log = false
+			player.rotation = PI / 2.0
+		if text.contains("creates the woman") and cutscene_eve == null:
+			cutscene_eve = _make_actor(&"eve", "EVE", Vector2(235, 94))
+			cutscene_eve.movement_enabled = false
+			add_child(cutscene_eve)
 
 func _draw_tree(position: Vector2) -> void:
 	draw_rect(Rect2(position - Vector2(3, 0), Vector2(6, 17)), Color("#70431f"))
@@ -571,8 +633,8 @@ func _draw_animal(animal: Dictionary) -> void:
 	var color := Color("#eee5d1")
 	match animal["id"]:
 		&"cow": color = Color("#eee5d1")
-		&"sheep": color = Color("#f7f0dd")
-		&"rabbit": color = Color("#d9c2b0")
+		&"lion": color = Color("#c89338")
+		&"elephant": color = Color("#a3a6ae")
 		&"turtle": color = Color("#5f914e")
 		&"eagle": color = Color("#835234")
 	draw_circle(position, 9, Color("#283126"))
