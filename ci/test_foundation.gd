@@ -78,7 +78,8 @@ func _run() -> void:
 	eden.ci_unlock_serpent()
 	_check(bool(state.get_flag(&"eden_serpent_unlocked")), "Eve naming unlocks serpent encounter")
 	eden.ci_start_fall()
-	_check(eden.fall_started and state.checkpoint == 6, "Fall checkpoint saves")
+	_check(eden.fall_started and eden.role == &"adam" and state.checkpoint == 6,
+		"Fall returns control to Adam and saves checkpoint")
 	await _snapshot("06_fall_boxes.png")
 	eden._use_leaves()
 	_check(eden.adam_clothed and state.checkpoint == 7, "Leaves resolve player gag and save final milestone")

@@ -156,6 +156,8 @@ func _restore_or_begin() -> void:
 	else:
 		if eve_created:
 			_activate_eve()
+		if fall_started:
+			_activate_adam_after_fall()
 		_update_objective()
 
 func _begin_intro() -> void:
@@ -204,6 +206,7 @@ func _on_dialogue_finished() -> void:
 	elif dialogue_after == &"fall_started":
 		dialogue_after = &""
 		fall_started = true
+		_activate_adam_after_fall()
 		inventory.visible = true
 		_commit(CHECKPOINT_SERPENT, {"eden_fall_started": true})
 		_update_objective()
@@ -330,6 +333,21 @@ func _activate_eve() -> void:
 	interactables["serpent"].visible = serpent_unlocked
 	queue_redraw()
 
+func _activate_adam_after_fall() -> void:
+	if follower == null:
+		return
+	# The player returns to Adam for the leaves gag. Reuse the two actor nodes
+	# instead of creating a second character-switching mechanism.
+	var eve_position := player.global_position
+	player.role = &"adam"
+	player.display_name = "ADAM"
+	player.global_position = follower.global_position
+	follower.role = &"eve"
+	follower.display_name = "EVE"
+	follower.global_position = eve_position
+	role = &"adam"
+	queue_redraw()
+
 func _open_serpent() -> void:
 	if fall_started:
 		dialogue.start(_lines([["GOD — FROM THE THEATER", "The leaves are in your inventory. I am not repeating myself."]]))
@@ -438,6 +456,7 @@ func ci_unlock_serpent() -> void:
 func ci_start_fall() -> void:
 	dialogue.close()
 	fall_started = true
+	_activate_adam_after_fall()
 	player.global_position = Vector2(285, 177)
 	if follower != null:
 		follower.global_position = Vector2(325, 177)
@@ -455,8 +474,8 @@ func _draw() -> void:
 	for animal in ANIMALS: _draw_animal(animal)
 	if serpent_unlocked or fall_started: _draw_serpent(Vector2(415, 134))
 	if fall_started:
-		_draw_modesty(player.global_position, adam_clothed if role == &"adam" else true)
-		if follower != null: _draw_modesty(follower.global_position, adam_clothed)
+		_draw_modesty(player.global_position, adam_clothed if player.role == &"adam" else true)
+		if follower != null: _draw_modesty(follower.global_position, adam_clothed if follower.role == &"adam" else true)
 
 func _draw_tree(position: Vector2) -> void:
 	draw_rect(Rect2(position - Vector2(3, 0), Vector2(6, 17)), Color("#70431f"))
