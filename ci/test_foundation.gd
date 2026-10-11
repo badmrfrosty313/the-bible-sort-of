@@ -34,6 +34,7 @@ func _run() -> void:
 	_check(_screen().name == &"TitleScreen", "Boot mounts approved title presentation")
 	_check(root.content_scale_size == Vector2i(1440, 810), "Title switches to a high-resolution 16:9 logical viewport")
 	_check(_screen().get_node("ApprovedArt").texture != null, "Approved title artwork is mounted")
+	_check(not _screen().fallback_active and not _screen().fallback_menu.visible and not _screen().quit_button.visible, "Valid title art never enters fallback or exposes Quit")
 	_check((_screen() as Control).size == Vector2(1440, 810), "Title renders directly in true 16:9 logical space")
 	var title_scale := Vector2(1440.0 / 1672.0, 810.0 / 941.0)
 	_check(_screen().get_node("%NewGame").position.is_equal_approx(Vector2(955, 414) * title_scale) and _screen().get_node("%Continue").position.is_equal_approx(Vector2(963, 457) * title_scale), "Live title hitboxes share the title-art coordinate transform")
@@ -70,6 +71,8 @@ func _run() -> void:
 	_check(state.episode_id == &"eden" and state.checkpoint == 0, "New Game uses Eden state")
 	_check(eden.player.get_node("Sprite") is AnimatedSprite2D and eden.god_actor.get_node("Sprite") is AnimatedSprite2D, "Adam and God use runtime sprite sheets")
 	_check(eden.dialogue.active, "Adam introduction begins with dialogue")
+	await _visible_actor(eden.player, "Initial Adam")
+	await _visible_actor(eden.god_actor, "Initial God")
 	await _snapshot("02_adam_intro.png")
 	for step in range(20): await _key(KEY_ENTER)
 	_check(not eden.dialogue.active and state.checkpoint == 1, "Intro completes and saves Eden checkpoint")
@@ -100,6 +103,8 @@ func _run() -> void:
 	eden.ci_activate_eve()
 	_check(eden.role == &"eve" and eden.follower != null, "Eve becomes player and Adam follows")
 	_check((eden.player.get_node("Sprite") as AnimatedSprite2D).sprite_frames.has_animation(&"walk_down") and (eden.follower.get_node("Sprite") as AnimatedSprite2D).visible, "Eve and Adam follower use covered walk sprites")
+	await _visible_actor(eden.player, "Eve")
+	await _visible_actor(eden.follower, "Adam follower")
 	var follower_start: Vector2 = eden.follower.global_position
 	eden.player.global_position += Vector2(25, 0)
 	await _settle()
@@ -110,6 +115,7 @@ func _run() -> void:
 	eden.ci_start_fall()
 	_check(eden.fall_started and eden.role == &"adam" and state.checkpoint == 6,
 		"Fall returns control to Adam and saves checkpoint")
+	await _visible_actor(eden.player, "Adam after Fall")
 	await _snapshot("06_fall_boxes.png")
 	eden._use_leaves()
 	_check(eden.adam_clothed and state.checkpoint == 7, "Leaves resolve player gag and save final milestone")
@@ -186,6 +192,36 @@ func _hold_stick(axis: int, amount: float, frames: int) -> void:
 
 func _settle() -> void:
 	for frame in range(4): await process_frame
+	await physics_frame
+	await process_frame
+
+func _visible_actor(actor: TopDownActor, label: String) -> void:
+	var sprite := actor.get_node("Sprite") as AnimatedSprite2D
+	_check(actor.is_visible_in_tree() and actor.modulate.a > 0.0 and actor.self_modulate.a > 0.0 and sprite.is_visible_in_tree() and not actor.fallback_active, label + " has visible imported sprite")
+	_check(actor.visible_frame_bounds().intersects(Rect2(0, 0, 480, 270)), label + " intersects gameplay viewport")
+	for direction in TopDownActor.DIRECTIONS:
+		for prefix in ["idle_", "walk_"]:
+			var animation: String = prefix + String(direction)
+			var frames := sprite.sprite_frames
+			_check(frames.has_animation(animation) and frames.get_frame_count(animation) == (4 if prefix == "walk_" else 1), label + " " + animation + " frame sequence")
+			for index in frames.get_frame_count(animation):
+				var frame := frames.get_frame_texture(animation, index) as AtlasTexture
+				_check(frame != null and frame.atlas != null and RuntimeTexture.image_is_visible(frame.get_image()), label + " visible atlas frame " + animation + str(index))
+	if capture:
+		await RenderingServer.frame_post_draw
+		var before := root.get_texture().get_image()
+		actor.hide()
+		await process_frame
+		await RenderingServer.frame_post_draw
+		var hidden := root.get_texture().get_image()
+		actor.show()
+		await process_frame
+		await RenderingServer.frame_post_draw
+		var changed := 0
+		for y in before.get_height():
+			for x in before.get_width():
+				if before.get_pixel(x, y) != hidden.get_pixel(x, y): changed += 1
+		_check(changed > 30, label + " changes actual rendered pixels when hidden")
 
 func _check(condition: bool, message: String) -> void:
 	checks += 1

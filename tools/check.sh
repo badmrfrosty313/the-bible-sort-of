@@ -3,6 +3,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 godot_bin="${GODOT_BIN:-godot}"
+if [[ " $* " == *" --clean "* ]]; then
+  rm -rf .godot
+fi
 test_root="$(mktemp -d)"
 trap 'rm -rf "$test_root"' EXIT
 export XDG_DATA_HOME="$test_root/data"
@@ -25,7 +28,7 @@ run_check godot-foundation.log timeout 30s "$godot_bin" --headless --path . --sc
 run_check godot-resume.log timeout 30s "$godot_bin" --headless --path . --script ci/test_foundation.gd -- --resume
 run_check godot-quit.log timeout 10s "$godot_bin" --headless --path . --script ci/test_foundation.gd -- --quit
 
-if [[ "${1:-}" == "--visual" ]]; then
+if [[ " $* " == *" --visual "* ]]; then
   # A fresh isolated save makes captures deterministic; do not reuse player data.
   visual_root="$(mktemp -d)"
   trap 'rm -rf "$test_root" "$visual_root"' EXIT

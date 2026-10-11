@@ -15,7 +15,7 @@ static func load_texture(path: String, expected_size := Vector2i.ZERO) -> Textur
 			return texture
 	# No static image preload: missing imports must not prevent a scene/script loading.
 	var source := Image.new()
-	if source.load(path) == OK and image_is_visible(source) and (expected_size == Vector2i.ZERO or source.get_size() == expected_size):
+	if FileAccess.file_exists(path) and source.load(path) == OK and image_is_visible(source) and (expected_size == Vector2i.ZERO or source.get_size() == expected_size):
 		push_warning("Imported texture unavailable; decoded source directly: " + path)
 		return ImageTexture.create_from_image(source)
 	push_warning("REQUIRED ART UNAVAILABLE: " + path + " — visible fallback enabled")
