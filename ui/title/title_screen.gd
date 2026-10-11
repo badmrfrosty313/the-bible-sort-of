@@ -1,14 +1,16 @@
 extends Control
 
-const TITLE_ART_PATH := "res://art/title/gods_beach_day_adams_tumble.png"
+const TITLE_ART_PATH := "res://art/title/gods_beach_day_adams_tumble_clean.png"
 const TITLE_RENDER_SIZE := Vector2i(1440, 810)
+const TITLE_SOURCE_SIZE := Vector2(1672, 941)
 const SETTINGS_PATH := "user://settings.json"
 const MENU_ENTRIES := ["NEW GAME", "CONTINUE", "LOAD", "CHAPTER SELECTION", "OPTIONS"]
 const MENU_NODE_NAMES := ["NewGame", "Continue", "Load", "ChapterSelection", "Options"]
-const MENU_RECTS := [
-	Rect2(785, 360, 220, 48), Rect2(805, 400, 220, 48), Rect2(805, 440, 150, 48),
-	Rect2(805, 480, 285, 48), Rect2(805, 520, 190, 48)
+const SOURCE_MENU_RECTS := [
+	Rect2(955, 414, 180, 45), Rect2(963, 457, 165, 42), Rect2(963, 498, 90, 42),
+	Rect2(963, 538, 290, 42), Rect2(963, 579, 135, 42)
 ]
+const SOURCE_SELECTOR_X := 925.0
 
 signal new_game_requested
 signal continue_requested
@@ -24,7 +26,7 @@ var settings := {"fullscreen": false, "master_volume": 1.0}
 
 @onready var approved_art: TextureRect = $ApprovedArt
 @onready var fallback_menu: Control = $FallbackMenu
-@onready var focus_marker: Label = $FocusMarker
+@onready var focus_marker: Control = $FocusMarker
 @onready var status: Label = %Status
 @onready var replace_save: ConfirmationDialog = $ReplaceSave
 @onready var quit_dialog: ConfirmationDialog = $QuitDialog
@@ -62,11 +64,6 @@ func _load_approved_art() -> void:
 	if approved_art.texture == null:
 		fallback_menu.show()
 		status.text = "Title artwork unavailable"
-		for button in menu_buttons:
-			button.modulate.a = 1.0
-			button.text = String(button.get_meta("entry"))
-		quit_button.modulate.a = 1.0
-		quit_button.text = "QUIT"
 		status.show()
 	else:
 		fallback_menu.hide()
@@ -76,8 +73,9 @@ func _build_menu() -> void:
 	for index in MENU_ENTRIES.size():
 		var button := get_node(MENU_NODE_NAMES[index]) as Button
 		button.set_meta("entry", MENU_ENTRIES[index])
-		button.position = MENU_RECTS[index].position
-		button.size = MENU_RECTS[index].size
+		var rect := _source_rect_to_title(SOURCE_MENU_RECTS[index])
+		button.position = rect.position
+		button.size = rect.size
 		button.flat = true
 		button.focus_mode = Control.FOCUS_ALL
 		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -107,8 +105,17 @@ func _next_enabled(index: int, direction: int) -> int:
 	return index
 
 func _move_marker(button: Button) -> void:
-	focus_marker.position = Vector2(button.position.x - 34.0, button.position.y + 12.0)
+	var index := menu_buttons.find(button)
+	var row: Rect2 = SOURCE_MENU_RECTS[index]
+	focus_marker.position = _source_to_title(Vector2(SOURCE_SELECTOR_X, row.get_center().y - 15.0))
 	focus_marker.show()
+
+func _source_to_title(point: Vector2) -> Vector2:
+	return point * (Vector2(TITLE_RENDER_SIZE) / TITLE_SOURCE_SIZE)
+
+func _source_rect_to_title(rect: Rect2) -> Rect2:
+	var scale := Vector2(TITLE_RENDER_SIZE) / TITLE_SOURCE_SIZE
+	return Rect2(rect.position * scale, rect.size * scale)
 
 func _refresh_save() -> void:
 	menu_buttons[1].disabled = not GameState.has_progress()
