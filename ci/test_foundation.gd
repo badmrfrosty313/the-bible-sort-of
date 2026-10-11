@@ -69,6 +69,7 @@ func _run() -> void:
 	_check(eden.name == &"Eden", "New Game enters Adam and Eve episode")
 	_check(root.content_scale_size == Vector2i(480, 270), "Entering Eden restores the 480x270 gameplay viewport")
 	_check(state.episode_id == &"eden" and state.checkpoint == 0, "New Game uses Eden state")
+	_check(eden.player.get_node("Sprite") is AnimatedSprite2D and eden.god_actor.get_node("Sprite") is AnimatedSprite2D, "Adam and God use runtime sprite sheets")
 	_check(eden.dialogue.active, "Adam introduction begins with dialogue")
 	await _snapshot("02_adam_intro.png")
 	for step in range(20): await _key(KEY_ENTER)
@@ -77,6 +78,7 @@ func _run() -> void:
 	var start: Vector2 = eden.player.global_position
 	await _hold_key(KEY_D, 10)
 	_check(eden.player.global_position.x > start.x, "Keyboard movement moves Adam")
+	_check((eden.player.get_node("Sprite") as AnimatedSprite2D).animation == &"idle_right", "Adam keeps a four-direction facing idle")
 	start = eden.player.global_position
 	await _hold_stick(0, 1.0, 10)
 	_check(eden.player.global_position.x > start.x, "Controller stick moves Adam")
@@ -98,6 +100,7 @@ func _run() -> void:
 	eden.toast.hide()
 	eden.ci_activate_eve()
 	_check(eden.role == &"eve" and eden.follower != null, "Eve becomes player and Adam follows")
+	_check((eden.player.get_node("Sprite") as AnimatedSprite2D).sprite_frames.has_animation(&"walk_down") and (eden.follower.get_node("Sprite") as AnimatedSprite2D).visible, "Eve and Adam follower use covered walk sprites")
 	var follower_start: Vector2 = eden.follower.global_position
 	eden.player.global_position += Vector2(25, 0)
 	await _settle()

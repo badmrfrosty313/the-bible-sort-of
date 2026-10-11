@@ -31,6 +31,7 @@ const CHECKPOINT_LEAVES := 7
 
 var player: TopDownActor
 var follower: TopDownActor
+var god_actor: TopDownActor
 var current_interactable: Interactable
 var role: StringName = &"adam"
 var intro_playing := false
@@ -129,6 +130,9 @@ func _add_interactable(id: StringName, position: Vector2, text: String) -> void:
 func _spawn_actors() -> void:
 	player = _make_actor(&"adam", "ADAM", Vector2(240, 205))
 	add_child(player)
+	god_actor = _make_actor(&"god", "GOD", Vector2(240, 55))
+	god_actor.movement_enabled = false
+	add_child(god_actor)
 
 func _make_actor(actor_role: StringName, display: String, position: Vector2) -> TopDownActor:
 	var actor := TopDownActor.new()
@@ -330,6 +334,7 @@ func _activate_eve() -> void:
 	if eve_named.size() >= 2:
 		god_in_garden = false
 		interactables["god"].visible = false
+		god_actor.visible = false
 	interactables["serpent"].visible = serpent_unlocked
 	queue_redraw()
 
@@ -462,7 +467,6 @@ func ci_start_fall() -> void:
 		follower.global_position = Vector2(325, 177)
 	_commit(CHECKPOINT_SERPENT, {"eden_fall_started": true})
 	_update_objective()
-
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, Vector2(480, 270)), Color("#102a2a"))
 	draw_rect(GARDEN, Color("#82b85b"))
@@ -470,12 +474,8 @@ func _draw() -> void:
 	for position in [Vector2(45,52),Vector2(82,49),Vector2(402,53),Vector2(437,55),Vector2(46,220),Vector2(425,216),Vector2(240,132)]:
 		_draw_tree(position)
 	_draw_rock(Vector2(202, 159))
-	if god_in_garden: _draw_god(Vector2(240, 55))
 	for animal in ANIMALS: _draw_animal(animal)
 	if serpent_unlocked or fall_started: _draw_serpent(Vector2(415, 134))
-	if fall_started:
-		_draw_modesty(player.global_position, adam_clothed if player.role == &"adam" else true)
-		if follower != null: _draw_modesty(follower.global_position, adam_clothed if follower.role == &"adam" else true)
 
 func _draw_tree(position: Vector2) -> void:
 	draw_rect(Rect2(position - Vector2(3, 0), Vector2(6, 17)), Color("#70431f"))
@@ -485,12 +485,6 @@ func _draw_rock(position: Vector2) -> void:
 	draw_circle(position, 12, Color("#515963"))
 	draw_circle(position - Vector2(3,3), 7, Color("#77808a"))
 	draw_string(ThemeDB.fallback_font, position + Vector2(-20,21), "ROCK", HORIZONTAL_ALIGNMENT_CENTER, 40, 7, Color("#fff4d5"))
-
-func _draw_god(position: Vector2) -> void:
-	draw_circle(position - Vector2(0,7), 7, Color("#d89a61"))
-	draw_arc(position - Vector2(0,8), 9, PI, TAU, 12, Color("#eee9d9"), 4)
-	draw_rect(Rect2(position - Vector2(7,1), Vector2(14,17)), Color("#eee9d9"))
-	draw_string(ThemeDB.fallback_font, position + Vector2(-20,23), "GOD", HORIZONTAL_ALIGNMENT_CENTER, 40, 7, Color("#fff4d5"))
 
 func _draw_animal(animal: Dictionary) -> void:
 	var position: Vector2 = animal["at"]
@@ -511,6 +505,4 @@ func _draw_serpent(position: Vector2) -> void:
 	draw_circle(position + Vector2(10,-10), 5, Color("#5ca34d"))
 	draw_string(ThemeDB.fallback_font, position + Vector2(-21,20), "SERPENT", HORIZONTAL_ALIGNMENT_CENTER, 42, 6, Color("#fff4d5"))
 
-func _draw_modesty(position: Vector2, clothed: bool) -> void:
-	var color := Color("#397b3f") if clothed else Color("#111111")
-	draw_rect(Rect2(position + Vector2(-6,1), Vector2(12,7)), color)
+# Adam, Eve, and God render through TopDownActor sprite sheets.
