@@ -246,11 +246,207 @@ Control passes to the player.
 
 ### Free-roam Garden
 
-- Ability to free roam the Garden area before the naming quest.
-- Reasonable size map.
-- Make it so Adam can try to talk to animals and they just make noises at him.
-- Eden should be set up as a square to keep boundaries with the animals inside.
-- Almost like a top-down view like a Pokémon game with better sprites.
+Control passes to Adam in the Garden. The animal interactions and the Rock are available in the same free-roam space before and during the naming quest.
+
+The player should be able to discover these in any reasonable order. Dialogue must respect discovery state rather than assuming the player has already encountered another object or animal.
+
+The Garden remains a reasonable-sized square map with clear natural/playable boundaries, broadly top-down like a Pokémon-style overworld with better sprites.
+
+#### State Requirement: Rock Discovery
+
+Track whether Adam has discovered/interacted with the **obvious Eden Rock**.
+
+This state is about the specific Rock interaction in the Garden, not whether Adam has ever seen the concept of a rock during the earlier teaching montage.
+
+The Turtle's dialogue and naming choices change depending on whether that Rock interaction has happened. The callback must feel earned rather than psychic.
+
+#### Cow — Free-roam Interaction
+
+**Adam:** "Hello."
+
+**Cow:** "Moooooo."
+
+Adam waits.
+
+**Adam:** "...Adam."
+
+**Cow:** "Moo."
+
+Adam nods.
+
+**Adam:** "Good."
+
+Beat.
+
+**Adam:** "We understand each other."
+
+Repeat interaction:
+
+**Cow:** "Moooo."
+
+**Adam:** "You already told me that."
+
+#### Turtle — Before Rock Discovery
+
+Adam crouches beside the turtle.
+
+**Adam:** "Hello."
+
+The turtle pulls its head into its shell.
+
+Adam waits.
+
+**Adam:** "Gone?"
+
+The turtle slowly pokes its head back out.
+
+**Adam:** "Not gone."
+
+The turtle takes one tiny step.
+
+Adam follows it with his eyes.
+
+**Adam:** "Slow."
+
+Another tiny step.
+
+**Adam:** "Very slow."
+
+Adam crouches lower and studies the shell.
+
+**Adam:** "You carry this?"
+
+The turtle keeps walking.
+
+Adam thinks about this.
+
+**Adam:** "That seems heavy."
+
+Use this version if Adam has not yet discovered/interacted with the obvious Eden Rock.
+
+#### Turtle — After Rock Discovery
+
+The turtle takes one tiny step.
+
+Adam's eyes widen.
+
+**Adam:** "Rock moves."
+
+The turtle takes another step.
+
+Adam follows it.
+
+**Adam:** "Rock?"
+
+No answer.
+
+**Adam:** "Moving rock."
+
+Repeat interaction after the Rock conversation:
+
+**Adam:** "You are confusing."
+
+The moving-rock callback must only become available once the player has established the Rock interaction in Eden.
+
+#### Lion — Free-roam Interaction
+
+The lion growls.
+
+Adam stops.
+
+**Adam:** "Hello."
+
+The lion ROARS.
+
+Adam takes several steps backward.
+
+Long pause.
+
+**Adam:** "No."
+
+Second interaction:
+
+**Adam:** "We have spoken."
+
+The lion growls.
+
+**Adam:** "We disagree."
+
+Third interaction:
+
+Adam begins approaching.
+
+The lion raises its head.
+
+Adam immediately stops.
+
+**Adam:** "Goodbye."
+
+#### Elephant — Free-roam Interaction
+
+Adam stares upward.
+
+The elephant trumpets.
+
+Adam jumps.
+
+**Adam:** "Why are you so much?"
+
+He walks around it.
+
+**Adam:** "You have..."
+
+He counts the legs.
+
+**Adam:** "One."
+
+**Adam:** "Two."
+
+Pause.
+
+**Adam:** "Three."
+
+Moves around.
+
+**Adam:** "Four."
+
+He sees the trunk.
+
+Long pause.
+
+**Adam:** "Five?"
+
+The elephant trumpets.
+
+**Adam:** "I knew it."
+
+#### Eagle — Free-roam Interaction
+
+The eagle is perched slightly above Adam.
+
+**Adam:** "Hello."
+
+The eagle screeches.
+
+Adam waves.
+
+**Adam:** "Come down."
+
+Nothing.
+
+**Adam:** "I am down."
+
+Beat.
+
+**Adam:** "Down is good."
+
+The eagle flies to another perch.
+
+Adam watches it.
+
+**Adam:** "Show-off."
+
+After a few interactions/exploration beats, God calls Adam over and introduces the naming job.
 
 ### The Rock
 
@@ -264,19 +460,314 @@ Adam just smiles and nods.
 
 ### Animal Naming Quest
 
-Adam keeps saying random words or phrases, exasperating God.
+God calls Adam over.
 
-Use a group of five animals with names available to pick from, but they are all nonsense except the eagle.
+**God:** "Adam."
 
-When Adam gets to the eagle, all four choices are **Jeff**.
+Adam approaches.
 
-God says:
+**Adam:** "God."
 
-> **God:** "You know what? That's Jeff."
+God is pleased he got that right.
 
-**Achievement: First Jeff**
+**God:** "Very good."
 
-This is an actual gameplay section.
+Adam smiles.
+
+**God:** "I've got something for you to do."
+
+Adam looks concerned.
+
+**Adam:** "Do?"
+
+**God:** "A job."
+
+Adam stares.
+
+**Adam:** "Job."
+
+**God:** "We're going to learn that one the hard way."
+
+God gestures toward the Garden.
+
+**God:** "All of these creatures need names."
+
+Adam looks around.
+
+**Adam:** "Names."
+
+**God:** "Exactly."
+
+God points to Adam.
+
+**God:** "Adam."
+
+God points to Himself.
+
+**God:** "God."
+
+God gestures toward the animals.
+
+**God:** "And now you get to decide what they're called."
+
+For possibly the first time in his existence, power enters Adam's tiny brain.
+
+**Adam:** "I decide?"
+
+God hesitates just long enough to realize He may have made a terrible mistake.
+
+**God:** "...Yes."
+
+Quest begins.
+
+#### Cow Naming
+
+**Cow:** "Moooo."
+
+**Adam:** "I know this one."
+
+**God:** "Really?"
+
+Choices:
+
+- **Moo**
+- **Grass Dog**
+- **Big**
+- **Wednesday**
+
+If **Moo**:
+
+**God:** "You named it after the noise it makes?"
+
+**Cow:** "Moo."
+
+**Adam:** "Yes."
+
+God considers it.
+
+**God:** "Actually, that one's defensible."
+
+If **Wednesday**:
+
+**Adam:** "Wednesday."
+
+**God:** "Wednesday?"
+
+**Adam:** "Wednesday."
+
+God starts to object, realizes days do not technically have names yet either, then stops.
+
+**God:** "Never mind."
+
+Other choices can receive short appropriate reactions, but do not over-write them.
+
+#### Turtle Naming — Before Rock Discovery
+
+If the player begins the naming quest without discovering the Rock, do **not** use Moving Rock / Other Rock callbacks yet.
+
+Choices:
+
+- **Slow**
+- **Shell**
+- **Round**
+- **Small**
+
+Adam confidently announces the selected name.
+
+God may react briefly, but this version must not imply Adam has already had the Rock interaction.
+
+#### Turtle Naming — After Rock Discovery
+
+If the Rock has already been discovered, the naming choices become:
+
+- **Moving Rock**
+- **Small Ground**
+- **Round**
+- **Other Rock**
+
+If the player chooses something other than Moving Rock, Adam can still look at the turtle afterward and quietly say:
+
+**Adam:** "Moving rock."
+
+**God:** "That's not what you picked."
+
+**Adam:** "Moving rock."
+
+If the player chooses **Moving Rock**:
+
+God looks toward the player for a beat.
+
+**God:** "Of course you did."
+
+The animal's chosen name can persist as its interaction label for the rest of the chapter.
+
+#### Lion Naming
+
+The lion growls.
+
+**Adam:** "No."
+
+**God:** "It still needs a name."
+
+Choices:
+
+- **No**
+- **Loud**
+- **Hair Mouth**
+- **Do Not**
+
+If **Do Not**:
+
+**Adam:** "Do Not."
+
+**God:** "That's an instruction."
+
+**Adam:** "Do Not."
+
+The lion ROARS.
+
+Adam points at it.
+
+**Adam:** "See?"
+
+**God:** "...Fine."
+
+If **Hair Mouth**:
+
+God starts to object, looks at the mane, then the mouth.
+
+**God:** "I hate that I understand it."
+
+#### Elephant Naming
+
+Adam looks up at the elephant.
+
+**Adam:** "Big."
+
+**God:** "We've already established that."
+
+Choices:
+
+- **Very Big**
+- **Five Legs**
+- **Long Face**
+- **Kevin**
+
+If **Five Legs**:
+
+**God:** "Four."
+
+Adam points to the trunk.
+
+**Adam:** "Five."
+
+**God:** "That's its nose."
+
+Adam studies the trunk.
+
+**Adam:** "That is too much nose."
+
+If **Kevin**:
+
+**God:** "Where did you get Kevin?"
+
+Adam shrugs.
+
+Never explain Kevin.
+
+#### Eagle Naming — First Jeff
+
+The eagle screeches.
+
+**God:** "All right."
+
+Beat.
+
+**God:** "Last one."
+
+Naming menu:
+
+- **Jeff**
+- **Jeff**
+- **Jeff**
+- **Jeff**
+
+All four choices must genuinely display Jeff.
+
+If the player backs out and reopens the menu, all four are still Jeff.
+
+If the player waits too long:
+
+**Adam:** "Jeff."
+
+**God:** "You haven't picked yet."
+
+Adam looks at the eagle.
+
+**Adam:** "Jeff."
+
+After the player selects any Jeff:
+
+**God:** "Adam..."
+
+Adam smiles.
+
+**Adam:** "Jeff."
+
+God looks at the eagle.
+
+The eagle looks back.
+
+God looks at Adam.
+
+**God:** "You know what?"
+
+God gestures toward the eagle.
+
+**God:** "That's Jeff."
+
+Trigger notification:
+
+**ACHIEVEMENT UNLOCKED — FIRST JEFF**
+
+**Adam:** "Jeff!"
+
+The eagle screeches.
+
+**Adam:** "Jeff."
+
+Afterward, interacting with the eagle:
+
+**Adam:** "Jeff."
+
+**Jeff:** *screech*
+
+**Adam:** "Yes."
+
+#### Rock / Naming Quest Crossover
+
+The Rock remains available throughout this same Garden section.
+
+If Adam has received naming authority and then returns to the Rock:
+
+**Adam:** "I can name things now."
+
+Silence.
+
+Adam looks at the Rock.
+
+A naming menu begins to appear:
+
+- **Rock**
+- **Friend**
+- **Adam**
+- **Jeff**
+
+Before the player can commit to one:
+
+**God, somewhere offscreen:** "DON'T."
+
+This is a callback only. The Rock's actual long conversation and eventual **"That's a rock, Adam."** resolution remain their own optional interaction chain.
 
 ### Creation of Eve
 
