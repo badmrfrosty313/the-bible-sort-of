@@ -2,7 +2,7 @@ extends Node
 ## Owns screen changes. Episode content requests transitions through signals.
 
 const TITLE := preload("res://ui/title/title_screen.tscn")
-const TITLE_CONTENT_SIZE := Vector2i(1200, 900)
+const TITLE_CONTENT_SIZE := Vector2i(1440, 810)
 const GAMEPLAY_CONTENT_SIZE := Vector2i(480, 270)
 
 var _transition_pending: bool = false

@@ -27,8 +27,9 @@ regression comparisons. CI runs the same script and rejects engine errors.
 
 ## Startup and controls
 
-`app/boot.tscn` mounts the approved illustrated beach title. Its 4:3 artwork is
-centered in the 16:9 viewport with pillarboxes rather than stretched. New Game
+`app/boot.tscn` mounts the approved illustrated beach title. The title uses a
+high-resolution 1440x810 16:9 presentation, then gameplay returns to the normal
+480x270 logical viewport. New Game
 creates a single local save and begins Adam's introduction, then releases the
 player into Eden. Continue restores the latest coherent Eden milestone. New Game
 asks before replacing existing progress; damaged saves display a recovery message.
@@ -93,12 +94,13 @@ until pagination is implemented.
 
 ## Presentation and art
 
-The existing 480x270 viewport, 1440x810 window override, aspect preservation,
-integer scaling, and nearest-neighbor canvas filtering remain unchanged. The
-approved 4:3 beach image is intentionally rendered 360x270 inside the 480x270
-viewport, keeping its composition intact. Eden uses deliberate simple draw-time
-placeholders for its map, animals, and animation-ready actors; they are not final
-production sprites. `art/title/` contains the approved title source artwork.
+Gameplay keeps the existing 480x270 viewport, 1440x810 window override, aspect
+preservation, integer scaling, and nearest-neighbor canvas filtering. The title
+uses the 16:9 `gods_beach_day_adams_tumble.png` artwork at a high-resolution
+1440x810 logical presentation before Boot restores gameplay mode. Eden uses
+deliberate simple draw-time placeholders for its map, animals, and animation-ready
+actors; they are not final production sprites. `art/title/` contains the approved
+title source artwork.
 
 ## Prototype decisions and remaining work
 

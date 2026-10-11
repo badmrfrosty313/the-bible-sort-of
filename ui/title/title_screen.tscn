@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://ui/title/title_screen.gd" id="1"]
 [ext_resource type="Theme" path="res://ui/shared/game_theme.tres" id="2"]
-[ext_resource type="Texture2D" path="res://art/title/approved_title.webp" id="3"]
+[ext_resource type="Texture2D" path="res://art/title/gods_beach_day_adams_tumble.png" id="3"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -16,8 +16,8 @@ script = ExtResource("1")
 
 [node name="ApprovedArt" type="TextureRect" parent="."]
 layout_mode = 0
-offset_right = 1200.0
-offset_bottom = 900.0
+offset_right = 1440.0
+offset_bottom = 810.0
 mouse_filter = 2
 texture = ExtResource("3")
 expand_mode = 1
@@ -26,123 +26,91 @@ texture_filter = 1
 
 [node name="FallbackMenu" type="Control" parent="."]
 layout_mode = 0
-offset_right = 1200.0
-offset_bottom = 900.0
+offset_right = 1440.0
+offset_bottom = 810.0
 visible = false
 mouse_filter = 2
 
 [node name="Heading" type="Label" parent="FallbackMenu"]
 layout_mode = 0
-offset_left = 180.0
-offset_top = 245.0
-offset_right = 1020.0
-offset_bottom = 320.0
+offset_left = 300.0
+offset_top = 180.0
+offset_right = 1140.0
+offset_bottom = 250.0
 theme_override_colors/font_color = Color(1, 0.87, 0.58, 1)
 theme_override_font_sizes/font_size = 42
 text = "THE BIBLE: SORT OF"
 horizontal_alignment = 1
 
-[node name="NewGameText" type="Label" parent="FallbackMenu"]
+[node name="MenuText" type="Label" parent="FallbackMenu"]
 layout_mode = 0
-offset_left = 415.0
-offset_top = 525.0
-offset_right = 785.0
-offset_bottom = 580.0
+offset_left = 500.0
+offset_top = 330.0
+offset_right = 1100.0
+offset_bottom = 620.0
 theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
 theme_override_font_sizes/font_size = 28
-text = "NEW GAME"
+text = "NEW GAME\n\nCONTINUE\n\nLOAD\n\nCHAPTER SELECTION\n\nOPTIONS"
 horizontal_alignment = 1
-vertical_alignment = 1
 
-[node name="ContinueText" type="Label" parent="FallbackMenu"]
+[node name="Quit" type="Button" parent="."]
 layout_mode = 0
-offset_left = 415.0
-offset_top = 580.0
-offset_right = 785.0
-offset_bottom = 640.0
-theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
-theme_override_font_sizes/font_size = 28
-text = "CONTINUE"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="QuitText" type="Label" parent="FallbackMenu"]
-layout_mode = 0
-offset_left = 415.0
+offset_left = 805.0
 offset_top = 640.0
-offset_right = 785.0
-offset_bottom = 700.0
+offset_right = 995.0
+offset_bottom = 688.0
+modulate = Color(1, 1, 1, 0)
 theme_override_colors/font_color = Color(1, 0.85, 0.47, 1)
 theme_override_font_sizes/font_size = 28
 text = "QUIT"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="NewGame" type="Button" parent="."]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 415.0
-offset_top = 525.0
-offset_right = 785.0
-offset_bottom = 580.0
-modulate = Color(1, 1, 1, 0)
-tooltip_text = "New Game"
-focus_neighbor_top = NodePath("../Quit")
-focus_neighbor_bottom = NodePath("../Continue")
 
 [node name="Continue" type="Button" parent="."]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 415.0
-offset_top = 580.0
-offset_right = 785.0
-offset_bottom = 640.0
-modulate = Color(1, 1, 1, 0)
-tooltip_text = "Continue"
-focus_neighbor_top = NodePath("../NewGame")
-focus_neighbor_bottom = NodePath("../Quit")
 
-[node name="Quit" type="Button" parent="."]
+[node name="Load" type="Button" parent="."]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 415.0
-offset_top = 640.0
-offset_right = 785.0
-offset_bottom = 700.0
-modulate = Color(1, 1, 1, 0)
-tooltip_text = "Quit"
-focus_neighbor_top = NodePath("../Continue")
-focus_neighbor_bottom = NodePath("../NewGame")
+
+[node name="ChapterSelection" type="Button" parent="."]
+unique_name_in_owner = true
+
+[node name="Options" type="Button" parent="."]
+unique_name_in_owner = true
 
 [node name="FocusMarker" type="Label" parent="."]
 layout_mode = 0
-offset_left = 357.5
-offset_top = 522.5
-offset_right = 397.5
-offset_bottom = 570.0
+offset_left = 750.0
+offset_top = 372.0
+offset_right = 784.0
+offset_bottom = 420.0
 theme_override_colors/font_color = Color(1, 0.83, 0.35, 1)
 theme_override_font_sizes/font_size = 28
-text = "◆"
+text = "▶"
 mouse_filter = 2
 visible = false
 
 [node name="Status" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 300.0
-offset_top = 730.0
-offset_right = 900.0
-offset_bottom = 780.0
+offset_left = 400.0
+offset_top = 680.0
+offset_right = 1040.0
+offset_bottom = 730.0
 theme_override_colors/font_color = Color(1, 0.78, 0.58, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
-vertical_alignment = 1
 visible = false
 
 [node name="ReplaceSave" type="ConfirmationDialog" parent="."]
 title = "Start over?"
-initial_position = 2
-size = Vector2i(640, 240)
-dialog_text = "New Game replaces your existing progress."
+dialog_text = "Start Adam & Eve from the beginning? Current progress will be replaced."
 dialog_autowrap = true
 ok_button_text = "Start over"
+
+[node name="QuitDialog" type="ConfirmationDialog" parent="."]
+title = "Quit the game?"
+dialog_text = "Quit the game?"
+ok_button_text = "YES"
+cancel_button_text = "NO"
