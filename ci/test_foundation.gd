@@ -43,7 +43,7 @@ func _run() -> void:
 	_check(state.episode_id == &"eden" and state.checkpoint == 0, "New Game uses Eden state")
 	_check(eden.dialogue.active, "Adam introduction begins with dialogue")
 	await _snapshot("02_adam_intro.png")
-	for step in range(8): await _key(KEY_ENTER)
+	for step in range(20): await _key(KEY_ENTER)
 	_check(not eden.dialogue.active and state.checkpoint == 1, "Intro completes and saves Eden checkpoint")
 	_check(eden.objective.text.begins_with("EDEN"), "Free roam objective is visible")
 	var start: Vector2 = eden.player.global_position

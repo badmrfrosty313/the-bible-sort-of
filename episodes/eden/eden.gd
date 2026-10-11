@@ -162,14 +162,26 @@ func _begin_intro() -> void:
 	intro_playing = true
 	dialogue_after = &"intro_complete"
 	dialogue.start(_lines([
-		["GOD", "Creation took a while. Rest is important."],
-		["STORY", "God finds Adam after approximately five minutes of existence."],
-		["GOD", "Hello, Adam. Can you say something?"],
-		["ADAM", "..."],
-		["STORY", "Five hours later."],
-		["GOD", "What have you learned?"],
+		["STORY", "Adam stares intensely at his own hand, opens and closes his fingers, and thinks very hard."],
+		["GOD", "Adam."],
 		["ADAM", "Adam."],
-		["STORY", "God begins teaching Adam words. It is going to be a long day."],
+		["GOD", "Yes. You're Adam."],
+		["ADAM", "Adam."],
+		["GOD", "Right."],
+		["GOD", "God."],
+		["ADAM", "Adam."],
+		["GOD", "No, you're Adam. I'm God."],
+		["ADAM", "Adam?"],
+		["GOD", "We have time."],
+		["STORY", "Five hours later."],
+		["GOD", "Tell me something you've learned."],
+		["ADAM", "Adam!"],
+		["GOD", "Fantastic. Five hours."],
+		["GOD", "I made that."],
+		["STORY", "God shows Adam a rock, an apple, a tree, and eventually Himself. Adam gets nearly every one wrong."],
+		["GOD", "You know what? Go explore."],
+		["ADAM", "Adam."],
+		["GOD", "Sure."],
 	]))
 
 func _on_dialogue_finished() -> void:
