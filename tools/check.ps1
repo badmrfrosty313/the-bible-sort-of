@@ -18,6 +18,7 @@ $testData = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid().ToStr
 New-Item -ItemType Directory -Path $testData | Out-Null
 try {
     $env:APPDATA = $testData
+    Invoke-Check @('--headless', '--path', '.', '--script', 'ci/test_saves.gd')
     Invoke-Check @('--headless', '--path', '.', '--script', 'ci/test_foundation.gd')
     Invoke-Check @('--headless', '--path', '.', '--script', 'ci/test_foundation.gd', '--', '--resume')
     Invoke-Check @('--headless', '--path', '.', '--script', 'ci/test_foundation.gd', '--', '--quit')

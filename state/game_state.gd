@@ -19,6 +19,11 @@ func has_progress() -> bool:
 	return not episode_id.is_empty()
 
 func new_game() -> Error:
+	if FileAccess.file_exists(SAVE_PATH):
+		var backup_error := DirAccess.copy_absolute(SAVE_PATH, SAVE_PATH + ".bak")
+		if backup_error != OK:
+			last_error = "Could not preserve your previous save. Check the user data folder permissions."
+			return backup_error
 	var previous := [episode_id, checkpoint, flags.duplicate(true)]
 	episode_id = EpisodeCatalog.FIRST_EPISODE
 	checkpoint = 0
@@ -128,4 +133,33 @@ func _valid_save(data: Variant) -> bool:
 		return false
 	if saved_checkpoint < 0 or saved_checkpoint > definition.last_checkpoint:
 		return false
-	return data.get("flags") is Dictionary
+	if not data.get("flags") is Dictionary: return false
+	var saved_flags: Dictionary = data.flags
+	for key in ["eden_named_animals", "eden_eve_named", "eden_animal_visits"]:
+		if not saved_flags.has(key): continue
+		if not saved_flags[key] is Dictionary: return false
+		for value in saved_flags[key].values():
+			if key == "eden_named_animals" and not value is String: return false
+			if key == "eden_eve_named" and not value is bool: return false
+			if key == "eden_animal_visits" and not _nonnegative_integer(value): return false
+	for key in ["eden_rock_complete", "eden_rock_discovered", "eden_naming_authority", "eden_rock_authority_seen", "eden_first_jeff", "eden_eve_created", "eden_serpent_unlocked", "eden_fall_started", "eden_adam_clothed"]:
+		if saved_flags.has(key) and not saved_flags[key] is bool: return false
+	if saved_flags.has("eden_rock_resume") and not saved_flags.eden_rock_resume is String: return false
+	if saved_flags.has("eden_rock_repeats") and not _nonnegative_integer(saved_flags.eden_rock_repeats): return false
+	if saved_flags.get("eden_fall_started", false) and not saved_flags.get("eden_eve_created", false): return false
+	if saved_flags.get("eden_adam_clothed", false) and not saved_flags.get("eden_fall_started", false): return false
+	return true
+
+func _nonnegative_integer(value: Variant) -> bool:
+	return (value is int or value is float) and is_finite(float(value)) and float(value) >= 0.0 and float(value) == floor(float(value))
+
+func progress_summary() -> String:
+	if not has_progress(): return "No usable save data"
+	if bool(get_flag(&"eden_adam_clothed", false)): return "Leaves equipped — current chapter boundary"
+	if bool(get_flag(&"eden_fall_started", false)): return "Adam — leaves waiting in inventory"
+	if bool(get_flag(&"eden_serpent_unlocked", false)): return "Eve — serpent encounter available"
+	if bool(get_flag(&"eden_eve_created", false)): return "Eve naming animals — %d / 5" % get_flag(&"eden_eve_named", {}).size()
+	if bool(get_flag(&"eden_first_jeff", false)): return "First Jeff complete — return to God"
+	if bool(get_flag(&"eden_naming_authority", false)): return "Adam naming animals — %d / 5" % get_flag(&"eden_named_animals", {}).size()
+	if bool(get_flag(&"eden_rock_complete", false)): return "Rock conversation complete — exploring Eden"
+	return "Adam's introduction" if checkpoint == 0 else "Adam exploring Eden"

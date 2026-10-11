@@ -25,6 +25,7 @@ run_check() {
 run_check godot-import.log timeout 120s "$godot_bin" --headless --editor --path . --quit
 run_check godot-resources.log timeout 30s "$godot_bin" --headless --path . --script ci/test_resources.gd
 run_check godot-content.log timeout 30s "$godot_bin" --headless --path . --script ci/test_content.gd
+run_check godot-saves.log timeout 30s "$godot_bin" --headless --path . --script ci/test_saves.gd
 run_check godot-foundation.log timeout 30s "$godot_bin" --headless --path . --script ci/test_foundation.gd
 run_check godot-resume.log timeout 30s "$godot_bin" --headless --path . --script ci/test_foundation.gd -- --resume
 run_check godot-quit.log timeout 10s "$godot_bin" --headless --path . --script ci/test_foundation.gd -- --quit

@@ -191,6 +191,13 @@ func _restore_or_begin() -> void:
 	named_animals = GameState.get_flag(&"eden_named_animals", {}).duplicate(true)
 	animal_visits = GameState.get_flag(&"eden_animal_visits", {}).duplicate(true)
 	eve_named = GameState.get_flag(&"eden_eve_named", {}).duplicate(true)
+	# Older foundation saves used Sheep/Rabbit for these two prototype rounds.
+	for names in [named_animals, eve_named]:
+		for old_id in {"sheep": "lion", "rabbit": "elephant"}:
+			if names.has(old_id):
+				var new_id: String = {"sheep": "lion", "rabbit": "elephant"}[old_id]
+				if not names.has(new_id): names[new_id] = names[old_id]
+				names.erase(old_id)
 	eve_created = bool(GameState.get_flag(&"eden_eve_created", false))
 	serpent_unlocked = bool(GameState.get_flag(&"eden_serpent_unlocked", false))
 	fall_started = bool(GameState.get_flag(&"eden_fall_started", false))

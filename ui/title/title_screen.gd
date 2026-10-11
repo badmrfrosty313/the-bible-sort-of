@@ -57,9 +57,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			quit_dialog.popup_centered()
 		get_viewport().set_input_as_handled()
 
-func _load_approved_art() -> void:
+func _load_approved_art(path := TITLE_ART_PATH) -> void:
+	menu_buttons.erase(quit_button)
 	approved_art.texture = null
-	var source := RuntimeTexture.load_texture(TITLE_ART_PATH, Vector2i(TITLE_SOURCE_SIZE))
+	var source := RuntimeTexture.load_texture(path, Vector2i(TITLE_SOURCE_SIZE))
 	if source != null:
 		var image := source.get_image()
 		if image != null and not image.is_empty():
@@ -96,6 +97,11 @@ func _load_approved_art() -> void:
 	else:
 		fallback_menu.hide()
 		status.hide()
+		focus_marker.show()
+		for button in menu_buttons:
+			button.text = ""
+			button.modulate.a = 0.0
+	_refresh_save()
 
 func _build_menu() -> void:
 	for index in MENU_ENTRIES.size():
@@ -248,10 +254,10 @@ func _back_button() -> void:
 func _show_load() -> void:
 	_make_panel("LOAD")
 	if GameState.has_progress():
-		panel_body.text = "ADAM & EVE\nCheckpoint %d of 7\nYour current progress is ready to load." % GameState.checkpoint
+		panel_body.text = "ADAM & EVE\n" + GameState.progress_summary()
 		_panel_button("LOAD SAVE", func() -> void: continue_requested.emit())
 	else:
-		panel_body.text = "No save data"
+		panel_body.text = "No save data" if GameState.last_error.is_empty() else GameState.last_error
 	_back_button()
 
 func _show_chapters() -> void:
@@ -292,6 +298,7 @@ func _show_options() -> void:
 func _apply_settings() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if settings.fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 	AudioServer.set_bus_volume_db(0, linear_to_db(maxf(settings.master_volume, 0.001)))
+	AudioServer.set_bus_mute(0, settings.master_volume == 0.0)
 
 func _load_settings() -> void:
 	if not FileAccess.file_exists(SETTINGS_PATH):
@@ -300,8 +307,10 @@ func _load_settings() -> void:
 	if file != null:
 		var parsed = JSON.parse_string(file.get_as_text())
 		if parsed is Dictionary:
-			settings.fullscreen = bool(parsed.get("fullscreen", false))
-			settings.master_volume = clampf(float(parsed.get("master_volume", 1.0)), 0.0, 1.0)
+			if parsed.get("fullscreen") is bool: settings.fullscreen = parsed.fullscreen
+			var volume: Variant = parsed.get("master_volume", 1.0)
+			if (volume is int or volume is float) and is_finite(float(volume)):
+				settings.master_volume = clampf(float(volume), 0.0, 1.0)
 
 func _save_settings() -> void:
 	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
