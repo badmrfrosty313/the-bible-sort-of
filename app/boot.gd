@@ -2,6 +2,8 @@ extends Node
 ## Owns screen changes. Episode content requests transitions through signals.
 
 const TITLE := preload("res://ui/title/title_screen.tscn")
+const TITLE_CONTENT_SIZE := Vector2i(1200, 900)
+const GAMEPLAY_CONTENT_SIZE := Vector2i(480, 270)
 
 var _transition_pending: bool = false
 
@@ -17,7 +19,7 @@ func show_title() -> void:
 	title.new_game_requested.connect(_on_new_game)
 	title.continue_requested.connect(_on_continue)
 	title.quit_requested.connect(func() -> void: get_tree().quit())
-	_replace_screen(title)
+	_replace_screen(title, true)
 
 func _on_new_game() -> void:
 	if _transition_pending:
@@ -29,7 +31,7 @@ func _on_new_game() -> void:
 		episode.free()
 		_show_error(GameState.last_error)
 		return
-	_replace_screen(episode)
+	_replace_screen(episode, false)
 
 func _on_continue() -> void:
 	if _transition_pending:
@@ -39,7 +41,7 @@ func _on_continue() -> void:
 		return
 	var episode := _prepare_episode(GameState.episode_id)
 	if episode != null:
-		_replace_screen(episode)
+		_replace_screen(episode, false)
 
 func _prepare_episode(id: StringName) -> Node:
 	var definition := EpisodeCatalog.find_episode(id)
@@ -58,12 +60,13 @@ func _prepare_episode(id: StringName) -> Node:
 	episode.connect("return_to_title_requested", show_title)
 	return episode
 
-func _replace_screen(screen: Node) -> void:
+func _replace_screen(screen: Node, title_presentation: bool) -> void:
 	# Deferred swaps are safe even when requested from a UI input callback.
 	_transition_pending = true
-	call_deferred("_mount_screen", screen)
+	call_deferred("_mount_screen", screen, title_presentation)
 
-func _mount_screen(screen: Node) -> void:
+func _mount_screen(screen: Node, title_presentation: bool) -> void:
+	get_window().content_scale_size = TITLE_CONTENT_SIZE if title_presentation else GAMEPLAY_CONTENT_SIZE
 	for old in screen_host.get_children():
 		screen_host.remove_child(old)
 		old.queue_free()

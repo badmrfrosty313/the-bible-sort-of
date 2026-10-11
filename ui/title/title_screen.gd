@@ -1,6 +1,6 @@
 extends Control
 
-const DESIGN_SIZE := Vector2(1200, 900)
+# The title is mounted only while Boot has the Window in this native 4:3 mode.
 const FULL_RES_TITLE_PATH := "res://art/title/approved_title_original.png"
 const TITLE_RENDER_SIZE := Vector2i(1200, 900)
 
@@ -8,20 +8,16 @@ signal new_game_requested
 signal continue_requested
 signal quit_requested
 
-@onready var title_canvas: Control = $TitleCanvas
-@onready var presentation: Control = $TitleCanvas/Presentation
-@onready var approved_art: TextureRect = $TitleCanvas/Presentation/ApprovedArt
-@onready var fallback_menu: Control = $TitleCanvas/Presentation/FallbackMenu
+@onready var approved_art: TextureRect = $ApprovedArt
+@onready var fallback_menu: Control = $FallbackMenu
 @onready var new_game_button: Button = %NewGame
 @onready var continue_button: Button = %Continue
 @onready var status: Label = %Status
 @onready var replace_save: ConfirmationDialog = $ReplaceSave
-@onready var focus_marker: Label = $TitleCanvas/Presentation/FocusMarker
+@onready var focus_marker: Label = $FocusMarker
 
 func _ready() -> void:
 	_load_approved_art()
-	resized.connect(_layout_presentation)
-	_layout_presentation()
 	new_game_button.pressed.connect(_on_new_game_pressed)
 	new_game_button.focus_entered.connect(_move_marker.bind(new_game_button))
 	continue_button.pressed.connect(func() -> void: continue_requested.emit())
@@ -32,8 +28,13 @@ func _ready() -> void:
 	replace_save.canceled.connect(func() -> void: new_game_button.grab_focus())
 	_refresh_save()
 	new_game_button.grab_focus()
-	# Preserve the untouched approved composition until the player navigates.
+	# The unmodified approved image is the first frame, just as it was before.
 	focus_marker.hide()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"ui_cancel"):
+		quit_requested.emit()
+		get_viewport().set_input_as_handled()
 
 func _load_approved_art() -> void:
 	var image_source: Texture2D = null
@@ -47,14 +48,10 @@ func _load_approved_art() -> void:
 			approved_art.texture = ImageTexture.create_from_image(image)
 	if approved_art.texture == null:
 		fallback_menu.show()
-		status.text = "Title art unavailable"
+		status.show()
 	else:
 		fallback_menu.hide()
-
-func _layout_presentation() -> void:
-	var uniform_scale := minf(title_canvas.size.x / DESIGN_SIZE.x, title_canvas.size.y / DESIGN_SIZE.y)
-	presentation.scale = Vector2.ONE * uniform_scale
-	presentation.position = (title_canvas.size - DESIGN_SIZE * uniform_scale) * 0.5
+		status.hide()
 
 func _move_marker(button: Button) -> void:
 	if button == %Quit:
@@ -65,7 +62,6 @@ func _move_marker(button: Button) -> void:
 
 func _refresh_save() -> void:
 	continue_button.disabled = not GameState.has_progress()
-	status.text = GameState.last_error
 	new_game_button.focus_neighbor_bottom = new_game_button.get_path_to(
 		%Quit if continue_button.disabled else continue_button)
 	continue_button.focus_neighbor_bottom = continue_button.get_path_to(%Quit)
@@ -74,11 +70,11 @@ func _refresh_save() -> void:
 
 func _on_new_game_pressed() -> void:
 	if FileAccess.file_exists(GameState.SAVE_PATH):
-		replace_save.popup_centered(Vector2i(320, 120))
+		replace_save.popup_centered(Vector2i(640, 240))
 	else:
 		new_game_requested.emit()
 
 func show_error(message: String) -> void:
-	_refresh_save()
 	status.text = message
+	status.show()
 	new_game_button.grab_focus()
