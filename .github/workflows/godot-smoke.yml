@@ -75,7 +75,7 @@ jobs:
           test -f ci_artifacts/02_burning_bush.png
 
       - name: Upload Godot logs
-        if: always()
+        if: ${{ failure() || github.event_name == 'workflow_dispatch' }}
         uses: actions/upload-artifact@v4
         with:
           name: godot-smoke-logs
@@ -84,13 +84,13 @@ jobs:
             godot-smoke.log
             godot-visual.log
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 1
 
       - name: Upload visual snapshots
-        if: always()
+        if: ${{ failure() || github.event_name == 'workflow_dispatch' }}
         uses: actions/upload-artifact@v4
         with:
           name: godot-visual-snapshots
           path: ci_artifacts/*.png
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 1
